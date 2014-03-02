@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical" >
+    
+     <LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#3c6586"
+    android:id="@+id/add_ll"
+    android:visibility="visible"
+    android:weightSum="2"
+    android:orientation="horizontal" >
+    
+    <ScrollView android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:scrollbars="none">
+    
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_height="fill_parent">
+            
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_height="fill_parent">
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Stores Details"
+                android:textStyle="bold"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+            
+             <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:weightSum="2"
+            android:id="@+id/ll_pendingorders"
+            android:orientation="horizontal">
+
+    
+			 <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp" >
+                        
+				     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+				         
+				         <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Add Store"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <Spinner
+                        android:id="@+id/storesspinner"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp" >
+                    </Spinner>
+
+				        
+				 </TableRow>
+				 				     	
+				 	     <LinearLayout android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:visibility="gone"
+                    android:id="@+id/ll_modifiers_group"
+                    android:gravity="left"
+                    android:orientation="vertical">
+				          <LinearLayout android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:gravity="left"
+                    android:orientation="horizontal">
+				 <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp" >
+                        
+				     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Description"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/description_modifiers"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="text"
+                        android:imeOptions="actionNext"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+				         
+				         
+                    </TableRow>
+                     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Prompt"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/prompt_modifiers"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="text"
+                        android:imeOptions="actionNext"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+				         
+				         
+                    </TableRow>
+				     
+                    </TableLayout>
+                     <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp" >
+                        
+				     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="# To Select"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+                    
+                    <Spinner
+                        android:id="@+id/to_select_spinner"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp">
+                    </Spinner>
+
+                    <EditText
+                        android:id="@+id/to_select"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:inputType="text"
+                        android:background="@drawable/addinputtextfield" >
+                    </EditText>
+				         
+				         
+                    </TableRow>
+                     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+                        <CheckBox
+            android:id="@+id/charge4modifier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Forced?" />
+                        
+                         <CheckBox
+            android:id="@+id/forced"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Charge for Modifier" />
+                    </TableRow>
+                    
+                   
+    
+                    </TableLayout>
+                    </LinearLayout>
+                       <LinearLayout android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="left"
+                    android:gravity="left"
+                    android:orientation="horizontal">
+				 <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp" >
+                        
+				     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+                    
+				         <ListView android:layout_width="fill_parent"
+				             android:id="@+id/modifiergroupitemslist"
+				             android:layout_height="200dp"></ListView>
+                    </TableRow>
+				 </TableLayout>
+				 </LinearLayout>
+                  
+                    </LinearLayout>
+                     <LinearLayout android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:visibility="visible"
+                    android:id="@+id/ll_indivisual_item_group"
+                    android:gravity="left"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal">
+                        
+				      <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+				         
+				          <ListView android:layout_width="fill_parent"
+				              android:layout_height="300dp"
+				              android:id="@+id/storeslist"></ListView>
+				         </TableRow>
+                    
+                    </LinearLayout>
+				 </TableLayout>
+                       
+                        
+				 </LinearLayout>
+				 <LinearLayout android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+            <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" 
+                    android:layout_marginTop="30dp"
+                    android:gravity="center"
+                    android:layout_marginBottom="30dp">
+
+                    <Button
+                        android:id="@+id/savecat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:text="Save"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/greenbutton" />
+
+                    <Button
+                        android:id="@+id/cancelcat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="40dp"
+                        android:text="Cancel"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/greenbutton" />
+                </TableRow>
+			</LinearLayout>
+				 </LinearLayout>
+				 </LinearLayout>
+				 </ScrollView>
+				 </LinearLayout>
+				 </LinearLayout>
