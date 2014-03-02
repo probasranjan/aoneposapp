@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rel"
+    android:layout_width="fill_parent"
+    android:layout_height="35dp"
+    android:background="#FFFFFF"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/TextViewHeaderTitleDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="7dp"
+        android:text="Profile"
+        android:textColor="#FFFFFF"
+        android:textSize="8pt"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/imageViewCloseDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="5dp"
+        android:src="@drawable/drawable_circle_button" />
+
+    <TextView
+        android:id="@+id/textViewCloseHeaderDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/imageViewCloseDialog"
+        android:layout_toLeftOf="@+id/imageViewCloseDialog"
+        android:text="Close"
+        android:textColor="#FFFFFF"
+        android:textSize="8pt" />
+
+</RelativeLayout>

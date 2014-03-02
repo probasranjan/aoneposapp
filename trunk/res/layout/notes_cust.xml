@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical" >
+    
+     <LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#3c6586"
+    android:id="@+id/add_ll"
+    android:visibility="visible"
+    android:weightSum="2"
+    android:orientation="horizontal" >
+    
+    <ScrollView android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:scrollbars="none">
+    
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_height="fill_parent">
+            
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_height="fill_parent">
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Notes Details"
+                android:textStyle="bold"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+            
+             <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:weightSum="2"
+            android:id="@+id/ll_pendingorders"
+            android:orientation="horizontal">
+
+    
+			  <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp" >
+                        
+				     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+
+				         <TextView
+				             android:id="@+id/textview"
+				             android:layout_width="wrap_content"
+				             android:layout_height="fill_parent"
+				             android:layout_marginBottom="10dp"
+				             android:textSize="25dp"
+				             android:text="Enter notes"/>
+				             
+				 </TableRow>
+				  <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+
+				         <EditText
+				             android:id="@+id/notestext"
+				             android:layout_width="fill_parent"
+				             android:layout_height="100dp"
+				             android:ems="10"
+				             android:inputType="textMultiLine" >
+
+				             <requestFocus />
+				         </EditText>
+				 </TableRow>
+				     
+				 </TableLayout>
+                       
+                        
+				 </LinearLayout>
+				 <LinearLayout android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+            <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" 
+                    android:layout_marginTop="30dp"
+                    android:gravity="center"
+                    android:layout_marginBottom="30dp">
+
+                    <Button
+                        android:id="@+id/savecat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:text="Save"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/greenbutton" />
+
+                    <Button
+                        android:id="@+id/cancelcat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="40dp"
+                        android:text="Cancel"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/greenbutton" />
+                </TableRow>
+			</LinearLayout>
+				 </LinearLayout>
+				 </LinearLayout>
+				 </ScrollView>
+				 </LinearLayout>
+				 </LinearLayout>
