@@ -2,7 +2,7 @@ package net.authorize.android.aim;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-
+ 
 import net.authorize.ResponseCode;
 import net.authorize.ResponseReasonCode;
 import net.authorize.TransactionType;
