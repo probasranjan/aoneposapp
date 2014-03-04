@@ -1,0 +1,735 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background" >
+
+    <LinearLayout
+        android:id="@+id/top"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingBottom="50dp"
+        android:paddingLeft="20dp" >
+
+        <LinearLayout
+            android:id="@+id/hello"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/hqbackground69opacity"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="3dp"
+                android:layout_marginTop="3dp"
+                android:background="@drawable/logo_login_bg" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:text="Profile"
+                    android:textColor="@android:color/black"
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                  android:layout_centerVertical="true"
+                     android:layout_marginLeft="15dp"
+                    android:src="@drawable/headeraonelogo" />
+
+                <DigitalClock
+                    android:id="@+id/digital_clock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="5dp"
+                    android:padding="5dp"
+                    android:text="DigitalClock"
+                    android:textColor="@android:color/black"
+                    android:textSize="10sp" />
+                
+                <TextView
+                    android:id="@+id/loginname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="0dp"
+                    android:layout_toLeftOf="@+id/loginnameval"
+                    android:text="Employee Id:"
+                    android:textColor="@android:color/black"
+                    android:textSize="10sp" />
+                
+                 <TextView
+                    android:id="@+id/loginnameval"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="5dp"
+                    android:layout_toLeftOf="@+id/digital_clock"
+                    android:text="sdsd"
+                    android:textColor="@android:color/black"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/station_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="5dp"
+                    android:layout_toLeftOf="@+id/loginname"
+                    android:text="StationNo: 01"
+                    android:textColor="@android:color/black"
+                    android:textSize="10sp" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/toptabview3"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/toprightmenu"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:weightSum="7" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/viewprofile"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/highlightedtopmenuitem"
+                    android:text="View Profile"
+                    android:textColor="@android:color/black"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/editprofile"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/toprightmenu"
+                    android:text="Edit profile"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/editpwd"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/toprightmenu"
+                    android:text="Edit Password"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/toptabview1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/toprightmenu"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:weightSum="7" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/create"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/highlightedtopmenuitem"
+                    android:text="Create profile"
+                    android:textColor="@android:color/black"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@android:color/transparent"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@android:color/white"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_margin="10dp"
+                        android:background="#3c6586"
+                        android:orientation="horizontal" >
+
+                        <LinearLayout
+                            android:id="@+id/inflatingLayoutfor1"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:orientation="vertical"
+                            android:visibility="gone" >
+
+                            <ScrollView
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent"
+                                android:layout_centerHorizontal="true" >
+
+                                <TableLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center|top"
+                                    android:layout_marginBottom="10dp"
+                                    android:layout_marginLeft="10dp"
+                                    android:layout_marginRight="10dp" >
+
+                                    <TableRow
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="User Id"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="17dp" />
+
+                                        <EditText
+                                            android:id="@+id/p_id_edit"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="40dp"
+                                            android:layout_marginLeft="10dp"
+                                            android:layout_toRightOf="@+id/tax_name"
+                                            android:background="@drawable/addinputtextfield"
+                                            android:ems="10"
+                                            android:imeOptions="actionNext"
+                                            android:singleLine="true"
+                                            android:paddingLeft="5dp" >
+                                        </EditText>
+                                    </TableRow>
+
+                                    <TableRow
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Password"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="17dp" />
+
+                                        <EditText
+                                            android:id="@+id/p_pass_edit"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="40dp"
+                                            android:layout_marginLeft="10dp"
+                                            android:layout_toRightOf="@+id/tax_name"
+                                            android:background="@drawable/addinputtextfield"
+                                            android:ems="10"
+                                            android:singleLine="true"
+                                            android:imeOptions="actionNext"
+                                            android:paddingLeft="5dp"
+                                            android:password="true" >
+                                        </EditText>
+                                    </TableRow>
+
+                                    <TableRow
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Confirm Password"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="17dp" />
+
+                                        <EditText
+                                            android:id="@+id/p_confirm_edit"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="40dp"
+                                            android:layout_marginLeft="10dp"
+                                            android:layout_toRightOf="@+id/tax_name"
+                                            android:background="@drawable/addinputtextfield"
+                                            android:ems="10"
+                                            android:singleLine="true"
+                                            android:imeOptions="actionNext"
+                                            android:padding="0dp"
+                                            android:paddingLeft="5dp"
+                                            android:password="true" >
+                                        </EditText>
+                                    </TableRow>
+
+                                    <TableRow
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="First Name"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="17dp" />
+
+                                        <EditText
+                                            android:id="@+id/p_first_edit"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="40dp"
+                                            android:layout_marginLeft="10dp"
+                                            android:layout_toRightOf="@+id/tax_name"
+                                            android:background="@drawable/addinputtextfield"
+                                            android:ems="10"
+                                            android:singleLine="true"
+                                            android:imeOptions="actionNext"
+                                            android:padding="0dp"
+                                            android:paddingLeft="5dp" >
+                                        </EditText>
+                                    </TableRow>
+
+                                    <TableRow
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Last Name"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="17dp" />
+
+                                        <EditText
+                                            android:id="@+id/p_last_edit"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="40dp"
+                                            android:layout_marginLeft="10dp"
+                                            android:layout_toRightOf="@+id/tax_name"
+                                            android:background="@drawable/addinputtextfield"
+                                            android:ems="10"
+                                            android:singleLine="true"
+                                            android:imeOptions="actionNext"
+                                            android:padding="0dp"
+                                            android:paddingLeft="5dp" >
+                                        </EditText>
+                                    </TableRow>
+
+                                    <TableRow
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Phone Number"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="17dp" />
+
+                                        <EditText
+                                            android:id="@+id/p_phone_edit"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="40dp"
+                                            android:layout_marginLeft="10dp"
+                                            android:layout_toRightOf="@+id/tax_name"
+                                            android:background="@drawable/addinputtextfield"
+                                            android:ems="10"
+                                            android:singleLine="true"
+                                            android:imeOptions="actionNext"
+                                            android:inputType="phone"
+                                            android:padding="0dp"
+                                            android:paddingLeft="5dp" >
+                                        </EditText>
+                                    </TableRow>
+
+                                    <TableRow
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Email"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="17dp" />
+
+                                        <EditText
+                                            android:id="@+id/p_email_edit"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="40dp"
+                                            android:layout_marginLeft="10dp"
+                                            android:layout_toRightOf="@+id/tax_name"
+                                            android:background="@drawable/addinputtextfield"
+                                            android:ems="10"
+                                            android:singleLine="true"
+                                            android:imeOptions="actionNext"
+                                            android:inputType="textEmailAddress"
+                                            android:padding="0dp"
+                                            android:paddingLeft="5dp" >
+                                        </EditText>
+                                    </TableRow>
+
+                                    <TableRow
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:paddingTop="15dp"
+                                            android:text="Address"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="17dp" />
+
+                                        <EditText
+                                            android:id="@+id/p_address_edit"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="150dp"
+                                            android:layout_marginLeft="10dp"
+                                            android:layout_toRightOf="@+id/tax_name"
+                                            android:background="@drawable/addinputtextfield"
+                                            android:ems="10"
+                                            android:imeOptions="actionDone"
+                                            android:padding="0dp"
+                                            android:paddingLeft="5dp" >
+                                        </EditText>
+                                    </TableRow>
+
+                                    <TableRow
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <Button
+                                            android:id="@+id/p_save"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginLeft="10dp"
+                                            android:background="@drawable/greenbutton"
+                                            android:text="Save"
+                                            android:textColor="#ffffff" />
+
+                                        <Button
+                                            android:id="@+id/p_cancel"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginLeft="40dp"
+                                            android:layout_marginRight="40dp"
+                                            android:background="@drawable/greenbutton"
+                                            android:text="Cancel"
+                                            android:textColor="#ffffff" />
+                                    </TableRow>
+                                </TableLayout>
+                            </ScrollView>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/inflatingLayoutfor3"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:orientation="vertical"
+                            android:visibility="visible" >
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginBottom="15dp"
+                                android:layout_marginLeft="15dp"
+                                android:layout_marginRight="15dp"
+                                android:orientation="vertical" >
+
+                                <RelativeLayout
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_margin="6dp"
+                                    android:padding="8dp" >
+
+                                    <Button
+                                        android:id="@+id/button2"
+                                        android:layout_width="fill_parent"
+                                        android:layout_height="40dp"
+                                        android:background="@android:color/darker_gray"
+                                        android:text="Profile Details" />
+
+                                    <LinearLayout
+                                        android:id="@+id/linearLayout1"
+                                        android:layout_width="fill_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_below="@+id/button2"
+                                        android:layout_gravity="center"
+                                        android:layout_marginLeft="20dp"
+                                        android:layout_marginRight="20dp"
+                                        android:gravity="center"
+                                        android:orientation="horizontal" >
+                                    </LinearLayout>
+
+                                    <LinearLayout
+                                        android:id="@+id/viewnames"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_below="@+id/linearLayout1"
+                                        android:orientation="horizontal"
+                                        android:visibility="gone" >
+
+                                        <LinearLayout
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal" >
+
+                                            <TextView
+                                                android:id="@+id/empname"
+                                                android:layout_width="150dp"
+                                                android:layout_height="wrap_content"
+                                                android:text="Employee ID"
+                                                android:textStyle="bold" />
+
+                                            <TextView
+                                                android:id="@+id/empaddress"
+                                                android:layout_width="150dp"
+                                                android:layout_height="wrap_content"
+                                                android:text="Employee Name"
+                                                android:textStyle="bold" />
+                                        </LinearLayout>
+
+                                        <LinearLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:orientation="horizontal"
+                                            android:weightSum="6" >
+
+                                            <TextView
+                                                android:id="@+id/empview"
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:layout_gravity="right"
+                                                android:layout_weight="2"
+                                                android:gravity="center_horizontal"
+                                                android:text="Duplicate"
+                                                android:textStyle="bold" />
+
+                                            <TextView
+                                                android:id="@+id/empedit"
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:layout_gravity="right"
+                                                android:layout_weight="2"
+                                                android:gravity="center_horizontal"
+                                                android:text="Edit"
+                                                android:textStyle="bold" />
+
+                                            <TextView
+                                                android:id="@+id/empdelete"
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:layout_weight="2"
+                                                android:gravity="center_horizontal"
+                                                android:text="Delete"
+                                                android:textStyle="bold" />
+                                        </LinearLayout>
+                                    </LinearLayout>
+
+                                    <ListView
+                                        android:id="@+id/listView1"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:layout_below="@+id/viewnames"
+                                        android:layout_centerHorizontal="true"
+                                        android:layout_margin="2dp"
+                                        android:layout_marginTop="20dp"
+                                        android:cacheColorHint="@android:color/transparent"
+                                        android:drawSelectorOnTop="false"
+                                        android:listSelector="@android:color/transparent" >
+                                    </ListView>
+                                </RelativeLayout>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <SlidingDrawer
+        android:id="@+id/SlidingDrawer"
+        android:layout_width="240dp"
+        android:layout_height="fill_parent"
+        android:content="@+id/contentLayout"
+        android:handle="@+id/slideButton"
+        android:orientation="horizontal"
+        android:rotation="180" >
+
+        <ImageView
+            android:id="@+id/slideButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rotation="180"
+            android:src="@drawable/arrow" >
+        </ImageView>
+
+        <LinearLayout
+            android:id="@+id/contentLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:rotation="180" >
+
+            <ScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scrollbars="none" >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <ImageView
+                        android:id="@+id/image0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/po0" />
+
+                    <ImageView
+                        android:id="@+id/image1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/i1" />
+
+                    <ImageView
+                        android:id="@+id/image2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/storesnormal" />
+
+                    <ImageView
+                        android:id="@+id/image3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/cu1" />
+
+                    <ImageView
+                        android:id="@+id/image4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/e1" />
+
+                    <ImageView
+                        android:id="@+id/image5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/r1" />
+
+                    <ImageView
+                        android:id="@+id/image6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/st1" />
+
+                    <ImageView
+                        android:id="@+id/image7"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/c1" />
+
+                    <ImageView
+                        android:id="@+id/image8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/pro0" />
+
+                    <ImageView
+                        android:id="@+id/logout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/pro0" />
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+    </SlidingDrawer>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_alignBottom="@+id/top"
+        android:background="@android:color/white"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/tabbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="855dp"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/helpicon" />
+
+        <ImageView
+            android:id="@+id/logout2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/logoutbutton" />
+    </LinearLayout>
+
+</RelativeLayout>
