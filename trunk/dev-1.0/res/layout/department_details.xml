@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#3c6586"
+    android:baselineAligned="false"
+    android:weightSum="2"
+    android:orientation="horizontal" >
+    
+    <ScrollView android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:scrollbars="none">
+    
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_height="fill_parent">
+            
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+       
+             <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:weightSum="2"
+            android:orientation="horizontal">
+       
+             <TableLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="10dp">
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Category for this Department"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <Spinner
+                        android:id="@+id/cat_id"
+                        android:layout_width="20dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp" >
+                    </Spinner>
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Department Id"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/dept_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:imeOptions="actionNext" android:singleLine="true"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Department Description"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/dept_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="150dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_toRightOf="@+id/tax_name"
+                        android:imeOptions="actionDone"
+                         android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10"
+                        android:padding="0dp" >
+                    </EditText>
+                </TableRow>
+                 <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Printer"
+                        android:gravity="center|left"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <Spinner
+                        android:id="@+id/printerspinner"
+                        android:layout_width="20dp"
+                        android:layout_height="40dp"
+                        android:prompt="@string/promptforprinter"
+                        android:layout_marginLeft="10dp" >
+                    </Spinner>
+                     </TableRow>
+              	<TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Time for Department printer"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                     <LinearLayout android:layout_width="fill_parent"
+                         android:layout_height="wrap_content"
+                         android:weightSum="2"
+                         android:orientation="horizontal">
+
+                    <Spinner
+                        android:id="@+id/printerspinnermints"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:prompt="@string/promptformimutes"
+                        android:entries="@array/minutes_array"
+                        android:layout_marginLeft="10dp" />
+                    
+                    <Spinner
+                        android:id="@+id/printerspinnerseconds"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:prompt="@string/promptforseconds"
+                        android:entries="@array/seconds_array"
+                        android:layout_marginLeft="10dp" />
+                    </LinearLayout>
+                </TableRow>
+              	<TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+              	     <CheckBox
+                        android:id="@+id/foodcheck"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right" />
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Foodstampable"
+                        android:layout_gravity="center"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+                </TableRow>
+                 </TableLayout>
+                
+           
+            <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp" >
+				 <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+
+                    <CheckBox
+           				 android:id="@+id/checkBox1"
+            			android:layout_width="wrap_content"
+            			android:layout_height="wrap_content"
+            			android:text="Tax1" />
+                    
+                    </TableRow>
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+
+                    <CheckBox
+            android:id="@+id/checkBox2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tax2" />
+                    
+                    </TableRow>				 
+                    
+				  <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+                    <CheckBox
+            android:id="@+id/checkBox3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tax3" />
+                    </TableRow>
+                    
+				  <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+                    <CheckBox
+            android:id="@+id/checkBox4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BarTax" />
+                </TableRow>
+            </TableLayout>
+             </LinearLayout>
+              <LinearLayout android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+            <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" 
+                    android:layout_marginTop="30dp"
+                    android:gravity="center"
+                    android:layout_marginBottom="30dp">
+
+                    <Button
+                        android:id="@+id/save"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:text="Save"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/greenbutton" />
+
+                    <Button
+                        android:id="@+id/cancel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="40dp"
+                        android:text="Cancel"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/greenbutton" />
+                </TableRow>
+			</LinearLayout>
+            </LinearLayout>
+            </LinearLayout>
+            </ScrollView>
+</LinearLayout>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/AIMButtonLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="fill_vertical"
+    android:orientation="vertical"
+    android:paddingTop="10dp" >
+
+    <!-- authCapture -->
+
+    <LinearLayout
+        android:id="@+id/AuthCaptureLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/AIMButtonLayout"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="10dp" >
+    </LinearLayout>
+
+    <!-- authOnly -->
+
+    <LinearLayout
+        android:id="@+id/AuthOnlyLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/AuthCaptureLayout"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="10dp" >
+    </LinearLayout>
+
+    <!-- priorAuthCapture -->
+
+    <LinearLayout
+        android:id="@+id/PriorAuthCaptureLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/AuthOnlyLayout"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="10dp" >
+    </LinearLayout>
+
+    <!-- captureOnly -->
+
+    <LinearLayout
+        android:id="@+id/CaptureOnlyLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/PriorAuthCaptureLayout"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="10dp" >
+    </LinearLayout>
+
+    <!-- void -->
+
+    <LinearLayout
+        android:id="@+id/VoidLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/CaptureOnlyLayout"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="10dp" >
+    </LinearLayout>
+
+    <!-- credit -->
+
+    <LinearLayout
+        android:id="@+id/CreditLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/VoidLayout"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="10dp" >
+    </LinearLayout>
+
+    <!-- footer -->
+
+    <LinearLayout
+        android:id="@+id/AIMFooterLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/CreditLayout"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:paddingTop="10dp" >
+    </LinearLayout>
+
+</LinearLayout>
