@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+     >
+
+    <Button
+        android:id="@+id/okRecipt"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/spinner1"
+        android:layout_marginLeft="31dp"
+        android:layout_marginTop="18dp"
+          android:textColor="#ffffff"
+        android:background="@drawable/greenbutton"
+        android:text="YES" />
+
+    <Button
+        android:id="@+id/cancelRecipt"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/okRecipt"
+        android:layout_alignBottom="@+id/okRecipt"
+        android:layout_toRightOf="@+id/okRecipt"
+          android:textColor="#ffffff"
+        android:background="@drawable/greenbutton"
+        android:text="NO" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/okRecipt"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="16dp"
+        android:textColor="#ffffff"
+        android:text="Do You Want Recipt?" />
+    
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/okRecipt"
+        android:layout_marginTop="16dp"
+          android:textColor="#ffffff"
+        android:layout_below="@+id/textView1"
+        android:text="Selected Printer" />
+    
+
+    <Spinner
+        android:id="@+id/spinner1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView2" />
+
+</RelativeLayout>

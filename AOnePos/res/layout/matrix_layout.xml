@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical" >
+    
+     <LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#3c6586"
+    android:id="@+id/add_ll"
+    android:visibility="visible"
+    android:weightSum="2"
+    android:orientation="horizontal" >
+    
+    <ScrollView android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:scrollbars="none">
+    
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_height="fill_parent">
+            
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_height="fill_parent">
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Optional Info Details"
+                android:textStyle="bold"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+            
+             <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:weightSum="2"
+            android:id="@+id/ll_optionalinfo"
+            android:orientation="horizontal">
+
+    
+			 <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp" >
+                        
+				     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				         <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Bonus Points"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/bonuspoints"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="number"
+                        android:imeOptions="actionNext"   android:singleLine="true"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+				         
+                    </TableRow>
+                    
+				      <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				         <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="# Barcodes"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/barcodes"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="number"
+                        android:imeOptions="actionNext"   android:singleLine="true"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+				         
+                    </TableRow>
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				         <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Commission"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <Spinner
+                        android:id="@+id/commission"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp" >
+                    </Spinner>
+				         
+                    </TableRow>
+				     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				         <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Location"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/location"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="number"
+                        android:imeOptions="actionNext"   android:singleLine="true"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+				         
+                    </TableRow>
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				         <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Unit Size"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/unitsize"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="number"
+                        android:imeOptions="actionNext"   android:singleLine="true"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+				         
+                    </TableRow>
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				         <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Unit Type"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/unittype"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="number"
+                        android:imeOptions="actionNext"   android:singleLine="true"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+				         
+                    </TableRow>
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				         <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Alternate SKU's"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/alternateskus"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="number"
+                        android:imeOptions="actionNext"   android:singleLine="true"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+				         
+                    </TableRow>
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				         <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:text="Tag Along Item"
+                        android:textColor="@android:color/white"
+                        android:textSize="17dp" />
+
+                    <EditText
+                        android:id="@+id/tagalongitem"
+                        android:layout_width="fill_parent"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="number"
+                        android:imeOptions="actionNext"   android:singleLine="true"
+                        android:background="@drawable/addinputtextfield"
+                        android:ems="10" >
+                    </EditText>
+				         
+                    </TableRow>
+                        </TableLayout>
+                        <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:layout_marginRight="10dp" >
+				     <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				          <CheckBox
+            android:id="@+id/modifieritem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Modifier Item" />
+                    </TableRow>
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				          <CheckBox
+            android:id="@+id/countthisitem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Count This Item" />
+                    </TableRow>
+                    
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				          <CheckBox
+            android:id="@+id/printonreceipt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Print on Receipt" />
+                    </TableRow>
+                    
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				          <CheckBox
+            android:id="@+id/allowbuyback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Allow Buyback" />
+                    </TableRow>
+                    
+                    <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" >
+                    
+				          <CheckBox
+            android:id="@+id/foodstamples"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Foodstampable" />
+                    </TableRow>
+                        </TableLayout>
+                        
+				 </LinearLayout>
+				 <LinearLayout android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+            <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" 
+                    android:layout_marginTop="30dp"
+                    android:gravity="center"
+                    android:layout_marginBottom="30dp">
+
+                    <Button
+                        android:id="@+id/savecat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:text="Save"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/greenbutton" />
+
+                    <Button
+                        android:id="@+id/cancelcat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="40dp"
+                        android:text="Cancel"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/greenbutton" />
+                </TableRow>
+			</LinearLayout>
+				 </LinearLayout>
+				 </LinearLayout>
+				 </ScrollView>
+				 </LinearLayout>
+				 </LinearLayout>

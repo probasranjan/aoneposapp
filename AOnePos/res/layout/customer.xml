@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/add_ll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#3c6586"
+        android:orientation="horizontal"
+        android:visibility="visible"
+        android:weightSum="2" >
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:scrollbars="none" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical|center_horizontal"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_gravity="center_horizontal"
+                        android:orientation="horizontal"
+                        android:weightSum="2" >
+
+                        <TableLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginTop="20dp"
+                            android:layout_weight="1" >
+
+                            <TableRow
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent" >
+
+                                <TextView
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:text="Customer Number"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="17dp" />
+
+                                <EditText
+                                    android:id="@+id/cust_no"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="40dp"
+                                    android:layout_marginLeft="10dp"
+                                    android:background="@drawable/addinputtextfield"
+                                    android:ems="10"
+                                    android:imeOptions="actionNext"
+                                    android:inputType="text"
+                                    android:singleLine="true" >
+                                </EditText>
+                            </TableRow>
+
+                            <TableRow
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent" >
+
+                                <TextView
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:text="Last Name"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="17dp" />
+
+                                <EditText
+                                    android:id="@+id/lastname"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="40dp"
+                                    android:layout_marginLeft="10dp"
+                                    android:background="@drawable/addinputtextfield"
+                                    android:ems="10"
+                                    android:imeOptions="actionNext"
+                                    android:inputType="text"
+                                    android:singleLine="true" >
+                                </EditText>
+                            </TableRow>
+                        </TableLayout>
+
+                        <TableLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginTop="20dp"
+                            android:layout_weight="1" >
+
+                            <TableRow
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent" >
+
+                                <TextView
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:text="First Name"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="17dp" />
+
+                                <EditText
+                                    android:id="@+id/firstname"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="40dp"
+                                    android:layout_marginLeft="10dp"
+                                    android:background="@drawable/addinputtextfield"
+                                    android:ems="10"
+                                    android:imeOptions="actionNext"
+                                    android:inputType="text"
+                                    android:singleLine="true" >
+                                </EditText>
+                            </TableRow>
+
+                            <TableRow
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent" >
+
+                                <TextView
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:text="Email Address"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="17dp" />
+
+                                <EditText
+                                    android:id="@+id/emailaddress"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="40dp"
+                                    android:layout_marginLeft="10dp"
+                                    android:background="@drawable/addinputtextfield"
+                                    android:ems="10"
+                                    android:imeOptions="actionNext"
+                                    android:inputType="textEmailAddress"
+                                    android:singleLine="true" >
+                                </EditText>
+                            </TableRow>
+                        </TableLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:weightSum="6" >
+
+                                <Button
+                                    android:id="@+id/generalinfo"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:layout_weight="1"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="General Info" />
+
+                                <Button
+                                    android:id="@+id/pendingorders"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Pending Orders"
+                                    android:visibility="gone" />
+
+                                <Button
+                                    android:id="@+id/properties"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Properties"
+                                    android:visibility="gone" />
+
+                                <Button
+                                    android:id="@+id/extendedinfo"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"  android:layout_weight="1"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Extended Info" />
+
+                                <Button
+                                    android:id="@+id/shippinginfo"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"  android:layout_weight="1"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Shipping Info" />
+
+                                <Button
+                                    android:id="@+id/priceleves"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Price Levels"
+                                    android:visibility="gone" />
+                                <Button
+                                    android:id="@+id/historyinfo"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"  android:layout_weight="1"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="History" />
+
+                                <Button
+                                    android:id="@+id/specialpricing"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Special Pricing"
+                                    android:visibility="gone" />
+
+                                <Button
+                                    android:id="@+id/matrix"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Matrix"
+                                    android:visibility="gone" />
+
+                                <Button
+                                    android:id="@+id/notesinfo"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Notes" />
+
+                                <Button
+                                    android:id="@+id/receipe"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="6dp"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Receipe"
+                                    android:visibility="gone" />
+
+                                <Button
+                                    android:id="@+id/storesinfo"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"  android:layout_weight="1"
+                                    android:background="@drawable/additionaloptions"
+                                    android:text="Stores" />
+                          
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:orientation="horizontal" >
+
+                        <TableRow
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:layout_marginBottom="30dp"
+                            android:layout_marginTop="30dp"
+                            android:gravity="center" >
+
+                            <Button
+                                android:id="@+id/savecat"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:background="@drawable/greenbutton"
+                                android:text="Save"
+                                android:textColor="@android:color/white" />
+
+                            <Button
+                                android:id="@+id/cancelcat"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="40dp"
+                                android:background="@drawable/greenbutton"
+                                android:text="Cancel"
+                                android:textColor="@android:color/white" />
+                        </TableRow>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+</LinearLayout>

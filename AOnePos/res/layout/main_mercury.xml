@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearlayout_main"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ffffff"
+    android:orientation="vertical" >
+  <ImageView
+        android:id="@+id/top0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/logo" />
+
+    <LinearLayout
+        android:id="@+id/top1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/top0"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="15sp"
+        android:paddingTop="15sp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:text="Bill Amount"
+            android:textColor="#372c24" />
+
+        <EditText
+            android:id="@+id/et_amount"
+            android:layout_width="150sp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:focusable="false"
+            android:inputType="numberDecimal"
+            android:singleLine="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="50dp"
+            android:gravity="center"
+            android:text="OperatorID"
+            android:textColor="#372c24" />
+
+        <EditText
+            android:id="@+id/operator_id"
+            android:layout_width="150sp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:singleLine="true" />
+    </LinearLayout>
+
+    <Spinner
+        android:id="@+id/spin_cardtype"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/top1"
+        android:layout_centerHorizontal="true"
+        android:paddingBottom="15sp" />
+
+    <Button
+        android:id="@+id/btn_connect_device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/spin_cardtype"
+        android:textColor="#ffffff"
+        android:padding="6dp"
+        android:layout_margin="4dp"
+         android:background="@drawable/actionbuttons"
+        android:text="Connect device" />
+
+    <TableLayout
+        android:id="@+id/top2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_connect_device"
+        android:orientation="vertical" >
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="#000000" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0" >
+
+                <TextView
+                    android:id="@+id/textview_app_status"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#FF0000"
+                    android:gravity="center"
+                    android:paddingLeft="4px"
+                    android:paddingRight="4px"
+                    android:textColor="#000000" >
+                </TextView>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/textview_title_status"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textSize="1px" >
+            </TextView>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:gravity="center" >
+
+                <TextView
+                    android:id="@+id/textview_info"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:textColor="#000000" />
+            </LinearLayout>
+        </TableRow>
+    </TableLayout>
+<RelativeLayout
+    android:id="@+id/bottom0"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        android:layout_marginTop="1px" >
+
+        <ImageButton
+            android:id="@+id/imagebutton_submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/sb_g"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/imagebutton_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/cb_r"
+            android:visibility="gone" >
+        </ImageButton>
+
+        <Button
+            android:id="@+id/imagebutton_webservice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+             android:layout_alignParentRight="true"
+            android:layout_margin="2dp"
+            android:layout_marginBottom="2dp"
+             android:background="@drawable/processpaymentbutton"
+            >
+        </Button>
+ <Button
+            android:id="@+id/button1_step1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+             android:layout_alignParentRight="true"
+            android:layout_margin="2dp"
+            android:layout_marginBottom="2dp"
+             android:background="@drawable/button_step1"
+            >
+        </Button>
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/paymentback" />
+         <ImageView
+        android:id="@+id/top0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/poweredbylogo" />
+    </RelativeLayout>
+    <LinearLayout
+        android:id="@+id/top3"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/top2"
+        android:layout_above="@+id/bottom0"
+        android:orientation="horizontal"
+        android:weightSum="2" >
+
+        <EditText
+            android:id="@+id/edittext_carddata"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:focusable="false"
+            android:gravity="top|left"
+            android:background="@android:color/transparent"
+            android:inputType="textMultiLine" >
+        </EditText>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            >
+
+            <ImageView
+                android:id="@+id/swipe_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/swipeimage" />
+            
+            <TextView
+                android:id="@+id/read_swipe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/swipe_img"
+                android:layout_centerHorizontal="true"
+                android:singleLine="true"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:text="Ready to Swipe..."
+                android:textColor="#23D6C1" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+    <TableLayout
+        android:id="@+id/top4"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/top3"
+        android:orientation="vertical"
+        android:paddingBottom="20px" >
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0" >
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="1px"
+                    android:layout_weight="1.0"
+                    android:gravity="center" >
+
+                    <CheckBox
+                        android:id="@+id/checkbox_getconfig"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="left|center_vertical"
+                        android:text="Get Configuration From Server"
+                        android:textColor="#000000"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </TableRow>
+    </TableLayout>
+
+    
+    
+  
+</RelativeLayout>
