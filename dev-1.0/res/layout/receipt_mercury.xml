@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+ <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/print_b"
+        android:orientation="horizontal"
+        android:weightSum="2" >
+
+        <WebView
+            android:id="@+id/receipt_web_holder"
+            android:layout_width="550dip"
+            android:layout_height="750dip"
+            android:layout_weight="1" />
+
+        <WebView
+            android:id="@+id/receipt_web_merchant"
+             android:layout_width="550dip"
+            android:layout_height="750dip"
+            android:layout_weight="1" />
+    </LinearLayout>
+    <RelativeLayout
+         android:id="@+id/print_b"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+         android:background="#2195DD"
+        android:orientation="horizontal" >
+   <!--  <Button
+        android:id="@+id/print_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Print Holder" 
+        />
+       <Button
+        android:id="@+id/print_merchant"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_height="wrap_content"
+        android:text="Print Merchant" 
+        />
+       <Button
+        android:id="@+id/print_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="Back" 
+        /> -->
+         <Button
+        android:id="@+id/print_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:background="@drawable/finishtransaction"
+        />
+         <ImageView
+        android:id="@+id/top0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/poweredbygray" />
+         <Button
+        android:id="@+id/void_transaction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:layout_alignParentRight="true"
+          android:background="@drawable/voidtransaction"
+        />
+</RelativeLayout>
+    <LinearLayout
+        android:id="@+id/side1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/print_b"
+        android:orientation="horizontal"
+        android:background="#000000"
+        android:weightSum="4" >
+<ScrollView 
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+              android:background="#2195DD"
+             android:layout_weight="1">
+        <TextView
+            android:id="@+id/approved_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+           android:text="result"
+           android:textSize="18sp"
+           android:layout_gravity="center_horizontal"
+           android:textColor="#ffffff"
+           android:background="#2195DD"
+            />
+</ScrollView>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+             android:background="#2195DD"
+            android:layout_weight="3" >
+         <Button
+        android:id="@+id/print_merchant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+          android:background="@drawable/printmerchantreceipt"
+        />
+         <Button
+        android:id="@+id/print_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dip"
+        android:layout_above="@+id/print_merchant"
+         android:background="@drawable/printcustomerreceipt"
+        />
+        </RelativeLayout>
+    </LinearLayout>
+ <WebView
+            android:id="@+id/receipt_web"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_toLeftOf="@+id/side1"
+             />
+    
+</RelativeLayout>

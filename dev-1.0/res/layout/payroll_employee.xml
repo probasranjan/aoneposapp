@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@android:color/white"
+        android:orientation="vertical" >
+
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="10dp"
+            android:background="#3c6586" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <TableLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp" >
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <CheckBox
+                            android:id="@+id/excludeCheck"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Exclude from payroll"
+                            android:textColor="@android:color/white"
+                            android:textSize="17sp" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Federal Allowances"
+                            android:textColor="@android:color/white"
+                            android:textSize="17sp" />
+
+                        <View
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/federal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Additional Federal Withholding Amount"
+                            android:textColor="@android:color/white"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:id="@+id/iderror"
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content"
+                            android:textColor="#F82424" />
+
+                        <EditText
+                            android:id="@+id/amount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="State Allowances"
+                            android:textColor="@android:color/white"
+                            android:textSize="17sp" />
+
+                        <View
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/statea"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Additional State Withholding Amount"
+                            android:textColor="@android:color/white"
+                            android:textSize="17sp" />
+
+                        <View
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/stateAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:inputType="number"
+                            android:padding="0dp"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="State Additional Credits"
+                            android:textColor="@android:color/white"
+                            android:textSize="17sp" />
+
+                        <View
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/credits"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionDone"   android:singleLine="true"
+                            android:padding="0dp"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="15dp"
+                            android:text="Exempt"
+                            android:textColor="@android:color/white"
+                            android:textSize="17sp" />
+
+                        <View
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <Spinner
+                            android:id="@+id/exempt"
+                            android:layout_width="10dp"
+                            android:layout_height="50dp"
+                            android:layout_marginLeft="10dp"
+                            android:clickable="false"
+                            android:padding="0dp" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="15dp"
+                            android:text="Filing Status"
+                            android:textColor="@android:color/white"
+                            android:textSize="17sp" />
+
+                        <View
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <Spinner
+                            android:id="@+id/fillingStatus"
+                            android:layout_width="10dp"
+                            android:layout_height="50dp"
+                            android:layout_marginLeft="10dp"
+                            android:clickable="false"
+                            android:padding="0dp" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <Button
+                            android:id="@+id/payrollsave"
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="45dp"
+                            android:layout_marginRight="45dp"
+                            android:background="@drawable/greenbutton"
+                            android:text="Save"
+                            android:textColor="#ffffff" />
+
+                        <View
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <Button
+                            android:id="@+id/payrollcancel"
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="25dp"
+                             android:textColor="@android:color/white"
+                            android:background="@drawable/greenbutton"
+                            android:layout_marginRight="25dp"
+                            android:text="Cancel" />
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+</LinearLayout>

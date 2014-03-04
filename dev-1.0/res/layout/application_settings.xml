@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@android:color/white"
+        android:orientation="vertical" >
+
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="10dp"
+            android:background="#3c6586" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <TableLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp" >
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Store Name*"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/store_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext" android:singleLine="true"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Store Id*"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <TextView
+                            android:id="@+id/iderror"
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content"
+                            android:textColor="#F82424" />
+
+                        <EditText
+                            android:id="@+id/store_id"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Store Email"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/store_email"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:inputType="textEmailAddress"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Store Contact Number"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/store_number"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:inputType="number"
+                            android:padding="0dp"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Street"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="60dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/street"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:padding="0dp"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="City"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <AutoCompleteTextView
+                            android:id="@+id/city"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:padding="0dp"
+                            android:paddingLeft="5dp" >
+                        </AutoCompleteTextView>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ZIP/Postal Code"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/postalcode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:padding="0dp"
+                            android:paddingLeft="5dp" >
+                        </EditText>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Country"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <AutoCompleteTextView
+                            android:id="@+id/country"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionNext"   android:singleLine="true"
+                            android:padding="0dp"
+                            android:paddingLeft="5dp" >
+                        </AutoCompleteTextView>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="State"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <AutoCompleteTextView
+                            android:id="@+id/state"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@drawable/addinputtextfield"
+                            android:ems="10"
+                            android:imeOptions="actionDone"   android:singleLine="true"
+                            android:padding="0dp"
+                            android:paddingLeft="5dp" >
+                        </AutoCompleteTextView>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="15dp"
+                            android:text="Default tax"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <Spinner
+                            android:id="@+id/store_tax"
+                            android:layout_width="30dp"
+                            android:layout_height="50dp"
+                            android:layout_marginLeft="10dp"
+                            android:padding="0dp" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sub Total Discount"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <CheckBox
+                            android:id="@+id/store_discount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="15dp"
+                            android:text="Currency"
+                            android:textColor="@android:color/white"
+                            android:textSize="17dp" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <Spinner
+                            android:id="@+id/store_currency"
+                            android:layout_width="30dp"
+                            android:layout_height="50dp"
+                            android:layout_marginLeft="10dp"
+                            android:padding="0dp" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <Button
+                            android:id="@+id/store_update"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/greenbutton"
+                            android:text="Save"
+                            android:textColor="#ffffff" />
+
+                        <View
+                            android:layout_width="30dp"
+                            android:layout_height="wrap_content" />
+
+                        <Button
+                            android:id="@+id/store_reset"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="25dp"
+                            android:layout_marginRight="25dp"
+                            android:background="@drawable/greenbutton"
+                            android:text="Reset"
+                            android:textColor="#ffffff" />
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+</LinearLayout>
