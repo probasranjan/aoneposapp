@@ -1,5 +1,6 @@
 package com.aoneposapp.utils;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -20,8 +22,8 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 
 	private static String DB_PATH;
 	private final Context mContext;
-	private SQLiteDatabase mDataBase;
-    public static DatabaseForDemo instance;
+//	private SQLiteDatabase mDataBase;
+	public static DatabaseForDemo instance;
 	public static final String CATEGORY_TABLE = "category_details";
 	public static final String CategoryId = "category_id";
 	public static final String CategoryDesp = "category_description";
@@ -57,20 +59,20 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 	public static final String MDF_STORE_ID = "store_id";
 	public static final String MDF_RECIVING_STORE = "reciving_store";
 	public static final String MDF_NOTES = "notes";
-	
-			public static final String MERCHANT_TABLE = "merchant_info_table";
-			public static final String MERCHANT_NAME = "merchant_name";
-			public static final String MERCHANT_ADDRESS = "merchant_address";
-			public static final String MERCHANT_ADDRESS2 = "merchant_address2";
-			public static final String MERCHANT_PHONE = "merchant_phone";
-			public static final String MERCHANT_ZIP = "merchant_zipcode";
-	
+
+	public static final String MERCHANT_TABLE = "merchant_info_table";
+	public static final String MERCHANT_NAME = "merchant_name";
+	public static final String MERCHANT_ADDRESS = "merchant_address";
+	public static final String MERCHANT_ADDRESS2 = "merchant_address2";
+	public static final String MERCHANT_PHONE = "merchant_phone";
+	public static final String MERCHANT_ZIP = "merchant_zipcode";
+
 	public static final String MERCURY_PAY_TABLE = "mercury_pay_table";
 	public static final String MERCURY_PRIMARY_URL = "mercury_primary_url";
 	public static final String MERCURY_SECONDARY_URL = "mercury_secondary_url";
 	public static final String MERCURY_MERCHANT_ID = "mercury_merchant_id";
 	public static final String MERCURY_PASSWORD = "mercury_password";
-	
+
 	public static final String ADMIN_TABLE = "admin_details";
 	public static final String USERID = "userid";
 	public static final String PASSWORD = "password";
@@ -178,7 +180,7 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 	public static final String PRINTER_ID = "print_id";
 	public static final String PRINTER_IP = "ipaddress";
 	public static final String PRINTER_TYPE = "printer_type";
-	
+
 	public static final String STORE_TABLE = "store_details";
 	public static final String STORE_NAME = "store_name";
 	public static final String STORE_ID = "store_id";
@@ -275,7 +277,7 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 	public static final String SPILT_LIST = "spilt_list";
 	public static final String SPILT_HOLDID = "spilt_holdid";
 	public static final String SPILT_HOLDID_UNIQE = "spilt_hold_uniqe";
-	
+
 	public static final String EMP_PAYROLL_TABLE = "employee_payroll";
 	public static final String EMP_FEDERAL = "federal";
 	public static final String EMP_AMOUNT = "amount";
@@ -355,14 +357,14 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 	public static final String CUSTOMER_COUNTRY = "customer_country";
 	public static final String CUSTOMER_ZIPCODE = "customer_zipcode";
 	public static final String CUSTOMER_BIRTHDAY = "customer_birthday";
-	
+
 	public static final String SPLIT_INVOICE_TABLE = "split_invoice_table";
 	public static final String SPLIT_INVOICE_ID = "invoice_id";
 	public static final String SPLIT_PAYMENT_TYPE = "payment_type";
 	public static final String SPLIT_AMOUNT = "amount";
 	public static final String SPLIT_CHEQUE_NO = "cheque_no";
 	public static final String SPLIT_ACCOUNT_NO = "account_no";
-	
+
 	public static final String LOGIN_LOGOUT_TABLE = "login_logout_table";
 	public static final String LOGIN_EMPLOYEE_NAME = "login_employee_name";
 	public static final String LOGIN_EMPLOYEE_ID = "login_employee_id";
@@ -373,27 +375,35 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 	public static final String WAGES = "wages";
 	public static final String SESSIONIDVAL = "sessioniduniqueval";
 
-	public DatabaseForDemo(Context context) {
-		super(context, DB_NAME, null, DB_VERSION);
-		// TODO Auto-generated constructor stub
-		if (android.os.Build.VERSION.SDK_INT >= 4.2) {
-			DB_PATH = context.getApplicationInfo().dataDir + "/databases/";
-		} else {
-			DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
-		}
+	public DatabaseForDemo(final Context context) 
+	{
+		super(context, Environment.getExternalStorageDirectory()
+                + File.separator + "/DataBase/" + File.separator
+                + DB_NAME, null, DB_VERSION);
+//		super(context, DB_NAME, null, DB_VERSION);
+//		if (android.os.Build.VERSION.SDK_INT >= 4.2) 
+//		{
+//			DB_PATH = context.getApplicationInfo().dataDir + "/databases/";
+//		} 
+//		else 
+//		{
+//			DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
+//			DB_PATH = Environment.getExternalStorageDirectory() + File.separator + "/DataBase/";
+//		}
 		this.mContext = context;
 	}
-	
-	 public static synchronized SQLiteOpenHelper getHelper(Context context)
-	    {
-	        if (instance == null)
-	            instance = new DatabaseForDemo(context);
-	        return instance;
-	    }
-	@Override
-	public void onCreate(android.database.sqlite.SQLiteDatabase db) {
-		// TODO Auto-generated method stub
 
+	public static synchronized SQLiteOpenHelper getHelper(Context context)
+	{
+		if (instance == null)
+			instance = new DatabaseForDemo(context);
+		return instance;
+	}
+	
+	
+	@Override
+	public void onCreate(android.database.sqlite.SQLiteDatabase db)
+	{
 		String loginlogouttime = "create table if not exists " + LOGIN_LOGOUT_TABLE
 				+ " ( " + BaseColumns._ID
 				+ " integer primary key autoincrement, " + LOGIN_EMPLOYEE_NAME
@@ -402,7 +412,7 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 				+ " text, "+ DIFF_HOURS+ " text, "+SESSIONIDVAL+" text,"+ UNIQUE_ID + " INTEGER, " + CREATED_DATE
 				+ " text, " + MODIFIED_DATE + " text, " + MODIFIED_IN
 				+ " text);";
-		
+
 		String customerdetails = "create table if not exists " + CUSTOMER_TABLE
 				+ " ( " + ID + " integer primary key autoincrement, "
 				+ UNIQUE_ID + " text, " + CREATED_DATE + " text, "
@@ -410,7 +420,7 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 				+ CUSTOMER_NO + " text, " + CUSTOMER_LAST_NAME + " text, "
 				+ CUSTOMER_EMAIL + " text, " + CUSTOMER_NOTES + " text, "
 				+ CUSTOMER_FIRST_NAME + " text);";
-		
+
 		String emp_store = "create table if not exists " + EMP_STORE_TABLE
 				+ " ( " + BaseColumns._ID
 				+ " integer primary key autoincrement, " + EMPLOYEE_EMPLOYEE_ID
@@ -433,12 +443,12 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 				+ " text, " + UNIQUE_ID + " text, " + COMMANDS_PRINTER_NAME
 				+ " text, " + COMMANDS_TIME + " text, " + COMMANDS_HOLDID
 				+ " text, " + COMMANDS_MESSAGE + " text);";
-		
+
 		String split_local = "create table if not exists "
 				+ SPILT_LOCAL_TABLE + " ( " + BaseColumns._ID
 				+ " integer primary key autoincrement, " + SPILT_LIST
 				+ " text, " + SPILT_HOLDID + " text, " + SPILT_HOLDID_UNIQE + " text);";
-		
+
 		String employeePermissionsDetails = "create table if not exists "
 				+ EMP_PERMISSIONS_TABLE + " ( " + BaseColumns._ID
 				+ " integer primary key autoincrement, " + UNIQUE_ID
@@ -497,9 +507,9 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 				+ EMPLOYEE_ADMIN_CARD + " text, " + SECURITY_QUESTION
 				+ " text, " + SECURITY_ANSWER + " text, " + SERVER_PASSWORD
 				+ " text);";
-	
-		
-		
+
+
+
 		String invoice_items = "create table if not exists "
 				+ INVOICE_ITEMS_TABLE + " ( " + BaseColumns._ID
 				+ " integer primary key autoincrement, " + INVOICE_ID
@@ -526,7 +536,7 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 		String dp_details = "create table if not exists " + PaymentProcessorPreferences
 				+ " ( " + PaymentProcessorName + " text , " + PaymentProcessSelectvalue
 				+ " text);";
-		
+
 		String insertpaymentprocess = "insert into "+PaymentProcessorPreferences+" ("+PaymentProcessorName+", "+PaymentProcessSelectvalue
 				+") values(\"First Data\", \"First Data\")";
 
@@ -662,8 +672,8 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 				+ MODIFIED_DATE
 				+ ") values (\"01\", \"admin\", \"momidala\", \"padmavathi\", \"1234567890\", "
 				+ "\"xyz@gmail.com\", \"hyderabad\", 123456789012345, \"2013-20-12 10-12\", \"2013-20-12 10-12\")";
-		
-		
+
+
 
 		String TaxDetails = "create table if not exists " + TAX_TABLE + " ( "
 				+ ID + " integer primary key autoincrement, " + UNIQUE_ID
@@ -766,7 +776,7 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 				+ " text, " + SPLIT_ACCOUNT_NO + " text, " + SPLIT_CHEQUE_NO + " INTEGER, " + CREATED_DATE
 				+ " text, " + MODIFIED_DATE + " text, " + UNIQUE_ID + " text, " + MODIFIED_IN
 				+ " text);";
-		
+
 		db.execSQL(split_table);
 		db.execSQL(AdminDetails);
 		db.execSQL(pendingqueries);
@@ -813,40 +823,40 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 		if(oldVersion<4){
 			Log.e("new version exqt in database","rao");
 			try{
-			String modification_sock = "create table if not exists "
-					+ STOCK_MODIFICATION_TABLE + " ( " + ID
-					+ " integer primary key autoincrement, " + UNIQUE_ID
-					+ " text, " + CREATED_DATE + " text, " + MODIFIED_DATE
-					+ " text, " + MODIFIED_IN + " text, " + MDF_ITEM_NO
-					+ " text, " + MDF_ITEM_NAME + " text, " + MDF_STOCK_COUNT
-					+ " text, " + MDF_EMP_ID + " text, " + MDF_STORE_ID + " text, " + MDF_RECIVING_STORE
-					+ " text, " + MDF_NOTES + " text);";
-			
-			String mercury_details = "create table if not exists "
-					+ MERCURY_PAY_TABLE + " ( " + ID
-					+ " integer primary key autoincrement, " + UNIQUE_ID
-					+ " text, " + CREATED_DATE + " text, " + MODIFIED_DATE
-					+ " text, " + MODIFIED_IN + " text, " + MERCURY_PRIMARY_URL
-					+ " text, " + MERCURY_SECONDARY_URL + " text, " + MERCURY_MERCHANT_ID
-					+ " text, " + MERCURY_PASSWORD + " text);";
-		
-			String merchant_details=  "create table if not exists "
-					+ MERCHANT_TABLE + " ( " + ID
-					+ " integer primary key autoincrement, " + UNIQUE_ID
-					+ " text, " + CREATED_DATE + " text, " + MODIFIED_DATE
-					+ " text, " + MODIFIED_IN + " text, " + MERCHANT_NAME
-					+ " text, " + MERCHANT_ADDRESS
-					+ " text, " + MERCHANT_ADDRESS2
-					+ " text, " + MERCHANT_PHONE
-					+ " text, " + MERCHANT_ZIP + " text);";
-					
-			db.execSQL(mercury_details);
-			db.execSQL(merchant_details);
-			db.execSQL(modification_sock);
-//				String invoie_total="ALTER TABLE "+INVOICE_TOTAL_TABLE+" ADD COLUMN "+MODIFIED_DATE+" text;";
-//			String invoie_item="ALTER TABLE "+INVOICE_ITEMS_TABLE+" ADD COLUMN "+MODIFIED_DATE+" text;";
-//			db.execSQL(invoie_total);
-//			db.execSQL(invoie_item);
+				String modification_sock = "create table if not exists "
+						+ STOCK_MODIFICATION_TABLE + " ( " + ID
+						+ " integer primary key autoincrement, " + UNIQUE_ID
+						+ " text, " + CREATED_DATE + " text, " + MODIFIED_DATE
+						+ " text, " + MODIFIED_IN + " text, " + MDF_ITEM_NO
+						+ " text, " + MDF_ITEM_NAME + " text, " + MDF_STOCK_COUNT
+						+ " text, " + MDF_EMP_ID + " text, " + MDF_STORE_ID + " text, " + MDF_RECIVING_STORE
+						+ " text, " + MDF_NOTES + " text);";
+
+				String mercury_details = "create table if not exists "
+						+ MERCURY_PAY_TABLE + " ( " + ID
+						+ " integer primary key autoincrement, " + UNIQUE_ID
+						+ " text, " + CREATED_DATE + " text, " + MODIFIED_DATE
+						+ " text, " + MODIFIED_IN + " text, " + MERCURY_PRIMARY_URL
+						+ " text, " + MERCURY_SECONDARY_URL + " text, " + MERCURY_MERCHANT_ID
+						+ " text, " + MERCURY_PASSWORD + " text);";
+
+				String merchant_details=  "create table if not exists "
+						+ MERCHANT_TABLE + " ( " + ID
+						+ " integer primary key autoincrement, " + UNIQUE_ID
+						+ " text, " + CREATED_DATE + " text, " + MODIFIED_DATE
+						+ " text, " + MODIFIED_IN + " text, " + MERCHANT_NAME
+						+ " text, " + MERCHANT_ADDRESS
+						+ " text, " + MERCHANT_ADDRESS2
+						+ " text, " + MERCHANT_PHONE
+						+ " text, " + MERCHANT_ZIP + " text);";
+
+				db.execSQL(mercury_details);
+				db.execSQL(merchant_details);
+				db.execSQL(modification_sock);
+				//				String invoie_total="ALTER TABLE "+INVOICE_TOTAL_TABLE+" ADD COLUMN "+MODIFIED_DATE+" text;";
+				//			String invoie_item="ALTER TABLE "+INVOICE_ITEMS_TABLE+" ADD COLUMN "+MODIFIED_DATE+" text;";
+				//			db.execSQL(invoie_total);
+				//			db.execSQL(invoie_item);
 			}catch(SQLiteException exception){
 				exception.getLocalizedMessage();
 			}
@@ -860,291 +870,413 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 	}
 
 	// Close Database
-//	@Override
+	//	@Override
 	public void close() {
 		if (sqliteDB != null)
 			sqliteDB.close();
 	}
 
-	public List<Inventory> getAllInventoryList(String itemNo,
-			String department, String itemName, String searchItemName) {
+	public List<Inventory> getAllInventoryList(String itemNo,String department, String itemName, String searchItemName) {
 		List<Inventory> inventoryList = new ArrayList<Inventory>();
-
+		System.out.println("no "+20);
 		// Select All Query
-try {
-		String selectQuery = null;
+		try {
+			System.out.println("no "+21);
+			String selectQuery = null;
 
-		if (itemNo != null) {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
-					+ INVENTORY_ITEM_NO + "=\"" + itemNo + "\";";
-		} else if (department != null) {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
-					+ INVENTORY_DEPARTMENT + "=\"" + department + "\";";
-		} else if (itemName != null) {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
-					+ INVENTORY_ITEM_NAME + "=\"" + itemName + "\";";
-		} else if (searchItemName != null) {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
-					+ INVENTORY_ITEM_NAME + " LIKE \"" + searchItemName + "%\";";
-		} else {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE;
-		}
-
-		SQLiteDatabase dbabcd = getReadableDatabase();
-		Cursor cursor = dbabcd.rawQuery(selectQuery, null);
-
-		// looping through all rows and adding to list
-		if (cursor.moveToFirst()) {
-			do {
-				Inventory inventory = new Inventory();
-				
-				inventory.setDepartmentAdd(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_DEPARTMENT)));
-				inventory.setItemNoAdd(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_ITEM_NO)));
-				inventory.setInventoryVndr(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_VENDOR)));
-				inventory.setItemNameAdd(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_ITEM_NAME)));
-				inventory.setAvgCost(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_AVG_COST)));
-				
-				inventory.setPriceTax(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_TAX)));
-				inventory.setPriceYouChange(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_CHANGE)));
-				Log.v("INVENTORY_PRICE_CHANGE",""+cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_CHANGE)));
-				inventory.setInStock(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_IN_STOCK)));
-				inventory.setQuantity(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_QUANTITY)));
-				inventory.setInventoryTaxOne(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_TAXONE)));
-				inventory.setSecondDescription(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_SECOND_DESCRIPTION)));
-				Double mSubTotal=0.0;
-				try{
-				 mSubTotal = Double.valueOf(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_CHANGE)));
-			} catch (NumberFormatException e) {
-			    e.getLocalizedMessage();
+			if (itemNo != null) {
+				System.out.println("no "+22);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_ITEM_NO + "=\"" + itemNo + "\";";
+			} else if (department != null) {
+				System.out.println("no "+23);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_DEPARTMENT + "=\"" + department + "\";";
+			} else if (itemName != null) {
+				System.out.println("no "+24);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_ITEM_NAME + "=\"" + itemName + "\";";
+			} else if (searchItemName != null) {
+				System.out.println("no "+25);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_ITEM_NAME + " LIKE \"" + searchItemName + "%\";";
+			} else {
+				System.out.println("no "+26);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE;
 			}
-				String texss=cursor.getString(cursor
-						.getColumnIndex(INVENTORY_TAXONE));
-				String[] parts = texss.split(",");
-				String part1 = parts[0]; 
-				Log.v(""+part1,"" +"  hari   "+parts.length);
-				double tax=0.0;
-				for(int t=0;t<parts.length;t++){
-					String ttt=parts[t]; 
-					Log.e("",""+ttt);
-					String query = "select * from "
-							+ DatabaseForDemo.TAX_TABLE + " where "
-							+ DatabaseForDemo.TAX_NAME + "=\""
-							+ ttt + "\"";
-					System.out.println(query);
-					Cursor cursortax = dbabcd.rawQuery(query, null);
-					if (cursortax != null) {
-						if (cursortax.moveToFirst()) {
-							do {
-								double taxvalpercent =0.0;
-								try{
-									taxvalpercent =cursortax.getDouble(cursortax
-												.getColumnIndex(DatabaseForDemo.TAX_VALUE));
-								} catch (NumberFormatException e) {
-								    e.getLocalizedMessage();
-								}
-								System.out.println("taxvalpercent     " + taxvalpercent);
-								tax += taxvalpercent;
-								System.out.println(" tax    " + tax);
-							} while (cursortax.moveToNext());
+
+			SQLiteDatabase dbabcd = getReadableDatabase();
+			Cursor cursor = dbabcd.rawQuery(selectQuery, null);
+
+			// looping through all rows and adding to list
+			if (cursor.moveToFirst()) {
+				System.out.println("no "+27);
+				do {
+					System.out.println("no "+30);
+					Inventory inventory = new Inventory();
+					System.out.println("no "+31);
+					inventory.setDepartmentAdd(cursor.getString(cursor.getColumnIndex(INVENTORY_DEPARTMENT)));
+					inventory.setItemNoAdd(cursor.getString(cursor.getColumnIndex(INVENTORY_ITEM_NO)));
+					inventory.setInventoryVndr(cursor.getString(cursor.getColumnIndex(INVENTORY_VENDOR)));
+					inventory.setItemNameAdd(cursor.getString(cursor.getColumnIndex(INVENTORY_ITEM_NAME)));
+					inventory.setAvgCost(cursor.getString(cursor.getColumnIndex(INVENTORY_AVG_COST)));
+					System.out.println("no "+32);
+					inventory.setPriceTax(cursor.getString(cursor.getColumnIndex(INVENTORY_PRICE_TAX)));
+					inventory.setPriceYouChange(cursor.getString(cursor.getColumnIndex(INVENTORY_PRICE_CHANGE)));
+
+					Log.v("INVENTORY_PRICE_CHANGE",""+cursor.getString(cursor.getColumnIndex(INVENTORY_PRICE_CHANGE)));
+					inventory.setInStock(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_IN_STOCK)));
+					inventory.setQuantity(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_QUANTITY)));
+					inventory.setInventoryTaxOne(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_TAXONE)));
+					inventory.setSecondDescription(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_SECOND_DESCRIPTION)));
+					System.out.println("no "+32);
+					Double mSubTotal=0.0;
+					try{
+						System.out.println("no "+33);
+						mSubTotal = Double.valueOf(cursor.getString(cursor
+								.getColumnIndex(INVENTORY_PRICE_CHANGE)));
+					} catch (NumberFormatException e) {
+						System.out.println("no "+34);
+						e.getLocalizedMessage();
+					}
+					String texss=cursor.getString(cursor
+							.getColumnIndex(INVENTORY_TAXONE));
+					String[] parts = texss.split(",");
+					String part1 = parts[0]; 
+					Log.v(""+part1,"" +"  hari   "+parts.length);
+					double tax=0.0;
+					for(int t=0;t<parts.length;t++){
+						String ttt=parts[t]; 
+						Log.e("",""+ttt);
+						String query = "select * from "
+								+ DatabaseForDemo.TAX_TABLE + " where "
+								+ DatabaseForDemo.TAX_NAME + "=\""
+								+ ttt + "\"";
+						System.out.println(query);
+						Cursor cursortax = dbabcd.rawQuery(query, null);
+						if (cursortax != null) {
+							if (cursortax.moveToFirst()) {
+								do {
+									double taxvalpercent =0.0;
+									try{
+										taxvalpercent =cursortax.getDouble(cursortax.getColumnIndex(DatabaseForDemo.TAX_VALUE));
+									} catch (NumberFormatException e) {
+										e.getLocalizedMessage();
+									}
+									System.out.println("taxvalpercent     " + taxvalpercent);
+									tax += taxvalpercent;
+									System.out.println(" tax    " + tax);
+								} while (cursortax.moveToNext());
+							}
+							cursortax.close();
 						}
-						cursortax.close();
-				}
-				}
-				tax = (mSubTotal * tax) / 100;
-				DecimalFormat df = new DecimalFormat("#.##");
-				inventory.setInventoryTaxTotal(df.format(tax));
-				inventoryList.add(inventory);
-			} while (cursor.moveToNext());
+					}
+					tax = (mSubTotal * tax) / 100;
+					DecimalFormat df = new DecimalFormat("#.##");
+					inventory.setInventoryTaxTotal(df.format(tax));
+					inventoryList.add(inventory);
+				} while (cursor.moveToNext());
+			}
+
+			// closing connection
+			cursor.close();
+			dbabcd.close();
+
+			// returning lables
+			Log.v("fgdgd", ""+inventoryList);
+
+		}catch(Exception e){
+			System.out.println("no "+28);
+			e.getLocalizedMessage();
 		}
-
-		// closing connection
-		cursor.close();
-		dbabcd.close();
-
-		// returning lables
-		Log.v("fgdgd", ""+inventoryList);
-		
-}catch(Exception e){
-	e.getLocalizedMessage();
-}
-return inventoryList;
+		return inventoryList;
 	}
-	
-	public List<Inventory> getAllInventoryListForName(String itemNo,
-			String department, String itemName, String searchItemName,String aaaName) {
+
+
+	public List<Inventory> getAllInventoryList1(String itemNo,String department, String itemName, String searchItemName, String prii) {
+		List<Inventory> inventoryList = new ArrayList<Inventory>();
+		System.out.println("no "+20);
+		// Select All Query
+		try {
+			System.out.println("no "+21);
+			String selectQuery = null;
+
+			if (itemNo != null) {
+				System.out.println("no "+22);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_ITEM_NO + "=\"" + itemNo + "\";";
+			} else if (department != null) {
+				System.out.println("no "+23);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_DEPARTMENT + "=\"" + department + "\";";
+			} else if (itemName != null) {
+				System.out.println("no "+24);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_ITEM_NAME + "=\"" + itemName + "\";";
+			} else if (searchItemName != null) {
+				System.out.println("no "+25);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_ITEM_NAME + " LIKE \"" + searchItemName + "%\";";
+			} else {
+				System.out.println("no "+26);
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE;
+			}
+
+			SQLiteDatabase dbabcd = getReadableDatabase();
+			Cursor cursor = dbabcd.rawQuery(selectQuery, null);
+
+			// looping through all rows and adding to list
+			if (cursor.moveToFirst()) {
+				System.out.println("no "+27);
+				do {
+					System.out.println("no "+30);
+					Inventory inventory = new Inventory();
+					System.out.println("no "+31);
+					inventory.setDepartmentAdd(cursor.getString(cursor.getColumnIndex(INVENTORY_DEPARTMENT)));
+					inventory.setItemNoAdd(cursor.getString(cursor.getColumnIndex(INVENTORY_ITEM_NO)));
+					inventory.setInventoryVndr(cursor.getString(cursor.getColumnIndex(INVENTORY_VENDOR)));
+					inventory.setItemNameAdd(cursor.getString(cursor.getColumnIndex(INVENTORY_ITEM_NAME)));
+					inventory.setAvgCost(cursor.getString(cursor.getColumnIndex(INVENTORY_AVG_COST)));
+					System.out.println("no "+32);
+					inventory.setPriceTax(cursor.getString(cursor.getColumnIndex(INVENTORY_PRICE_TAX)));
+					inventory.setPriceYouChange(prii);
+
+					Log.v("INVENTORY_PRICE_CHANGE",""+prii);
+					inventory.setInStock(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_IN_STOCK)));
+					inventory.setQuantity(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_QUANTITY)));
+					inventory.setInventoryTaxOne(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_TAXONE)));
+					inventory.setSecondDescription(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_SECOND_DESCRIPTION)));
+					System.out.println("no "+32);
+					Double mSubTotal=0.0;
+					try{
+						System.out.println("no "+33);
+						mSubTotal = Double.valueOf(prii);
+					} catch (NumberFormatException e) {
+						System.out.println("no "+34);
+						e.getLocalizedMessage();
+					}
+					String texss=cursor.getString(cursor
+							.getColumnIndex(INVENTORY_TAXONE));
+					String[] parts = texss.split(",");
+					String part1 = parts[0]; 
+					Log.v(""+part1,"" +"  hari   "+parts.length);
+					double tax=0.0;
+					for(int t=0;t<parts.length;t++){
+						String ttt=parts[t]; 
+						Log.e("",""+ttt);
+						String query = "select * from "
+								+ DatabaseForDemo.TAX_TABLE + " where "
+								+ DatabaseForDemo.TAX_NAME + "=\""
+								+ ttt + "\"";
+						System.out.println(query);
+						Cursor cursortax = dbabcd.rawQuery(query, null);
+						if (cursortax != null) {
+							if (cursortax.moveToFirst()) {
+								do {
+									double taxvalpercent =0.0;
+									try{
+										taxvalpercent =cursortax.getDouble(cursortax.getColumnIndex(DatabaseForDemo.TAX_VALUE));
+									} catch (NumberFormatException e) {
+										e.getLocalizedMessage();
+									}
+									System.out.println("taxvalpercent     " + taxvalpercent);
+									tax += taxvalpercent;
+									System.out.println(" tax    " + tax);
+								} while (cursortax.moveToNext());
+							}
+							cursortax.close();
+						}
+					}
+					tax = (mSubTotal * tax) / 100;
+					DecimalFormat df = new DecimalFormat("#.##");
+					inventory.setInventoryTaxTotal(df.format(tax));
+					inventoryList.add(inventory);
+				} while (cursor.moveToNext());
+			}
+
+			// closing connection
+			cursor.close();
+			dbabcd.close();
+
+			// returning lables
+			Log.v("fgdgd", ""+inventoryList);
+
+		}catch(Exception e){
+			System.out.println("no "+28);
+			e.getLocalizedMessage();
+		}
+		return inventoryList;
+	}
+
+	public List<Inventory> getAllInventoryListForName(String itemNo,String department, String itemName, String searchItemName,String aaaName) {
 		List<Inventory> inventoryList = new ArrayList<Inventory>();
 		try{
-		String selectQuery = null;
+			String selectQuery = null;
 
-		if (itemNo != null) {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
-					+ INVENTORY_ITEM_NO + "=\"" + itemNo + "\";";
-		} else if (department != null) {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
-					+ INVENTORY_DEPARTMENT + "=\"" + department + "\";";
-		} else if (itemName != null) {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
-					+ INVENTORY_ITEM_NAME + "=\"" + itemName + "\";";
-		} else if (searchItemName != null) {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
-					+ INVENTORY_ITEM_NAME + " LIKE \"" + searchItemName + "%\";";
-		} else {
-			selectQuery = "SELECT  * FROM " + INVENTORY_TABLE;
-		}
-
-		SQLiteDatabase dbabcd = getReadableDatabase();
-		Cursor cursor = dbabcd.rawQuery(selectQuery, null);
-
-		// looping through all rows and adding to list
-		if (cursor.moveToFirst()) {
-			do {
-				Inventory inventory = new Inventory();
-				
-				inventory.setDepartmentAdd(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_DEPARTMENT)));
-				inventory.setItemNoAdd(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_ITEM_NO)));
-				inventory.setInventoryVndr(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_VENDOR)));
-				inventory.setItemNameAdd(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_ITEM_NAME))+" \n "+aaaName);
-				inventory.setAvgCost(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_AVG_COST)));
-				
-				inventory.setPriceTax(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_TAX)));
-				inventory.setPriceYouChange(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_CHANGE)));
-				Log.v("INVENTORY_PRICE_CHANGE",""+cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_CHANGE)));
-				inventory.setInStock(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_IN_STOCK)));
-				inventory.setQuantity(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_QUANTITY)));
-				inventory.setInventoryTaxOne(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_TAXONE)));
-				inventory.setSecondDescription(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_SECOND_DESCRIPTION)));
-				Double mSubTotal=0.0;
-				try{
-				 mSubTotal = Double.valueOf(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_CHANGE)));
-			} catch (NumberFormatException e) {
-			    e.getLocalizedMessage();
+			if (itemNo != null) {
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_ITEM_NO + "=\"" + itemNo + "\";";
+			} else if (department != null) {
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_DEPARTMENT + "=\"" + department + "\";";
+			} else if (itemName != null) {
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_ITEM_NAME + "=\"" + itemName + "\";";
+			} else if (searchItemName != null) {
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE + " WHERE "
+						+ INVENTORY_ITEM_NAME + " LIKE \"" + searchItemName + "%\";";
+			} else {
+				selectQuery = "SELECT  * FROM " + INVENTORY_TABLE;
 			}
-				String texss=cursor.getString(cursor
-						.getColumnIndex(INVENTORY_TAXONE));
-				String[] parts = texss.split(",");
-				String part1 = parts[0]; 
-				Log.v(""+part1,"" +"  hari   "+parts.length);
-				double tax=0.0;
-				for(int t=0;t<parts.length;t++){
-					String ttt=parts[t]; 
-					Log.e("",""+ttt);
-					String query = "select * from "
-							+ DatabaseForDemo.TAX_TABLE + " where "
-							+ DatabaseForDemo.TAX_NAME + "=\""
-							+ ttt + "\"";
-					System.out.println(query);
-					Cursor cursortax = dbabcd.rawQuery(query, null);
-					if (cursortax != null) {
-						if (cursortax.moveToFirst()) {
-							do {
-								double taxvalpercent =0.0;
-								try{
-									taxvalpercent =cursortax.getDouble(cursortax
+
+			SQLiteDatabase dbabcd = getReadableDatabase();
+			Cursor cursor = dbabcd.rawQuery(selectQuery, null);
+
+			// looping through all rows and adding to list
+			if (cursor.moveToFirst()) {
+				do {
+					Inventory inventory = new Inventory();
+
+					inventory.setDepartmentAdd(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_DEPARTMENT)));
+					inventory.setItemNoAdd(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_ITEM_NO)));
+					inventory.setInventoryVndr(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_VENDOR)));
+					inventory.setItemNameAdd(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_ITEM_NAME))+" \n "+aaaName);
+					inventory.setAvgCost(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_AVG_COST)));
+
+					inventory.setPriceTax(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_PRICE_TAX)));
+					inventory.setPriceYouChange(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_PRICE_CHANGE)));
+					Log.v("INVENTORY_PRICE_CHANGE",""+cursor.getString(cursor
+							.getColumnIndex(INVENTORY_PRICE_CHANGE)));
+					inventory.setInStock(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_IN_STOCK)));
+					inventory.setQuantity(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_QUANTITY)));
+					inventory.setInventoryTaxOne(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_TAXONE)));
+					inventory.setSecondDescription(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_SECOND_DESCRIPTION)));
+					Double mSubTotal=0.0;
+					try{
+						mSubTotal = Double.valueOf(cursor.getString(cursor
+								.getColumnIndex(INVENTORY_PRICE_CHANGE)));
+					} catch (NumberFormatException e) {
+						e.getLocalizedMessage();
+					}
+					String texss=cursor.getString(cursor
+							.getColumnIndex(INVENTORY_TAXONE));
+					String[] parts = texss.split(",");
+					String part1 = parts[0]; 
+					Log.v(""+part1,"" +"  hari   "+parts.length);
+					double tax=0.0;
+					for(int t=0;t<parts.length;t++){
+						String ttt=parts[t]; 
+						Log.e("",""+ttt);
+						String query = "select * from "
+								+ DatabaseForDemo.TAX_TABLE + " where "
+								+ DatabaseForDemo.TAX_NAME + "=\""
+								+ ttt + "\"";
+						System.out.println(query);
+						Cursor cursortax = dbabcd.rawQuery(query, null);
+						if (cursortax != null) {
+							if (cursortax.moveToFirst()) {
+								do {
+									double taxvalpercent =0.0;
+									try{
+										taxvalpercent =cursortax.getDouble(cursortax
 												.getColumnIndex(DatabaseForDemo.TAX_VALUE));
-								} catch (NumberFormatException e) {
-								    e.getLocalizedMessage();
-								}
-								
-								System.out.println("taxvalpercent     " + taxvalpercent);
-								tax += taxvalpercent;
-								System.out.println(" tax    " + tax);
-							} while (cursortax.moveToNext());
+									} catch (NumberFormatException e) {
+										e.getLocalizedMessage();
+									}
+
+									System.out.println("taxvalpercent     " + taxvalpercent);
+									tax += taxvalpercent;
+									System.out.println(" tax    " + tax);
+								} while (cursortax.moveToNext());
+							}
+							cursortax.close();
 						}
-						cursortax.close();
-				}
-				}
-				tax = (mSubTotal * tax) / 100;
-				DecimalFormat df = new DecimalFormat("#.##");
-				inventory.setInventoryTaxTotal(df.format(tax));
-				inventoryList.add(inventory);
-			} while (cursor.moveToNext());
+					}
+					tax = (mSubTotal * tax) / 100;
+					DecimalFormat df = new DecimalFormat("#.##");
+					inventory.setInventoryTaxTotal(df.format(tax));
+					inventoryList.add(inventory);
+				} while (cursor.moveToNext());
+			}
+
+			// closing connection
+			cursor.close();
+			dbabcd.close();
+
+			// returning lables
+			Log.v("fgdgd", ""+inventoryList);
+
+		}catch(Exception e){
+			e.getLocalizedMessage();
 		}
-
-		// closing connection
-		cursor.close();
-		dbabcd.close();
-
-		// returning lables
-		Log.v("fgdgd", ""+inventoryList);
-		
-	}catch(Exception e){
-		e.getLocalizedMessage();
-	}
 		return inventoryList;
 	}
 	public List<Inventory> getSelectInventoryList(String selectQuery) {
 		List<Inventory> inventoryList = new ArrayList<Inventory>();
-try{
-		SQLiteDatabase dbabcdef = getReadableDatabase();
-		Cursor cursor = dbabcdef.rawQuery(selectQuery, null);
+		try{
+			SQLiteDatabase dbabcdef = getReadableDatabase();
+			Cursor cursor = dbabcdef.rawQuery(selectQuery, null);
 
-		// looping through all rows and adding to list
-		if (cursor.moveToFirst()) {
-			do {
-				Inventory inventory = new Inventory();
+			// looping through all rows and adding to list
+			if (cursor.moveToFirst()) {
+				do {
+					Inventory inventory = new Inventory();
 
-				inventory.setDepartmentAdd(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_DEPARTMENT)));
-				inventory.setItemNoAdd(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_ITEM_NO)));
-				inventory.setItemNameAdd(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_ITEM_NAME)));
-				inventory.setAvgCost(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_AVG_COST)));
-				inventory.setPriceTax(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_TAX)));
-				inventory.setPriceYouChange(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_PRICE_CHANGE)));
-				inventory.setInStock(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_IN_STOCK)));
-				inventory.setQuantity(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_QUANTITY)));
-				inventory.setInventoryTaxOne(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_TAXONE)));
-				inventory.setSecondDescription(cursor.getString(cursor
-						.getColumnIndex(INVENTORY_SECOND_DESCRIPTION)));
-				
-				/*Double mSubTotal = Double.valueOf(cursor.getString(cursor
+					inventory.setDepartmentAdd(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_DEPARTMENT)));
+					inventory.setItemNoAdd(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_ITEM_NO)));
+					inventory.setItemNameAdd(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_ITEM_NAME)));
+					inventory.setAvgCost(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_AVG_COST)));
+					inventory.setPriceTax(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_PRICE_TAX)));
+					inventory.setPriceYouChange(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_PRICE_CHANGE)));
+					inventory.setInStock(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_IN_STOCK)));
+					inventory.setQuantity(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_QUANTITY)));
+					inventory.setInventoryTaxOne(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_TAXONE)));
+					inventory.setSecondDescription(cursor.getString(cursor
+							.getColumnIndex(INVENTORY_SECOND_DESCRIPTION)));
+
+					/*Double mSubTotal = Double.valueOf(cursor.getString(cursor
 						.getColumnIndex(INVENTORY_AVG_COST)));
 
 				Double tax = Double.valueOf(cursor.getString(cursor
 						.getColumnIndex(INVENTORY_TOTAL_TAX)));*/
-				inventoryList.add(inventory);
-			} while (cursor.moveToNext());
-		}
+					inventoryList.add(inventory);
+				} while (cursor.moveToNext());
+			}
 
-		// closing connection
-		cursor.close();
-		dbabcdef.close();
-	}catch(Exception e){
-		e.getLocalizedMessage();
-	}
+			// closing connection
+			cursor.close();
+			dbabcdef.close();
+		}catch(Exception e){
+			e.getLocalizedMessage();
+		}
 		// returning lables
 		return inventoryList;
 	}
@@ -1152,60 +1284,60 @@ try{
 	public List<Inventory> getSelectInvoiceItemList(String itemNo,
 			String invoiceid) {
 		List<Inventory> inventoryList = new ArrayList<Inventory>();
-try{
-		// Select All Query
+		try{
+			// Select All Query
 
-		String selectQuery = null;
+			String selectQuery = null;
 
-		if (itemNo != null) {
-			selectQuery = "SELECT  * FROM " + INVOICE_ITEMS_TABLE + " WHERE "
-					+ INVOICE_ITEM_ID + "=\"" + itemNo + "\" AND "
-					+ DatabaseForDemo.INVOICE_ID + "=\"" + invoiceid + "\"";
-		}
-
-		SQLiteDatabase dbabcdefgh = getReadableDatabase();
-		Cursor cursor = dbabcdefgh.rawQuery(selectQuery, null);
-
-		// looping through all rows and adding to list
-		if (cursor.moveToFirst()) {
-			do {
-				Inventory inventory = new Inventory();
-
-				inventory.setItemNoAdd(cursor.getString(cursor
-						.getColumnIndex(INVOICE_ITEM_ID)));
-				inventory.setInventoryVndr(cursor.getString(cursor
-						.getColumnIndex(INVOICE_VENDOR)));
-				inventory.setItemNameAdd(cursor.getString(cursor
-						.getColumnIndex(INVOICE_ITEM_NAME)));
-				inventory.setAvgCost(cursor.getString(cursor
-						.getColumnIndex(INVOICE_AVG_COST)));
-				inventory.setPriceTax("77");
-				inventory.setPriceYouChange(cursor.getString(cursor
-						.getColumnIndex(INVOICE_YOUR_COST)));
-				inventory.setInStock("66");
-				inventory.setQuantity(cursor.getString(cursor
-						.getColumnIndex(INVOICE_QUANTITY)));
-				inventory.setInventoryTaxOne(cursor.getString(cursor
-						.getColumnIndex(INVOICE_TAX)));
-				inventory.setSecondDescription(cursor.getString(cursor
-						.getColumnIndex(INVOICE_DISCRIPTION)));
-				try{
-				Double mSubTotal = Double.valueOf(cursor.getString(cursor
-						.getColumnIndex(INVOICE_TAX)));
-				inventory.setInventoryTaxTotal("" + mSubTotal);
-			} catch (NumberFormatException e) {
-			  e.getLocalizedMessage();
+			if (itemNo != null) {
+				selectQuery = "SELECT  * FROM " + INVOICE_ITEMS_TABLE + " WHERE "
+						+ INVOICE_ITEM_ID + "=\"" + itemNo + "\" AND "
+						+ DatabaseForDemo.INVOICE_ID + "=\"" + invoiceid + "\"";
 			}
-				inventoryList.add(inventory);
-			} while (cursor.moveToNext());
-		}
 
-		// closing connection
-		cursor.close();
-		dbabcdefgh.close();
-	}catch(Exception e){
-		e.getLocalizedMessage();
-	}
+			SQLiteDatabase dbabcdefgh = getReadableDatabase();
+			Cursor cursor = dbabcdefgh.rawQuery(selectQuery, null);
+
+			// looping through all rows and adding to list
+			if (cursor.moveToFirst()) {
+				do {
+					Inventory inventory = new Inventory();
+
+					inventory.setItemNoAdd(cursor.getString(cursor
+							.getColumnIndex(INVOICE_ITEM_ID)));
+					inventory.setInventoryVndr(cursor.getString(cursor
+							.getColumnIndex(INVOICE_VENDOR)));
+					inventory.setItemNameAdd(cursor.getString(cursor
+							.getColumnIndex(INVOICE_ITEM_NAME)));
+					inventory.setAvgCost(cursor.getString(cursor
+							.getColumnIndex(INVOICE_AVG_COST)));
+					inventory.setPriceTax("77");
+					inventory.setPriceYouChange(cursor.getString(cursor
+							.getColumnIndex(INVOICE_YOUR_COST)));
+					inventory.setInStock("66");
+					inventory.setQuantity(cursor.getString(cursor
+							.getColumnIndex(INVOICE_QUANTITY)));
+					inventory.setInventoryTaxOne(cursor.getString(cursor
+							.getColumnIndex(INVOICE_TAX)));
+					inventory.setSecondDescription(cursor.getString(cursor
+							.getColumnIndex(INVOICE_DISCRIPTION)));
+					try{
+						Double mSubTotal = Double.valueOf(cursor.getString(cursor
+								.getColumnIndex(INVOICE_TAX)));
+						inventory.setInventoryTaxTotal("" + mSubTotal);
+					} catch (NumberFormatException e) {
+						e.getLocalizedMessage();
+					}
+					inventoryList.add(inventory);
+				} while (cursor.moveToNext());
+			}
+
+			// closing connection
+			cursor.close();
+			dbabcdefgh.close();
+		}catch(Exception e){
+			e.getLocalizedMessage();
+		}
 		// returning lables
 		return inventoryList;
 	}
@@ -1218,7 +1350,7 @@ try{
 			if(cursor.getCount()>0){
 				if(cursor.moveToFirst()){
 					do{
-						
+
 						if(cursor.isNull(cursor.getColumnIndex(MERCURY_PRIMARY_URL))){
 						}else{
 							values.setPrimaryURL(cursor.getString(cursor.getColumnIndex(MERCURY_PRIMARY_URL)));
@@ -1236,9 +1368,9 @@ try{
 							values.setPassword( cursor.getString(cursor.getColumnIndex(MERCURY_PASSWORD)));
 						}
 					}while(cursor.moveToNext());
-	          }
+				}
 			}
-			}
+		}
 		cursor.close();
 		return values;
 	}
