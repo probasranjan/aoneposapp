@@ -16,6 +16,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.aoneposapp.PosMainActivity;
 import com.aoneposapp.R;
 import com.aoneposapp.utils.Inventory;
 import com.aoneposapp.utils.Parameters;
@@ -25,10 +26,10 @@ public class InventoryListAdapter extends BaseAdapter{
 	Context mContext;
 	ArrayList<Inventory> mInventoryList;
 	private OnDeleteClicked listener;
-	public InventoryListAdapter(Context context,
-			List<Inventory> list) {
+	public InventoryListAdapter(Context context,List<Inventory> list) {
 		mContext = context;
 		mInventoryList = (ArrayList<Inventory>) list;
+		System.out.println("mInventoryList"+mInventoryList);
 	}
 	public void setListener(OnDeleteClicked listener){
 		this.listener = listener;
@@ -56,21 +57,16 @@ public class InventoryListAdapter extends BaseAdapter{
 		ViewHolder holder;
 
 		if (convertView == null) {
-			convertView = LayoutInflater.from(mContext).inflate(
-					R.layout.list_item_item, null);
+			convertView = LayoutInflater.from(mContext).inflate(R.layout.list_item_item, null);
 
 			holder = new ViewHolder();
-			holder.textViewSerialNo = (TextView) convertView
-					.findViewById(R.id.serialNo);
-			holder.textViewItemNo = (TextView) convertView
-					.findViewById(R.id.itemNo);
-			holder.textViewItemInfo = (TextView) convertView
-					.findViewById(R.id.itemInfo);
-			holder.textViewQuantity = (TextView) convertView
-					.findViewById(R.id.quantity);
-			holder.textViewPrice = (TextView) convertView
-					.findViewById(R.id.price);
-     holder.deleterow=(ImageView) convertView.findViewById(R.id.deleterow);
+			holder.textViewSerialNo = (TextView) convertView.findViewById(R.id.serialNo);
+			holder.textViewItemNo = (TextView) convertView.findViewById(R.id.itemNo);
+			holder.textViewItemInfo = (TextView) convertView.findViewById(R.id.itemInfo);
+			holder.textViewQuantity = (TextView) convertView.findViewById(R.id.quantity);
+			holder.textViewPrice = (TextView) convertView.findViewById(R.id.price);
+            holder.deleterow=(ImageView) convertView.findViewById(R.id.deleterow);
+            holder.changeprice = (TextView) convertView.findViewById(R.id.changeprice);
 			convertView.setTag(holder);
 
 		} else {
@@ -81,6 +77,7 @@ public class InventoryListAdapter extends BaseAdapter{
 		holder.textViewItemNo.setText(mInventoryList.get(position).getItemNoAdd());
 		holder.textViewItemInfo.setText(mInventoryList.get(position).getItemNameAdd());
         holder.textViewQuantity.setText(mInventoryList.get(position).getQuantity());
+        holder.changeprice.setText(""+mInventoryList.get(position).getPriceYouChange().toString());
         holder.deleterow.setTag(""+position);
         String qtyStr = mInventoryList.get(position).getQuantity();
         
@@ -92,6 +89,7 @@ public class InventoryListAdapter extends BaseAdapter{
 		double price = Double.valueOf(mInventoryList.get(position).getPriceYouChange()) * qty;
 	//	price = Math.round(price * 100)/100;
 		holder.textViewPrice.setText(String.valueOf(df.format(price)));
+
 		holder.deleterow.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -115,6 +113,7 @@ public class InventoryListAdapter extends BaseAdapter{
 		TextView textViewItemInfo;
 		TextView textViewQuantity;
 		TextView textViewPrice;
+		TextView changeprice;
 		ImageView deleterow;
 	}
 public interface OnDeleteClicked{
