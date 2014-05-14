@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,18 +15,46 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 
+import net.authorize.ResponseCode;
+import net.authorize.ResponseReasonCode;
+import net.authorize.TransactionType;
+import net.authorize.android.AuthNetActivityBase;
+import net.authorize.android.SDKActivity;
+import net.authorize.android.SimpleActivity;
+import net.authorize.android.TransationActivity;
+import net.authorize.android.button.AuthNetButton;
+import net.authorize.android.model.AppConstant;
+import net.authorize.android.model.SystemSession;
+import net.authorize.data.Customer;
+import net.authorize.data.EmailReceipt;
+import net.authorize.data.Order;
+import net.authorize.data.ShippingAddress;
+import net.authorize.data.ShippingCharges;
+import net.authorize.data.creditcard.CreditCard;
+import net.authorize.xml.Result;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import IDTech.MSR.XMLManager.StructConfigParameters;
+import IDTech.MSR.uniMag.Common;
+import IDTech.MSR.uniMag.StateList;
+import IDTech.MSR.uniMag.uniMagReader;
+import IDTech.MSR.uniMag.uniMagReader.ReaderType;
+import IDTech.MSR.uniMag.uniMagReaderMsg;
+import IDTech.MSR.uniMag.UniMagTools.uniMagReaderToolsMsg;
+import IDTech.MSR.uniMag.UniMagTools.uniMagSDKTools;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -33,24 +63,30 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.ParseException;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
@@ -75,6 +111,7 @@ import android.widget.SlidingDrawer.OnDrawerCloseListener;
 import android.widget.SlidingDrawer.OnDrawerOpenListener;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TextView.BufferType;
 import android.widget.Toast;
 
 import com.aoneposapp.adapters.Custom_Adapter;
@@ -84,6 +121,9 @@ import com.aoneposapp.adapters.InventoryListAdapter.OnDeleteClicked;
 import com.aoneposapp.adapters.PaymentTypeAdapter;
 import com.aoneposapp.adapters.RecallListAdapter;
 import com.aoneposapp.adapters.StoreItemAdapter;
+import com.aoneposapp.firstdata.CardData;
+import com.aoneposapp.firstdata.FileDialog;
+import com.aoneposapp.firstdata.ProfileDatabase;
 import com.aoneposapp.mercury.MagTekDemo;
 import com.aoneposapp.starprinter.PrinterFunctions;
 import com.aoneposapp.utils.Constants;
@@ -91,14 +131,12 @@ import com.aoneposapp.utils.DatabaseForDemo;
 import com.aoneposapp.utils.Inventory;
 import com.aoneposapp.utils.JsonPostMethod;
 import com.aoneposapp.utils.Parameters;
-import com.aoneposapp.utils.ServerSyncClass;
 import com.epson.eposprint.Builder;
 import com.epson.eposprint.EposException;
 import com.epson.eposprint.Print;
 import com.paypal.android.sdk.payments.PayPalService;
 
-public class PosMainActivity extends Activity implements OnDeleteClicked,
-		ImageAdapterForHold.fetchButtomEditInterface {
+public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,uniMagReaderToolsMsg,OnDeleteClicked, ImageAdapterForHold.fetchButtomEditInterface {
 	private EditText quantityEdit;
 	private EditText barcodeEdit;
 	Calendar rightNow = Calendar.getInstance();
@@ -106,12 +144,13 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 	String itemidrrrr = null;
 	private int saveforlistcolourchange = -1;
 	String datavalforupdate = "";
+	
 	String dataval = "";
 	String invoice_forHold;
-	 String hold_Status="";
+	String hold_Status="";
 	String hold_Id;
 	Timer myTimer = new Timer();
-	boolean printBool = true;;
+	boolean printBool = true;
 	private Spinner fetchprinter;
 	private EditText fetchEdittext, fetchMinutes;
 	private TextView fetchTextView;
@@ -133,9 +172,9 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 	String lastpaymenttypeString = "";
 	String customer_phone = " ", customer_company = " ", customer_first = "Cash Customer",
 			customer_last = " ";
-	 String customer_id = "101";
+	String customer_id = "101";
 	private Button quantitybutton, deleteall, pricechange;
-	 Button fetchOnHoldButton;
+	Button fetchOnHoldButton;
 	private Button c_find;
 	private Button c_add;
 	private Button paybutton;
@@ -151,11 +190,11 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 	private Button customerInfoButton;
 	private Button customerButton;
 	private ListView itemlistView;
-	 Inventory mSelectedItem;
+	Inventory mSelectedItem;
 	private Inventory mEnterItemInventory;
-	 double mSubTotal;
-	 double mTaxTotal;
-	 double mGrandTotal;
+	double mSubTotal;
+	double mTaxTotal;
+	double mGrandTotal;
 	double remainingamount;
 	private AlertDialog alertDialogDismiss;
 	double cashpaymentAmount;
@@ -176,13 +215,13 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 	final ArrayList<String> itemsNo = new ArrayList<String>();
 	TextView subTotalView;
 	TextView taxTotalview;
-	 TextView grandTotalview;
+	TextView grandTotalview;
 	private TextView customerDetailsText;
-	 InventoryListAdapter mAdapter;
-	 ArrayList<Inventory> mItemList;
+	InventoryListAdapter mAdapter;
+	ArrayList<Inventory> mItemList;
 	private ArrayList<Inventory> mItemDiscountList = new ArrayList<Inventory>();
 	private LinearLayout showitemsll, deparmentlist;
-	 int mSelectedPosition;
+	int mSelectedPosition;
 	String holdidexist = "";
 	String invoiceidexist = "", recallidExist = "";
 	boolean directpayment;
@@ -195,15 +234,195 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 	DatabaseForDemo sqlitePos;
 	SQLiteDatabase dbforloginlogoutWritePos,dbforloginlogoutReadPos;
 	@SuppressWarnings("deprecation")
+	
+	//Swip Card
+	// declaring the instance of the uniMagReader;
+		private uniMagReader myUniMagReader = null;
+		private uniMagSDKTools firmwareUpdateTool = null;
+		
+		private TextView connectStatusTextView; // displays status of UniMag Reader: Connected / Disconnected
+		private TextView headerTextView; // short description of data displayed below
+		private TextView textAreaTop;
+		private EditText textAreaBottom;
+		private Button btnCommand;
+		private Button btnSwipeCard;
+		private boolean isReaderConnected = false;
+		private boolean isExitButtonPressed = false;
+		private boolean isWaitingForCommandResult=false;
+		private boolean isSaveLogOptionChecked = false;
+		private boolean isUseAutoConfigProfileChecked = false;
+		private boolean isConnectWithCommand = true;
+		
+		//update the powerup status
+		private int percent = 0;
+		private long beginTime = 0;
+		private long beginTimeOfAutoConfig = 0;
+		private byte[] challengeResponse = null;
+
+		private String popupDialogMsg = null;
+		private boolean enableSwipeCard =false;
+		private boolean autoconfig_running = false;	
+
+		private String strMsrData = null;
+		private byte[] msrData = null;
+		private String statusText = null;
+		private int challengeResult = 0;
+		
+		
+		static private final int REQUEST_GET_XML_FILE = 1;
+		static private final int REQUEST_GET_BIN_FILE = 2;
+		static private final int REQUEST_GET_ENCRYPTED_BIN_FILE = 3;
+		
+		//property for the menu item.
+		static final private int START_SWIPE_CARD 	= Menu.FIRST;
+		static final private int SETTINGS_ITEM 		= Menu.FIRST + 2;
+		static final private int SUB_SAVE_LOG_ITEM 	= Menu.FIRST + 3;
+		static final private int SUB_USE_AUTOCONFIG_PROFILE = Menu.FIRST + 4;
+		static final private int SUB_USE_COMMAND_TO_CONNECT = Menu.FIRST + 5;
+		static final private int SUB_LOAD_XML 		= Menu.FIRST + 6;
+		static final private int SUB_LOAD_BIN 		= Menu.FIRST + 7;
+		static final private int SUB_START_AUTOCONFIG= Menu.FIRST + 8;
+		static final private int SUB_STOP_AUTOCONFIG = Menu.FIRST + 10;
+		static final private int SUB_ATTACHED_TYPE 	= Menu.FIRST + 103;
+		static final private int SUB_SUPPORT_STATUS	= Menu.FIRST + 104;
+		static final private int DELETE_LOG_ITEM 	= Menu.FIRST + 11;   
+		static final private int ABOUT_ITEM 		= Menu.FIRST + 12;  
+		static final private int EXIT_IDT_APP 		= Menu.FIRST + 13;
+		static final private int SUB_LOAD_ENCRYPTED_BIN = Menu.FIRST + 14;
+	    
+		private MenuItem itemStartSC = null;
+		private MenuItem itemSubSaveLog = null;
+		private MenuItem itemSubUseAutoConfigProfile = null;
+		private MenuItem itemSubUseCommandToConnect = null;
+		private MenuItem itemSubLoadXML = null;
+		private MenuItem itemSubSetBinFile = null;
+		private MenuItem itemSubSetEncryptedBinFile = null;
+		private MenuItem itemSubStartAutoConfig = null;
+		private MenuItem itemSubStopAutoConfig = null;
+		private MenuItem itemDelLogs = null;   
+		private MenuItem itemAbout = null;
+		private MenuItem itemExitApp = null;
+		
+		private SubMenu sub = null;
+	    
+		private UniMagTopDialog dlgTopShow = null ;
+		private UniMagTopDialog dlgSwipeTopShow = null ;
+		private UniMagTopDialogYESNO dlgYESNOTopShow = null ;
+
+		private StructConfigParameters profile = null;
+		private ProfileDatabase profileDatabase = null;
+		private Handler handler = new Handler();
+		
+		private EditText editText_CreditCard,editText_ExpMonth,editText_ExpYear;
+		
+		public EditText editText_CreditCard1,editText_ExpMonth1,editText_ExpYear1,editText_Cvv;
+		String Text_Cvv;
+		
+		
+		// Athorize .net code
+		
+		 // buttons
+		  private static final int AUTH_ONLY_BUTTON_ID = 0x998;
+		  private AuthNetButton authOnlyButton;
+
+		  private ArrayList<HashMap<String, String>> arrayList_Details = new ArrayList<HashMap<String,String>>();;
+		  
+		  // AIM request containers
+		  private static String refId = "ref" + System.currentTimeMillis();
+		  private static BigDecimal totalAmount;
+		  private static CreditCard creditCard;
+		  private static String refTransId;
+		  private static String authCode;
+		  private static Order order;
+		  private static ShippingCharges shippingCharges;
+		  private static Customer customer;
+		  private static ShippingAddress shippingAddress;
+		  private static EmailReceipt emailReceipt;
+		  private static HashMap<String, String> merchantDefinedFields = new HashMap<String, String>();
+		  
+		  private SystemSession session;
+		  
+		  private Dialog mainDialog;
+		
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pos_activity);
+		
+		session = new SystemSession(PosMainActivity.this);
+		
+    	editText_CreditCard = (EditText) findViewById(R.id.editText_CreditCard1);
+		editText_ExpMonth =(EditText) findViewById(R.id.editText_ExpMonth1);
+		editText_ExpYear = (EditText) findViewById(R.id.editText_ExpYear1);
+    	
+    	profileDatabase = new ProfileDatabase(this);
+    	profileDatabase.initializeDB();
+    	isUseAutoConfigProfileChecked = profileDatabase.getIsUseAutoConfigProfile();
+
+		btnSwipeCard = (Button)findViewById(R.id.btn_swipeCard);
+		btnCommand = (Button)findViewById(R.id.btn_command);
+		textAreaTop = (TextView)findViewById(R.id.text_area_top);
+		textAreaBottom = (EditText)findViewById(R.id.text_area_bottom);
+		connectStatusTextView = (TextView)findViewById(R.id.status_text);
+		headerTextView = (TextView)findViewById(R.id.header_text);
+		getWindow().setFlags(WindowManager.LayoutParams. FLAG_FULLSCREEN, WindowManager.LayoutParams. FLAG_FULLSCREEN);
+		
+		// Set Listener for "Swipe Card" Button
+//		btnSwipeCard.setOnClickListener(new OnClickListener(){  
+//			public void onClick(View v) {
+//				if (myUniMagReader!=null)
+//				{	
+//					if (!isWaitingForCommandResult) 
+//					{
+//						if(myUniMagReader.startSwipeCard())
+//						{
+//							headerTextView.setText("MSR Data");
+//							textAreaTop.setText("");
+//							textAreaBottom.setText("");
+//							Log.d("Demo Info >>>>>","to startSwipeCard");
+//						}
+//						else
+//							Log.d("Demo Info >>>>>","cannot startSwipeCard");
+//					}
+//				}
+//			}  
+//		});  
+//		System.out.println("On creart id"+17);
+//		// Set Listener for "Command" Button
+//		btnCommand.setOnClickListener(new OnClickListener(){  
+//			public void onClick(View v) {
+//				if (!isWaitingForCommandResult)
+//				{
+////					DlgSettingOption myDlg = new DlgSettingOption (uniMagIIDemo.this,myUniMagReader);
+////					myDlg.DisplayDlg();
+//				}
+//			}  
+//		});  
+		
+		
+		
+//		System.out.println("On creart id"+18);
+//    	initializeReader();
+//    	System.out.println("On creart id"+19);
+//    	String strManufacture = myUniMagReader.getInfoManufacture();
+//    	System.out.println("On creart id"+20);
+//    	String strModel = myUniMagReader.getInfoModel();
+//    	System.out.println("On creart id"+21);
+//    	String strSDKVerInfo = myUniMagReader.getSDKVersionInfo();
+//    	System.out.println("On creart id"+22);
+//    	String strOSVerInfo = android.os.Build.VERSION.RELEASE;
+//    	System.out.println("On creart id"+23);
+    	
+    	// to prevent screen timeout
+    	System.out.println("On creart id"+25);
+    	getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		
 		Parameters.printerContext=PosMainActivity.this;
-		if(Parameters.PrinterBool){
+		if (Parameters.PrinterBool) {
 			Parameters.theardRunForPrint();
-			Parameters.PrinterBool=false;
-			}
+			Parameters.PrinterBool = false;
+		}
 		sqlitePos = new DatabaseForDemo(PosMainActivity.this);
 		dbforloginlogoutWritePos = sqlitePos.getWritableDatabase();
 		dbforloginlogoutReadPos = sqlitePos.getReadableDatabase();
@@ -220,12 +439,10 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 				"AcSD5hA7phPfAsXzPd85LZ43vUdzEX5Bkf2P8tuTtXBCN1f3RDq_GRBuxGdM");
 
 		startService(intent);*/
-		final AlertDialog alertStore = new AlertDialog.Builder(
-				PosMainActivity.this).create();
+		final AlertDialog alertStore = new AlertDialog.Builder(PosMainActivity.this).create();
 		LayoutInflater mInflater = LayoutInflater.from(PosMainActivity.this);
 		View layout = mInflater.inflate(R.layout.store_selection, null);
-		final Spinner selectStore = (Spinner) layout
-				.findViewById(R.id.spinner1);
+		final Spinner selectStore = (Spinner) layout.findViewById(R.id.spinner1);
 		Button ok = (Button) layout.findViewById(R.id.button1);
 
 		if (Parameters.usertype.equals("employee")) {
@@ -237,11 +454,8 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			if (mCuaonersor != null) {
 				if (mCuaonersor.moveToFirst()) {
 					do {
-						String storename = mCuaonersor
-								.getString(mCuaonersor
-										.getColumnIndex(DatabaseForDemo.EMP_STORE_NAME));
-						String storeid = mCuaonersor.getString(mCuaonersor
-								.getColumnIndex(DatabaseForDemo.EMP_STORE_ID));
+						String storename = mCuaonersor .getString(mCuaonersor .getColumnIndex(DatabaseForDemo.EMP_STORE_NAME));
+						String storeid = mCuaonersor.getString(mCuaonersor .getColumnIndex(DatabaseForDemo.EMP_STORE_ID));
 						String[] itemsid = storeid.split(",");
 						for (String item : itemsid) {
 							if (item.length() > 1)
@@ -258,31 +472,25 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			}
 			mCuaonersor.close();
 
-			DPadapter = new StoreItemAdapter(PosMainActivity.this,
-					android.R.layout.simple_spinner_item, storearray);
+			DPadapter = new StoreItemAdapter(PosMainActivity.this, android.R.layout.simple_spinner_item, storearray);
 			selectStore.setAdapter(DPadapter);
 
 		}
-		if (Parameters.usertype.equals("admin")
-				|| Parameters.usertype.equals("demo")) {
-			Cursor mCurchisor = dbforloginlogoutReadPos.rawQuery(
-					"select * from " + DatabaseForDemo.STORE_TABLE, null);
+		if (Parameters.usertype.equals("admin") || Parameters.usertype.equals("demo")) {
+			Cursor mCurchisor = dbforloginlogoutReadPos.rawQuery( "select * from " + DatabaseForDemo.STORE_TABLE, null);
 			System.out.println(mCurchisor);
 			if (mCurchisor != null) {
 				if (mCurchisor.moveToFirst()) {
 					do {
-						String storename = mCurchisor.getString(mCurchisor
-								.getColumnIndex(DatabaseForDemo.STORE_NAME));
-						String storeid = mCurchisor.getString(mCurchisor
-								.getColumnIndex(DatabaseForDemo.STORE_ID));
+						String storename = mCurchisor.getString(mCurchisor .getColumnIndex(DatabaseForDemo.STORE_NAME));
+						String storeid = mCurchisor.getString(mCurchisor .getColumnIndex(DatabaseForDemo.STORE_ID));
 						storearray.add(storename);
 						storearrayid.add(storeid);
 					} while (mCurchisor.moveToNext());
 				}
 			}
 			mCurchisor.close();
-			DPadapter = new StoreItemAdapter(PosMainActivity.this,
-					android.R.layout.simple_spinner_item, storearray);
+			DPadapter = new StoreItemAdapter(PosMainActivity.this, android.R.layout.simple_spinner_item, storearray);
 			selectStore.setAdapter(DPadapter);
 
 		}
@@ -294,12 +502,8 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 				alertStore.dismiss();
 				if (storearrayid.size() > 0) {
 
-					Parameters.store_id = storearrayid.get(selectStore
-							.getSelectedItemPosition());
-					String qry = "update "
-							+ DatabaseForDemo.MISCELLANEOUS_TABLE + " set "
-							+ DatabaseForDemo.MISCEL_STORE + "=\"" + Parameters.store_id
-							+ "\"";
+					Parameters.store_id = storearrayid.get(selectStore .getSelectedItemPosition());
+					String qry = "update " + DatabaseForDemo.MISCELLANEOUS_TABLE + " set " + DatabaseForDemo.MISCEL_STORE + "=\"" + Parameters.store_id + "\"";
 					dbforloginlogoutWritePos.execSQL(qry);
 				}
 			}
@@ -311,10 +515,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 		}else{
 			if (storearrayid.size() > 0){
 				Parameters.store_id = storearrayid.get(0);
-				String qry = "update "
-						+ DatabaseForDemo.MISCELLANEOUS_TABLE + " set "
-						+ DatabaseForDemo.MISCEL_STORE + "=\"" + Parameters.store_id
-						+ "\"";
+				String qry = "update " + DatabaseForDemo.MISCELLANEOUS_TABLE + " set " + DatabaseForDemo.MISCEL_STORE + "=\"" + Parameters.store_id + "\"";
 				dbforloginlogoutWritePos.execSQL(qry);
 			}
 		}
@@ -368,19 +569,13 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 				String viewdata = "";
 				if (demobutton.getTag().equals("0")) {
 					if (Parameters.usertype.equals("admin")) {
-						viewdata = "Are you sure that you want to turn off? \n"
-								+ "The data will not be saved if the mode is off";
-						final AlertDialog alertDialog1 = new AlertDialog.Builder(
-								PosMainActivity.this).create();
-						LayoutInflater mInflater = LayoutInflater
-								.from(PosMainActivity.this);
-						View layout = mInflater.inflate(R.layout.delete_popup,
-								null);
+						viewdata = "Are you sure that you want to turn off? \n" + "The data will not be saved if the mode is off";
+						final AlertDialog alertDialog1 = new AlertDialog.Builder( PosMainActivity.this).create();
+						LayoutInflater mInflater = LayoutInflater .from(PosMainActivity.this);
+						View layout = mInflater.inflate(R.layout.delete_popup, null);
 						Button ok = (Button) layout.findViewById(R.id.ok);
-						Button cancel = (Button) layout
-								.findViewById(R.id.cancel);
-						TextView deletetext = (TextView) layout
-								.findViewById(R.id.deletetext);
+						Button cancel = (Button) layout .findViewById(R.id.cancel);
+						TextView deletetext = (TextView) layout .findViewById(R.id.deletetext);
 						deletetext.setText("" + viewdata);
 						ok.setOnClickListener(new OnClickListener() {
 							@Override
@@ -424,60 +619,45 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 
 			}
 		});
+		
 		image1.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if (Parameters.inventory_permission) {
-					Intent intent1 = new Intent(PosMainActivity.this,
-							InventoryActivity.class);
+					Intent intent1 = new Intent(PosMainActivity.this, InventoryActivity.class);
 					startActivity(intent1);
 					finish();
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
+		
 		image2.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if(Parameters.stores_permission){
-				Intent intent1 = new Intent(PosMainActivity.this,
-						StoresActivity.class);
+				Intent intent1 = new Intent(PosMainActivity.this, StoresActivity.class);
 				startActivity(intent1);
 				finish();
 			} else {
-				showAlertDialog(
-						PosMainActivity.this,
-						"Sorry",
-						"You are not authenticated to perform this operation.",
-						false);
+				showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 			}
 			}
 		});
+		
 		image3.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if (Parameters.customer_permission) {
-					Intent intent1 = new Intent(PosMainActivity.this,
-							CustomerActivity.class);
+					Intent intent1 = new Intent(PosMainActivity.this, CustomerActivity.class);
 					startActivity(intent1);
 					finish();
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -487,16 +667,11 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if(Parameters.employee_permission){
-				Intent intent1 = new Intent(PosMainActivity.this,
-						EmployeeActivity.class);
+				Intent intent1 = new Intent(PosMainActivity.this, EmployeeActivity.class);
 				startActivity(intent1);
 				finish();
 			} else {
-				showAlertDialog(
-						PosMainActivity.this,
-						"Sorry",
-						"You are not authenticated to perform this operation.",
-						false);
+				showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 			}
 			}
 		});
@@ -506,16 +681,11 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if (Parameters.reports_permission) {
-					Intent intent1 = new Intent(PosMainActivity.this,
-							ReportsActivity.class);
+					Intent intent1 = new Intent(PosMainActivity.this, ReportsActivity.class);
 					startActivity(intent1);
 					finish();
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -525,16 +695,11 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if (Parameters.settings_permission) {
-					Intent intent1 = new Intent(PosMainActivity.this,
-							SettingsActivity.class);
+					Intent intent1 = new Intent(PosMainActivity.this, SettingsActivity.class);
 					startActivity(intent1);
 					finish();
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -543,8 +708,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent intent1 = new Intent(PosMainActivity.this,
-						ContactsActivity.class);
+				Intent intent1 = new Intent(PosMainActivity.this, ContactsActivity.class);
 				startActivity(intent1);
 				finish();
 			}
@@ -555,16 +719,11 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if (Parameters.profile_permission) {
-					Intent intent1 = new Intent(PosMainActivity.this,
-							ProfileActivity.class);
+					Intent intent1 = new Intent(PosMainActivity.this, ProfileActivity.class);
 					startActivity(intent1);
 					finish();
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -612,21 +771,16 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 		TextView loginnameempid = (TextView)findViewById(R.id.loginnameval);
 		loginnameempid.setText(Parameters.usertypeloginvalue);
 		
-		customerDetailsText.setText("Customer No = " + customer_id
-				+ ", \n Customer Name = " + customer_first + " "
-				+ customer_last);
+		customerDetailsText.setText("Customer No = " + customer_id + ", \n Customer Name = " + customer_first + " " + customer_last);
 		
-		Cursor mCursora = dbforloginlogoutReadPos.rawQuery(
-				"select * from " + DatabaseForDemo.DEPARTMENT_TABLE, null);
+		Cursor mCursora = dbforloginlogoutReadPos.rawQuery( "select * from " + DatabaseForDemo.DEPARTMENT_TABLE, null);
 		System.out.println(mCursora);
 		if (mCursora != null) {
 			if (mCursora.moveToFirst()) {
 				do {
-					String catid = mCursora.getString(mCursora
-							.getColumnIndex(DatabaseForDemo.DepartmentID));
+					String catid = mCursora.getString(mCursora .getColumnIndex(DatabaseForDemo.DepartmentID));
 					System.out.println(catid);
-					String check = mCursora.getString(mCursora
-							.getColumnIndex(DatabaseForDemo.CHECKED_VALUE));
+					String check = mCursora.getString(mCursora .getColumnIndex(DatabaseForDemo.CHECKED_VALUE));
 					System.out.println(check);
 					if (check.equals("true")) {
 						deptspinnerdata.add(catid);
@@ -650,8 +804,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 		                  //  Toast.makeText(PosMainActivity.this, "Enter key detected", Toast.LENGTH_SHORT).show();
 		                    String mBarcode = barcodeEdit.getText().toString();
 		                    String mQuantity = "1";
-		                    if (mBarcode.length() > 0 && mBarcode != null
-		    						&& mQuantity != null && mQuantity.length() > 0) {
+		                    if (mBarcode.length() > 0 && mBarcode != null && mQuantity != null && mQuantity.length() > 0) {
 		    					mSubTotal = 0;
 		    					mTaxTotal = 0;
 		    					if (checkitemExists(mBarcode, mQuantity)) {
@@ -671,12 +824,10 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 		    						if (mSelectedItem != null) {
 		    							mSubTotal = 0;
 		    							mTaxTotal = 0;
-		    							getItemDetails(true, mSelectedItem.getItemNoAdd(),
-		    									mQuantity);
+		    							getItemDetails(true, mSelectedItem.getItemNoAdd(), mQuantity);
 		    							// getItemDetailsAndQuantitiy(true,mBarcode,mQuantity);
 		    						} else {
-		    							Toast.makeText(getApplicationContext(),
-		    									"Select List Item", 1000).show();
+		    							Toast.makeText(getApplicationContext(), "Select List Item", 1000).show();
 		    						}
 		    					}
 
@@ -698,11 +849,9 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if(printLastInvoice.getText().toString().equals("Print Last Invoice")){
-				SharedPreferences sharedPreferences = PreferenceManager
-						.getDefaultSharedPreferences(PosMainActivity.this);
+				SharedPreferences sharedPreferences = PreferenceManager .getDefaultSharedPreferences(PosMainActivity.this);
 
-				String print_text = sharedPreferences.getString(
-						"image_data", "");
+				String print_text = sharedPreferences.getString( "image_data", "");
 				Bitmap map=null;
 				if( !print_text.equalsIgnoreCase("") ){
 				    byte[] b = Base64.decode(print_text, Base64.DEFAULT);
@@ -856,20 +1005,13 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 					final ArrayList<String> typeR = new ArrayList<String>();
 					final ArrayList<String> dateR = new ArrayList<String>();
 
-					final AlertDialog alertDialog12 = new AlertDialog.Builder(
-							PosMainActivity.this,
-							android.R.style.Theme_NoTitleBar).create();
-					LayoutInflater mInflater2 = LayoutInflater
-							.from(PosMainActivity.this);
-					View layout2 = mInflater2.inflate(
-							R.layout.recallinvoice_popup, null);
-					RelativeLayout recallvisible = (RelativeLayout) layout2
-							.findViewById(R.id.recallvisible);
+					final AlertDialog alertDialog12 = new AlertDialog.Builder( PosMainActivity.this, android.R.style.Theme_NoTitleBar).create();
+					LayoutInflater mInflater2 = LayoutInflater .from(PosMainActivity.this);
+					View layout2 = mInflater2.inflate( R.layout.recallinvoice_popup, null);
+					RelativeLayout recallvisible = (RelativeLayout) layout2 .findViewById(R.id.recallvisible);
 					recallvisible.setVisibility(View.VISIBLE);
-					ListView listt = (ListView) layout2
-							.findViewById(R.id.recallList);
-					Button recallCancel = (Button) layout2
-							.findViewById(R.id.recallCancel);
+					ListView listt = (ListView) layout2 .findViewById(R.id.recallList);
+					Button recallCancel = (Button) layout2 .findViewById(R.id.recallCancel);
 				
 					Log.v("hari", "nath");
 					String selectQuery = "SELECT * FROM "
@@ -882,23 +1024,17 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 					if (mCursoraa != null) {
 						if (mCursoraa.moveToFirst()) {
 							do {
-								String custno = mCursoraa.getString(mCursoraa
-										.getColumnIndex(DatabaseForDemo.INVOICE_ID));
+								String custno = mCursoraa.getString(mCursoraa .getColumnIndex(DatabaseForDemo.INVOICE_ID));
 								idR.add(custno);
-								custno = mCursoraa.getString(mCursoraa
-										.getColumnIndex(DatabaseForDemo.INVOICE_TOTAL_AMT));
+								custno = mCursoraa.getString(mCursoraa .getColumnIndex(DatabaseForDemo.INVOICE_TOTAL_AMT));
 								amtR.add(custno);
-								custno = mCursoraa.getString(mCursoraa
-										.getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE));
+								custno = mCursoraa.getString(mCursoraa .getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE));
 								emyR.add(custno);
-								custno = mCursoraa.getString(mCursoraa
-										.getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER));
+								custno = mCursoraa.getString(mCursoraa .getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER));
 								cosmR.add(custno);
-								custno = mCursoraa.getString(mCursoraa
-										.getColumnIndex(DatabaseForDemo.INVOICE_PAYMENT_TYPE));
+								custno = mCursoraa.getString(mCursoraa .getColumnIndex(DatabaseForDemo.INVOICE_PAYMENT_TYPE));
 								typeR.add(custno);
-								custno = mCursoraa.getString(mCursoraa
-										.getColumnIndex(DatabaseForDemo.CREATED_DATE));
+								custno = mCursoraa.getString(mCursoraa .getColumnIndex(DatabaseForDemo.CREATED_DATE));
 								dateR.add(custno);
 
 							} while (mCursoraa.moveToNext());
@@ -907,17 +1043,14 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 					
 					Log.v("hari", "nath" + mCursoraa.getCount());
 					Log.v("hari", "nath" + mCursoraa.getColumnCount());
-					RecallListAdapter arr = new RecallListAdapter(
-							PosMainActivity.this, idR, amtR, emyR, cosmR,
-							typeR, dateR);
+					RecallListAdapter arr = new RecallListAdapter( PosMainActivity.this, idR, amtR, emyR, cosmR, typeR, dateR);
 					Log.v("hari", "nath");
 					listt.setAdapter(arr);
 					mCursoraa.close();
 
 					listt.setOnItemClickListener(new OnItemClickListener() {
 						@Override
-						public void onItemClick(AdapterView<?> arg0, View arg1,
-								int arg2, long arg3) {
+						public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 							// TODO Auto-generated method stub
 							mSubTotal = 0;
 							mTaxTotal = 0;
@@ -929,15 +1062,12 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 									+ "=\"" + idR.get(arg2) + "\"";
 
 							Cursor mCursorbb = dbforloginlogoutReadPos.rawQuery(selectQuery, null);
-							System.out.println("cusor countis jariskflskjfjsf:"
-									+ mCursorbb.getCount());
+							System.out.println("cusor countis jariskflskjfjsf:" + mCursorbb.getCount());
 							if (mCursorbb != null) {
 								if (mCursorbb.moveToFirst()) {
 									do {
-										String name = mCursorbb.getString(mCursorbb
-												.getColumnIndex(DatabaseForDemo.INVOICE_ITEM_ID));
-										getIvoiceItemDetails(name,
-												idR.get(arg2));
+										String name = mCursorbb.getString(mCursorbb .getColumnIndex(DatabaseForDemo.INVOICE_ITEM_ID));
+										getIvoiceItemDetails(name, idR.get(arg2));
 									} while (mCursorbb.moveToNext());
 									fetchOnHoldButton.setTag("0");
 									fetchOnHoldButton.setText("Save On Hold");
@@ -987,12 +1117,9 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 								mTaxTotal = 0;
 								fetchOnHoldButton.setTag("1");
 								fetchOnHoldButton.setText("Fetch On Hold");
-								subTotalView.setText(String.valueOf("$"
-										+ mSubTotal));
-								taxTotalview.setText(String.valueOf("$"
-										+ mTaxTotal));
-								grandTotalview.setText(String.valueOf("$"
-										+ mSubTotal));
+								subTotalView.setText(String.valueOf("$" + mSubTotal));
+								taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+								grandTotalview.setText(String.valueOf("$" + mSubTotal));
 							}
 							alertDialog12.dismiss();
 						}
@@ -1003,8 +1130,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 					alertDialog12.show();
 					Log.v("hari", "nath");
 				} else {
-					Toast.makeText(getApplicationContext(), "Clear ItemList",
-							Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), "Clear ItemList", Toast.LENGTH_LONG).show();
 				}
 			}
 
@@ -1032,8 +1158,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent intent1 = new Intent(PosMainActivity.this,
-						CustomerActivity.class);
+				Intent intent1 = new Intent(PosMainActivity.this, CustomerActivity.class);
 				startActivity(intent1);
 			}
 		});
@@ -1048,17 +1173,13 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 				final ArrayList<String> total_lastname_data = new ArrayList<String>();
 				final ArrayList<String> auto_data = new ArrayList<String>();
 				final ArrayList<String> total_company_data = new ArrayList<String>();
-				final AlertDialog alertDialog12 = new AlertDialog.Builder(
-						PosMainActivity.this, android.R.style.Theme_NoTitleBar)
-						.create();
-				LayoutInflater mInflater2 = LayoutInflater
-						.from(PosMainActivity.this);
+				final AlertDialog alertDialog12 = new AlertDialog.Builder( PosMainActivity.this, android.R.style.Theme_NoTitleBar) .create();
+				LayoutInflater mInflater2 = LayoutInflater .from(PosMainActivity.this);
 				View layout2 = mInflater2.inflate(R.layout.customer_find, null);
 				ListView listt = (ListView) layout2.findViewById(R.id.c_list);
 				
 				
-				String selectQuery = "SELECT  * FROM "
-						+ DatabaseForDemo.CUSTOMER_TABLE;
+				String selectQuery = "SELECT  * FROM " + DatabaseForDemo.CUSTOMER_TABLE;
 				Cursor mCursoraaq = dbforloginlogoutReadPos.rawQuery(selectQuery, null);
 
 				if (mCursoraaq != null) {
@@ -1066,14 +1187,11 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 					if (mCursoraaq.moveToFirst()) {
 						do {
 							Log.v("errrr","null");
-							String custno = mCursoraaq.getString(mCursoraaq
-									.getColumnIndex(DatabaseForDemo.CUSTOMER_NO));
+							String custno = mCursoraaq.getString(mCursoraaq .getColumnIndex(DatabaseForDemo.CUSTOMER_NO));
 							total_customerno_data.add(custno);
-							String firstname = mCursoraaq.getString(mCursoraaq
-									.getColumnIndex(DatabaseForDemo.CUSTOMER_FIRST_NAME));
+							String firstname = mCursoraaq.getString(mCursoraaq .getColumnIndex(DatabaseForDemo.CUSTOMER_FIRST_NAME));
 							total_firstname_data.add(firstname);
-							String lastname = mCursoraaq.getString(mCursoraaq
-									.getColumnIndex(DatabaseForDemo.CUSTOMER_LAST_NAME));
+							String lastname = mCursoraaq.getString(mCursoraaq .getColumnIndex(DatabaseForDemo.CUSTOMER_LAST_NAME));
 							total_lastname_data.add(lastname);
 						} while (mCursoraaq.moveToNext());
 					}
@@ -1082,7 +1200,6 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			
 				for (int ii = 0; ii < total_customerno_data.size(); ii++) {
 					
-					
 					String selectQuery123 = "SELECT * FROM "
 							+ DatabaseForDemo.CUSTOMER_GENERAL_INFO_TABLE+ " where " + DatabaseForDemo.CUSTOMER_NO + "=\""
 									+ total_customerno_data.get(ii) + "\"";
@@ -1090,8 +1207,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 					if (mCursoraa1234 != null) {
 						if(mCursoraa1234.getCount()>0){
 						if (mCursoraa1234.moveToFirst()) {
-								String company = mCursoraa1234.getString(mCursoraa1234
-										.getColumnIndex(DatabaseForDemo.CUSTOMER_COMPANY_NAME));
+								String company = mCursoraa1234.getString(mCursoraa1234 .getColumnIndex(DatabaseForDemo.CUSTOMER_COMPANY_NAME));
 								total_company_data.add(company);
 								String custno = mCursoraa1234.getString(mCursoraa1234.getColumnIndex(DatabaseForDemo.CUSTOMER_PRIMARY_PHONE));
 								total_customerno_datadddddd.add(""+custno);
@@ -1147,9 +1263,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 						customer_company = total_company_data.get(arg2);
 						customer_first = total_firstname_data.get(arg2);
 						customer_last = total_lastname_data.get(arg2);
-						customerDetailsText.setText("Customer No="
-								+ customer_id + ", \n Customer Name="
-								+ customer_first + " " + customer_last);
+						customerDetailsText.setText("Customer No=" + customer_id + ", \n Customer Name=" + customer_first + " " + customer_last);
 						alertDialog12.dismiss();
 					}
 				});
@@ -1164,8 +1278,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 					auto_data.add(sss);
 					}
 				}
-				final AutoCompleteTextView autocomplete = (AutoCompleteTextView) layout2
-						.findViewById(R.id.auto_for_customer);
+				final AutoCompleteTextView autocomplete = (AutoCompleteTextView) layout2 .findViewById(R.id.auto_for_customer);
 				if(auto_data.size()>-1){
 				ArrayAdapter<String> arr_auto = new ArrayAdapter<String>(PosMainActivity.this,  android.R.layout.select_dialog_item, auto_data);
 				autocomplete.setAdapter(arr_auto);
@@ -1183,19 +1296,15 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 						if(arg2>=0){
 						String itemnoo=total_customerno_data.get(arg2);
 						
-						String selectQuery = "SELECT  * FROM "
-								+ DatabaseForDemo.CUSTOMER_TABLE +" where "+DatabaseForDemo.CUSTOMER_NO+"='"+itemnoo+"'";
+						String selectQuery = "SELECT  * FROM " + DatabaseForDemo.CUSTOMER_TABLE +" where "+DatabaseForDemo.CUSTOMER_NO+"='"+itemnoo+"'";
 						Cursor mCursoraa1 = dbforloginlogoutReadPos.rawQuery(selectQuery, null);
 
 						if (mCursoraa1 != null) {
 							if (mCursoraa1.moveToFirst()) {
 								do {
-									 customer_id = mCursoraa1.getString(mCursoraa1
-											.getColumnIndex(DatabaseForDemo.CUSTOMER_NO));
-									 customer_first = mCursoraa1.getString(mCursoraa1
-											.getColumnIndex(DatabaseForDemo.CUSTOMER_FIRST_NAME));
-									 customer_last = mCursoraa1.getString(mCursoraa1
-											.getColumnIndex(DatabaseForDemo.CUSTOMER_LAST_NAME));
+									 customer_id = mCursoraa1.getString(mCursoraa1.getColumnIndex(DatabaseForDemo.CUSTOMER_NO));
+									 customer_first = mCursoraa1.getString(mCursoraa1.getColumnIndex(DatabaseForDemo.CUSTOMER_FIRST_NAME));
+									 customer_last = mCursoraa1.getString(mCursoraa1.getColumnIndex(DatabaseForDemo.CUSTOMER_LAST_NAME));
 								} while (mCursoraa1.moveToNext());
 							}
 						}
@@ -1207,17 +1316,14 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 								+ " where " + DatabaseForDemo.CUSTOMER_NO + "=\""
 								+ itemnoo + "\"";
 
-						Cursor mCursorforshipping1 = dbforloginlogoutReadPos.rawQuery(
-								selectQueryforshipping, null);
+						Cursor mCursorforshipping1 = dbforloginlogoutReadPos.rawQuery(selectQueryforshipping, null);
 
 						if (mCursorforshipping1.getCount() > 0) {
 							if (mCursorforshipping1 != null) {
 								if (mCursorforshipping1.moveToFirst()) {
 									do {
-										customer_company  = mCursorforshipping1.getString(mCursorforshipping1
-												.getColumnIndex(DatabaseForDemo.CUSTOMER_COMPANY_NAME));
-										customer_phone  = mCursorforshipping1.getString(mCursorforshipping1
-												.getColumnIndex(DatabaseForDemo.CUSTOMER_PRIMARY_PHONE));
+										customer_company  = mCursorforshipping1.getString(mCursorforshipping1.getColumnIndex(DatabaseForDemo.CUSTOMER_COMPANY_NAME));
+										customer_phone  = mCursorforshipping1.getString(mCursorforshipping1.getColumnIndex(DatabaseForDemo.CUSTOMER_PRIMARY_PHONE));
 									} while (mCursorforshipping1.moveToNext());
 								}
 							}
@@ -1233,9 +1339,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 								+ customer_first + " " + customer_last);
 						alertDialog12.dismiss();
 						}else{
-							Toast.makeText(getApplicationContext(),
-									"You Have Entered Invalid Phone Number",
-									Toast.LENGTH_LONG).show();
+							Toast.makeText(getApplicationContext(), "You Have Entered Invalid Phone Number", Toast.LENGTH_LONG).show();
 						}
 					}
 				});
@@ -1248,8 +1352,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 					}
 				});
 				alertDialog12.setView(layout2);
-				alertDialog12.getWindow().setSoftInputMode(
-						WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+				alertDialog12.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 				alertDialog12.show();
 			}
 		});
@@ -1265,26 +1368,23 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 				final TextView tv = new TextView(PosMainActivity.this);
 				tv.setId(dsize);
 				tv.setText(deptspinnerdata.get(dsize));
-				tv.setTextAppearance(getApplicationContext(),
-						android.R.style.TextAppearance_Medium);
-				tv.setPadding(10, 10, 10, 10);
+				tv.setTextAppearance(getApplicationContext(),android.R.style.TextAppearance_Medium);
+				tv.setPadding(5, 5, 5, 5);
 				if (dsize == 0) {
-					tv.setBackgroundResource(R.drawable.departmentselectedhightlighted);
+					tv.setBackgroundResource(R.drawable.highlightedtopmenuitem);
 					tv.setTextColor(Color.BLACK);
 					setitemList(deptspinnerdata.get(0));
 					saveforlistcolourchange = dsize;
 				}
 				deparmentlist.addView(tv);
 				tv.setOnClickListener(new OnClickListener() {
-
 					@Override
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
-						tv.setBackgroundResource(R.drawable.departmentselectedhightlighted);
+						tv.setBackgroundResource(R.drawable.highlightedtopmenuitem);
 						tv.setTextColor(Color.BLACK);
 						setitemList(deptspinnerdata.get(xyz));
-						if (saveforlistcolourchange != -1
-								&& saveforlistcolourchange != xyz) {
+						if (saveforlistcolourchange != -1 && saveforlistcolourchange != xyz) {
 							TextView tvin = (TextView) findViewById(saveforlistcolourchange);
 							tvin.setBackgroundResource(0);
 							tvin.setTextColor(Color.WHITE);
@@ -1330,8 +1430,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 			}
 
 			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem,
-					int visibleItemCount, int totalItemCount) {
+			public void onScroll(AbsListView view, int firstVisibleItem,int visibleItemCount, int totalItemCount) {
 
 			}
 		});
@@ -1345,30 +1444,22 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 
 					if (holdidexist.equals("")) {
 
-						final AlertDialog alertDialog12 = new AlertDialog.Builder(
-								PosMainActivity.this).create();
-						LayoutInflater mInflater2 = LayoutInflater
-								.from(PosMainActivity.this);
-						View layout2 = mInflater2.inflate(R.layout.fetch_popup,
-								null);
-						final EditText totalchange = (EditText) layout2
-								.findViewById(R.id.namepop);
-						alertDialog12
-								.setTitle("Enter the Hold Order Reference Name");
-						Button okchange = (Button) layout2
-								.findViewById(R.id.okpop);
+						final AlertDialog alertDialog12 = new AlertDialog.Builder(PosMainActivity.this).create();
+						LayoutInflater mInflater2 = LayoutInflater.from(PosMainActivity.this);
+						View layout2 = mInflater2.inflate(R.layout.fetch_popup,null);
+						final EditText totalchange = (EditText) layout2.findViewById(R.id.namepop);
+						alertDialog12.setTitle("Enter the Hold Order Reference Name");
+						Button okchange = (Button) layout2.findViewById(R.id.okpop);
 
 						okchange.setOnClickListener(new OnClickListener() {
 
 							@Override
 							public void onClick(View v) {
 								// TODO Auto-generated method stub
-								String totalchangeval = totalchange.getText()
-										.toString().trim();
+								String totalchangeval = totalchange.getText().toString().trim();
 
 								if (totalchangeval.length() > 0) {
-									hold_Id = totalchange.getText().toString()
-											.trim();
+									hold_Id = totalchange.getText().toString().trim();
 									String query111 = "SELECT "
 											+ DatabaseForDemo.INVOICE_HOLD_ID
 											+ " from "
@@ -1379,161 +1470,93 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 									Cursor cursor111 = dbforloginlogoutReadPos.rawQuery(query111,
 											null);
 									if (cursor111.getCount() > 0) {
-										Toast.makeText(getApplicationContext(),
-												"Hold Id already exist",
-												Toast.LENGTH_LONG).show();
+										Toast.makeText(getApplicationContext(),"Hold Id already exist",Toast.LENGTH_LONG).show();
 										
 									} else {
-										
 										alertDialog12.dismiss();
 										if (mode) {
-											invoice_forHold = Parameters
-															.generateRandomNumber();
-											Log.e("invoice",
-													Parameters.generateRandomNumber()
-															+ "  "
-															+ invoice_forHold);
+											invoice_forHold = Parameters.generateRandomNumber();
+											Log.e("invoice",Parameters.generateRandomNumber()+ "  "+ invoice_forHold);
 											hold_Status = "hold";
-											System.out
-													.println("hold id val is:"
-															+ hold_Id);
-											createPrintRecipt(invoice_forHold,
-													hold_Id, 0.0, 0.0, 0.0, 0.0, "", paymentTypestr);
+											System.out.println("hold id val is:"+ hold_Id);
+											createPrintRecipt(invoice_forHold,hold_Id, 0.0, 0.0, 0.0, 0.0, "", paymentTypestr);
 										}
 
 										mSelectedItem = null;
 										mSelectedPosition = -1;
 										if (mItemList.isEmpty()) {
 											fetchOnHoldButton.setTag("1");
-											fetchOnHoldButton
-													.setText("Fetch On Hold");
+											fetchOnHoldButton.setText("Fetch On Hold");
 											mSubTotal = 0;
 											mTaxTotal = 0;
-											subTotalView.setText(String
-													.valueOf("$" + mSubTotal));
-											taxTotalview.setText(String
-													.valueOf("$" + mTaxTotal));
-											grandTotalview.setText(String
-													.valueOf("$" + mSubTotal));
+											subTotalView.setText(String.valueOf("$" + mSubTotal));
+											taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+											grandTotalview.setText(String.valueOf("$" + mSubTotal));
 										}
 
 										if (showPrintTimer()) {
-											final AlertDialog alertDialog = new AlertDialog.Builder(
-													PosMainActivity.this,
-													android.R.style.Theme_Translucent_NoTitleBar)
-													.create();
-											LayoutInflater mInflater2 = LayoutInflater
-													.from(PosMainActivity.this);
-											final View layoutforprint = mInflater2
-													.inflate(
-															R.layout.send_print,
-															null);
+											final AlertDialog alertDialog = new AlertDialog.Builder(PosMainActivity.this,android.R.style.Theme_Translucent_NoTitleBar).create();
+											LayoutInflater mInflater2 = LayoutInflater.from(PosMainActivity.this);
+											final View layoutforprint = mInflater2.inflate(R.layout.send_print,null);
 
-											final LinearLayout ll4rd = (LinearLayout) layoutforprint
-													.findViewById(R.id.listView1);
-											Button save = (Button) layoutforprint
-													.findViewById(R.id.save);
-											Button cancel = (Button) layoutforprint
-													.findViewById(R.id.cancel);
+											final LinearLayout ll4rd = (LinearLayout) layoutforprint.findViewById(R.id.listView1);
+											Button save = (Button) layoutforprint.findViewById(R.id.save);
+											Button cancel = (Button) layoutforprint.findViewById(R.id.cancel);
 
 											ll4rd.removeAllViews();
 
-											for (int count = 0; count < mItemList
-													.size(); count++) {
+											for (int count = 0; count < mItemList.size(); count++) {
 												Log.v(count + "", "" + count);
 
-												final LinearLayout roww = new LinearLayout(
-														PosMainActivity.this);
+												final LinearLayout roww = new LinearLayout(PosMainActivity.this);
 												roww.setOrientation(LinearLayout.HORIZONTAL);
-												roww.setLayoutParams(new LayoutParams(
-														LayoutParams.MATCH_PARENT,
-														LayoutParams.WRAP_CONTENT));
+												roww.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
 												roww.setPadding(1, 1, 1, 1);
-												fetchTextView = new TextView(
-														PosMainActivity.this);
-												fetchTextView.setText(mItemList
-														.get(count)
-														.getItemNameAdd());
-												Log.v("textview", mItemList
-														.get(count)
-														.getItemNameAdd());
+												fetchTextView = new TextView(PosMainActivity.this);
+												fetchTextView.setText(mItemList.get(count).getItemNameAdd());
+												Log.v("textview", mItemList.get(count).getItemNameAdd());
 												fetchTextView.setTextSize(14);
 												fetchTextView.setId(count);
-												fetchTextView
-														.setLayoutParams(new LinearLayout.LayoutParams(
-																200,
-																LayoutParams.WRAP_CONTENT));
+												fetchTextView.setLayoutParams(new LinearLayout.LayoutParams(200,LayoutParams.WRAP_CONTENT));
 												roww.addView(fetchTextView);
 
-												fetchprinter = new Spinner(
-														PosMainActivity.this);
+												fetchprinter = new Spinner(PosMainActivity.this);
 												fetchprinter.setId(100 + count);
-												fetchprinter
-														.setLayoutParams(new LinearLayout.LayoutParams(
-																150, 45));
+												fetchprinter.setLayoutParams(new LinearLayout.LayoutParams(150, 45));
 												roww.addView(fetchprinter);
 
-												fetchMinutes = new EditText(
-														PosMainActivity.this);
-												fetchMinutes
-														.setLayoutParams(new LinearLayout.LayoutParams(
-																100,
-																LayoutParams.WRAP_CONTENT));
+												fetchMinutes = new EditText(PosMainActivity.this);
+												fetchMinutes.setLayoutParams(new LinearLayout.LayoutParams(100,LayoutParams.WRAP_CONTENT));
 												fetchMinutes.setTextSize(14);
-												fetchMinutes
-														.setId(1000 + count);
-												fetchMinutes
-														.setInputType(InputType.TYPE_CLASS_NUMBER);
+												fetchMinutes.setId(1000 + count);
+												fetchMinutes.setInputType(InputType.TYPE_CLASS_NUMBER);
 												roww.addView(fetchMinutes);
 
-												fetchEdittext = new EditText(
-														PosMainActivity.this);
-												fetchEdittext
-														.setLayoutParams(new LinearLayout.LayoutParams(
-																500,
-																LayoutParams.WRAP_CONTENT));
-												fetchEdittext
-														.setText(mItemList.get(
-																count)
-																.getQuantity()
-																+ " "
-																+ mItemList
-																		.get(count)
-																		.getItemNoAdd());
+												fetchEdittext = new EditText(PosMainActivity.this);
+												fetchEdittext.setLayoutParams(new LinearLayout.LayoutParams(500,LayoutParams.WRAP_CONTENT));
+												fetchEdittext.setText(mItemList.get(count).getQuantity()+ " "+ mItemList.get(count).getItemNoAdd());
 												fetchEdittext.setTextSize(14);
-												fetchEdittext
-														.setId(10000 + count);
-												fetchEdittext.setTag(mItemList
-														.get(count)
-														.getItemNameAdd());
+												fetchEdittext.setId(10000 + count);
+												fetchEdittext.setTag(mItemList.get(count).getItemNameAdd());
 												roww.addView(fetchEdittext);
 
 												ArrayList<String> printerlistval = new ArrayList<String>();
 												printerlistval.clear();
 												printerlistval.add("None");
-												String query = "SELECT * from "
-														+ DatabaseForDemo.PRINTER_TABLE;
-												Cursor cursorpand = dbforloginlogoutReadPos
-														.rawQuery(query, null);
+												String query = "SELECT * from "+ DatabaseForDemo.PRINTER_TABLE;
+												Cursor cursorpand = dbforloginlogoutReadPos.rawQuery(query, null);
 
 												if (cursorpand.getCount() > 0) {
 													if (cursorpand != null) {
-														if (cursorpand
-																.moveToFirst()) {
+														if (cursorpand.moveToFirst()) {
 															do {
-																if (cursorpand
-																		.isNull(cursorpand
-																				.getColumnIndex(DatabaseForDemo.PRINTER_ID))) {
+																if (cursorpand.isNull(cursorpand.getColumnIndex(DatabaseForDemo.PRINTER_ID))) {
 
 																} else {
-																	String catid = cursorpand
-																			.getString(cursorpand
-																					.getColumnIndex(DatabaseForDemo.PRINTER_ID));
-																	printerlistval
-																			.add(catid);
+																	String catid = cursorpand.getString(cursorpand.getColumnIndex(DatabaseForDemo.PRINTER_ID));
+																	printerlistval.add(catid);
 																}
-															} while (cursorpand
-																	.moveToNext());
+															} while (cursorpand.moveToNext());
 														}
 													}
 												}
@@ -1545,34 +1568,25 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 														+ " where "
 														+ DatabaseForDemo.INVENTORY_ITEM_NO
 														+ "=\""
-														+ mItemList.get(count)
-																.getItemNoAdd()
+														+ mItemList.get(count) .getItemNoAdd()
 														+ "\"";
-												Cursor cursor1asq = dbforloginlogoutReadPos
-														.rawQuery(query1, null);
+												Cursor cursor1asq = dbforloginlogoutReadPos.rawQuery(query1, null);
 												String deptid = "";
 												if (cursor1asq.getCount() > 0) {
 													if (cursor1asq != null) {
-														if (cursor1asq
-																.moveToFirst()) {
+														if (cursor1asq.moveToFirst()) {
 															do {
-																if (cursor1asq
-																		.isNull(cursor1asq
-																				.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT))) {
+																if (cursor1asq.isNull(cursor1asq.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT))) {
 
 																} else {
-																	deptid = cursor1asq
-																			.getString(cursor1asq
-																					.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT));
+																	deptid = cursor1asq.getString(cursor1asq.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT));
 																}
-															} while (cursor1asq
-																	.moveToNext());
+															} while (cursor1asq.moveToNext());
 														}
 													}
 												}
 												cursor1asq.close();
-												Cursor mCursor3ba = dbforloginlogoutReadPos
-														.rawQuery(
+												Cursor mCursor3ba = dbforloginlogoutReadPos.rawQuery(
 																"select *from "
 																		+ DatabaseForDemo.DEPARTMENT_PRINTER_COMMANDS
 																		+ " where "
@@ -1585,62 +1599,37 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 												String timeminutes = "0", timeseconds = "0";
 												if (mCursor3ba.getCount() > 0) {
 													if (mCursor3ba != null) {
-														if (mCursor3ba
-																.moveToFirst()) {
+														if (mCursor3ba.moveToFirst()) {
 															do {
-																if (mCursor3ba
-																		.isNull(mCursor3ba
-																				.getColumnIndex(DatabaseForDemo.PrinterForDept))) {
+																if (mCursor3ba.isNull(mCursor3ba.getColumnIndex(DatabaseForDemo.PrinterForDept))) {
 																	printerdata = "None";
 																} else {
-																	printerdata = mCursor3ba
-																			.getString(mCursor3ba
-																					.getColumnIndex(DatabaseForDemo.PrinterForDept));
-																	System.out
-																			.println("the array values are is:"
-																					+ printerdata);
+																	printerdata = mCursor3ba.getString(mCursor3ba.getColumnIndex(DatabaseForDemo.PrinterForDept));
+																	System.out.println("the array values are is:"+ printerdata);
 																}
-																if (mCursor3ba
-																		.isNull(mCursor3ba
-																				.getColumnIndex(DatabaseForDemo.TimeForDeptPrint))) {
+																if (mCursor3ba.isNull(mCursor3ba.getColumnIndex(DatabaseForDemo.TimeForDeptPrint))) {
 																	timeminutes = "0";
 																	timeseconds = "0";
 																} else {
-																	String timeval = mCursor3ba
-																			.getString(mCursor3ba
-																					.getColumnIndex(DatabaseForDemo.TimeForDeptPrint));
+																	String timeval = mCursor3ba.getString(mCursor3ba.getColumnIndex(DatabaseForDemo.TimeForDeptPrint));
 																	String mystring = timeval;
-																	String[] a = mystring
-																			.split(":");
+																	String[] a = mystring.split(":");
 
 																	timeminutes = a[0];
 																	timeseconds = a[1];
-																	System.out
-																			.println(timeseconds
-																					+ " the array values are is:"
-																					+ timeminutes);
+																	System.out.println(timeseconds+ " the array values are is:"+ timeminutes);
 																}
-															} while (mCursor3ba
-																	.moveToNext());
+															} while (mCursor3ba.moveToNext());
 														}
 													}
 												}
 												mCursor3ba.close();
-												ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-														PosMainActivity.this,
-														android.R.layout.simple_list_item_1,
-														printerlistval);
+												ArrayAdapter<String> adapter = new ArrayAdapter<String>(PosMainActivity.this,android.R.layout.simple_list_item_1,printerlistval);
 												adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-												fetchprinter
-														.setAdapter(adapter);
-												System.out
-														.println("printer data val is:"
-																+ printerdata);
-												fetchprinter
-														.setSelection(printerlistval
-																.indexOf(printerdata));
-												fetchMinutes
-														.setText(timeseconds);
+												fetchprinter.setAdapter(adapter);
+												System.out.println("printer data val is:"+ printerdata);
+												fetchprinter.setSelection(printerlistval.indexOf(printerdata));
+												fetchMinutes.setText(timeseconds);
 												ll4rd.addView(roww);
 
 											}
@@ -1654,74 +1643,31 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 													alertDialog.dismiss();
 
 													mAdapter.notifyDataSetChanged();
-													for (int cccc = 0; cccc < mItemList
-															.size(); cccc++) {
-														long now = System
-																.currentTimeMillis();
-														now = now
-																+ (Long.valueOf(((EditText) layoutforprint
-																		.findViewById(1000 + cccc))
-																		.getText()
-																		.toString()
-																		.trim()) * 60 * 1000);
+													for (int cccc = 0; cccc < mItemList.size(); cccc++) {
+														long now = System.currentTimeMillis();
+														now = now+ (Long.valueOf(((EditText) layoutforprint.findViewById(1000 + cccc)).getText().toString().trim()) * 60 * 1000);
 														
 														ContentValues contentValues = new ContentValues();
-														contentValues
-																.put(DatabaseForDemo.COMMANDS_ITEM_NAME,
-																		""
-																				+ ((TextView) layoutforprint
-																						.findViewById(cccc))
-																						.getText());
-														contentValues
-																.put(DatabaseForDemo.COMMANDS_PRINTER_NAME,
-																		""
-																				+ ((Spinner) layoutforprint
-																						.findViewById(100 + cccc))
-																						.getSelectedItem());
-														contentValues
-																.put(DatabaseForDemo.COMMANDS_TIME,
-																		""
-																				+ now);
-														contentValues
-																.put(DatabaseForDemo.COMMANDS_MESSAGE,
-																		""
-																				+ ((EditText) layoutforprint
-																						.findViewById(10000 + cccc))
-																						.getText());
-														contentValues
-																.put(DatabaseForDemo.COMMANDS_HOLDID,
-																		""
-																				+ hold_Id);
-														contentValues
-																.put(DatabaseForDemo.UNIQUE_ID,
-																		""
-																				+ Parameters
-																						.randomValue());
-														dbforloginlogoutWritePos
-																.insert(DatabaseForDemo.COMMANDS_PRINTER_TABLE,
-																		null,
-																		contentValues);
+														contentValues.put(DatabaseForDemo.COMMANDS_ITEM_NAME,""+ ((TextView) layoutforprint.findViewById(cccc)).getText());
+														contentValues.put(DatabaseForDemo.COMMANDS_PRINTER_NAME,""+ ((Spinner) layoutforprint.findViewById(100 + cccc)).getSelectedItem());
+														contentValues.put(DatabaseForDemo.COMMANDS_TIME,""+ now);
+														contentValues.put(DatabaseForDemo.COMMANDS_MESSAGE,""+ ((EditText) layoutforprint.findViewById(10000 + cccc)).getText());
+														contentValues.put(DatabaseForDemo.COMMANDS_HOLDID,""+ hold_Id);
+														contentValues.put(DatabaseForDemo.UNIQUE_ID,""+ Parameters.randomValue());
+														dbforloginlogoutWritePos.insert(DatabaseForDemo.COMMANDS_PRINTER_TABLE,null,contentValues);
 														contentValues.clear();
 
 													}
 
 													mItemList.clear();
 													if (mItemList.isEmpty()) {
-														fetchOnHoldButton
-																.setTag("1");
-														fetchOnHoldButton
-																.setText("Fetch On Hold");
+														fetchOnHoldButton.setTag("1");
+														fetchOnHoldButton.setText("Fetch On Hold");
 														mSubTotal = 0;
 														mTaxTotal = 0;
-														subTotalView.setText(String
-																.valueOf("$"
-																		+ mSubTotal));
-														taxTotalview.setText(String
-																.valueOf("$"
-																		+ mTaxTotal));
-														grandTotalview.setText(String
-																.valueOf("$"
-																		+ mSubTotal));
+														subTotalView.setText(String.valueOf("$"+ mSubTotal));
+														taxTotalview.setText(String.valueOf("$"+ mTaxTotal));
+														grandTotalview.setText(String.valueOf("$"+ mSubTotal));
 													}
 												}
 											});
@@ -1740,33 +1686,23 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 											alertDialog.setView(layoutforprint);
 											alertDialog.show();
 											InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-											mgr.hideSoftInputFromWindow(
-													ll4rd.getWindowToken(), 0);
+											mgr.hideSoftInputFromWindow(ll4rd.getWindowToken(), 0);
 										} else {
 											mItemList.clear();
 											if (mItemList.isEmpty()) {
 												fetchOnHoldButton.setTag("1");
-												fetchOnHoldButton
-														.setText("Fetch On Hold");
+												fetchOnHoldButton.setText("Fetch On Hold");
 												mSubTotal = 0;
 												mTaxTotal = 0;
-												subTotalView.setText(String
-														.valueOf("$"
-																+ mSubTotal));
-												taxTotalview.setText(String
-														.valueOf("$"
-																+ mTaxTotal));
-												grandTotalview.setText(String
-														.valueOf("$"
-																+ mSubTotal));
+												subTotalView.setText(String.valueOf("$"+ mSubTotal));
+												taxTotalview.setText(String .valueOf("$" + mTaxTotal));
+												grandTotalview.setText(String .valueOf("$" + mSubTotal));
 											}
 										}
 									}
 									cursor111.close();
 								} else {
-									Toast.makeText(getApplicationContext(),
-											"Please enter Hold Id",
-											Toast.LENGTH_LONG).show();
+									Toast.makeText(getApplicationContext(), "Please enter Hold Id", Toast.LENGTH_LONG).show();
 								}
 							}
 
@@ -1788,98 +1724,65 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 						}
 
 						if (showPrintTimer()) {
-							final AlertDialog alertDialog = new AlertDialog.Builder(
-									PosMainActivity.this,
-									android.R.style.Theme_Translucent_NoTitleBar)
-									.create();
-							LayoutInflater mInflater2 = LayoutInflater
-									.from(PosMainActivity.this);
-							final View layoutforprint = mInflater2.inflate(
-									R.layout.send_print, null);
+							final AlertDialog alertDialog = new AlertDialog.Builder( PosMainActivity.this, android.R.style.Theme_Translucent_NoTitleBar).create();
+							LayoutInflater mInflater2 = LayoutInflater .from(PosMainActivity.this);
+							final View layoutforprint = mInflater2.inflate( R.layout.send_print, null);
 
-							final LinearLayout ll4rd = (LinearLayout) layoutforprint
-									.findViewById(R.id.listView1);
-							Button save = (Button) layoutforprint
-									.findViewById(R.id.save);
-							Button cancel = (Button) layoutforprint
-									.findViewById(R.id.cancel);
+							final LinearLayout ll4rd = (LinearLayout) layoutforprint .findViewById(R.id.listView1);
+							Button save = (Button) layoutforprint.findViewById(R.id.save);
+							Button cancel = (Button) layoutforprint.findViewById(R.id.cancel);
 
 							ll4rd.removeAllViews();
 
 							for (int count = 0; count < mItemList.size(); count++) {
 								Log.v(count + "", "" + count);
 
-								final LinearLayout roww = new LinearLayout(
-										PosMainActivity.this);
+								final LinearLayout roww = new LinearLayout(PosMainActivity.this);
 								roww.setOrientation(LinearLayout.HORIZONTAL);
-								roww.setLayoutParams(new LayoutParams(
-										LayoutParams.MATCH_PARENT,
-										LayoutParams.WRAP_CONTENT));
+								roww.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT));
 								roww.setPadding(1, 1, 1, 1);
-								fetchTextView = new TextView(
-										PosMainActivity.this);
-								fetchTextView.setText(mItemList.get(count)
-										.getItemNameAdd());
-								Log.v("textview", mItemList.get(count)
-										.getItemNameAdd());
+								fetchTextView = new TextView(PosMainActivity.this);
+								fetchTextView.setText(mItemList.get(count).getItemNameAdd());
+								Log.v("textview", mItemList.get(count).getItemNameAdd());
 								fetchTextView.setTextSize(14);
 								fetchTextView.setId(count);
-								fetchTextView
-										.setLayoutParams(new LinearLayout.LayoutParams(
-												200, LayoutParams.WRAP_CONTENT));
+								fetchTextView.setLayoutParams(new LinearLayout.LayoutParams(200, LayoutParams.WRAP_CONTENT));
 								roww.addView(fetchTextView);
 
 								fetchprinter = new Spinner(PosMainActivity.this);
 								fetchprinter.setId(100 + count);
-								fetchprinter
-										.setLayoutParams(new LinearLayout.LayoutParams(
-												170, 45));
+								fetchprinter.setLayoutParams(new LinearLayout.LayoutParams(170, 45));
 								roww.addView(fetchprinter);
 
-								fetchMinutes = new EditText(
-										PosMainActivity.this);
-								fetchMinutes
-										.setLayoutParams(new LinearLayout.LayoutParams(
-												100, LayoutParams.WRAP_CONTENT));
+								fetchMinutes = new EditText(PosMainActivity.this);
+								fetchMinutes.setLayoutParams(new LinearLayout.LayoutParams(100, LayoutParams.WRAP_CONTENT));
 								fetchMinutes.setTextSize(14);
 								fetchMinutes.setId(1000 + count);
-								fetchMinutes
-										.setInputType(InputType.TYPE_CLASS_NUMBER);
+								fetchMinutes.setInputType(InputType.TYPE_CLASS_NUMBER);
 								roww.addView(fetchMinutes);
 
-								fetchEdittext = new EditText(
-										PosMainActivity.this);
-								fetchEdittext
-										.setLayoutParams(new LinearLayout.LayoutParams(
-												500, LayoutParams.WRAP_CONTENT));
-								fetchEdittext.setText(mItemList.get(count)
-										.getQuantity()
-										+ " "
-										+ mItemList.get(count).getItemNoAdd());
+								fetchEdittext = new EditText(PosMainActivity.this);
+								fetchEdittext.setLayoutParams(new LinearLayout.LayoutParams(500, LayoutParams.WRAP_CONTENT));
+								fetchEdittext.setText(mItemList.get(count).getQuantity() + " " + mItemList.get(count).getItemNoAdd());
 								fetchEdittext.setTextSize(14);
 								fetchEdittext.setId(10000 + count);
-								fetchEdittext.setTag(mItemList.get(count)
-										.getItemNoAdd());
+								fetchEdittext.setTag(mItemList.get(count) .getItemNoAdd());
 								roww.addView(fetchEdittext);
 
 								ArrayList<String> printerlistval = new ArrayList<String>();
 								printerlistval.clear();
 								printerlistval.add("None");
-								String query = "SELECT * from "
-										+ DatabaseForDemo.PRINTER_TABLE;
-								Cursor cursorqswer = dbforloginlogoutReadPos.rawQuery(query,
-										null);
+								String query = "SELECT * from " + DatabaseForDemo.PRINTER_TABLE;
+								Cursor cursorqswer = dbforloginlogoutReadPos.rawQuery(query, null);
 
 								if (cursorqswer.getCount() > 0) {
 									if (cursorqswer != null) {
 										if (cursorqswer.moveToFirst()) {
 											do {
-												if (cursorqswer.isNull(cursorqswer
-														.getColumnIndex(DatabaseForDemo.PRINTER_ID))) {
+												if (cursorqswer.isNull(cursorqswer .getColumnIndex(DatabaseForDemo.PRINTER_ID))) {
 
 												} else {
-													String catid = cursorqswer.getString(cursorqswer
-															.getColumnIndex(DatabaseForDemo.PRINTER_ID));
+													String catid = cursorqswer.getString(cursorqswer.getColumnIndex(DatabaseForDemo.PRINTER_ID));
 													printerlistval.add(catid);
 												}
 											} while (cursorqswer.moveToNext());
@@ -1903,75 +1806,56 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 									if (cursoasr1o != null) {
 										if (cursoasr1o.moveToFirst()) {
 											do {
-												if (cursoasr1o.isNull(cursoasr1o
-														.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT))) {
+												if (cursoasr1o.isNull(cursoasr1o.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT))) {
 
 												} else {
-													deptid = cursoasr1o.getString(cursoasr1o
-															.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT));
+													deptid = cursoasr1o.getString(cursoasr1o.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT));
 												}
 											} while (cursoasr1o.moveToNext());
 										}
 									}
 								}
 								cursoasr1o.close();
-								Cursor mCursor3sagi = dbforloginlogoutReadPos
-										.rawQuery(
-												"select *from "
+								Cursor mCursor3sagi = dbforloginlogoutReadPos.rawQuery("select *from "
 														+ DatabaseForDemo.DEPARTMENT_PRINTER_COMMANDS
 														+ " where "
 														+ DatabaseForDemo.DepartmentID
 														+ "=\"" + deptid + "\"",
-												null);
+														null);
 								String printerdata = "None";
 								String timeminutes = "0", timeseconds = "0";
 								if (mCursor3sagi.getCount() > 0) {
 									if (mCursor3sagi != null) {
 										if (mCursor3sagi.moveToFirst()) {
 											do {
-												if (mCursor3sagi.isNull(mCursor3sagi
-														.getColumnIndex(DatabaseForDemo.PrinterForDept))) {
+												if (mCursor3sagi.isNull(mCursor3sagi.getColumnIndex(DatabaseForDemo.PrinterForDept))) {
 													printerdata = "None";
 												} else {
-													printerdata = mCursor3sagi.getString(mCursor3sagi
-															.getColumnIndex(DatabaseForDemo.PrinterForDept));
-													System.out
-															.println("the array values are is:"
-																	+ printerdata);
+													printerdata = mCursor3sagi.getString(mCursor3sagi.getColumnIndex(DatabaseForDemo.PrinterForDept));
+													System.out.println("the array values are is:"+ printerdata);
 												}
-												if (mCursor3sagi.isNull(mCursor3sagi
-														.getColumnIndex(DatabaseForDemo.TimeForDeptPrint))) {
+												if (mCursor3sagi.isNull(mCursor3sagi .getColumnIndex(DatabaseForDemo.TimeForDeptPrint))) {
 													timeminutes = "0";
 													timeseconds = "0";
 												} else {
-													String timeval = mCursor3sagi.getString(mCursor3sagi
-															.getColumnIndex(DatabaseForDemo.TimeForDeptPrint));
+													String timeval = mCursor3sagi.getString(mCursor3sagi .getColumnIndex(DatabaseForDemo.TimeForDeptPrint));
 													String mystring = timeval;
-													String[] a = mystring
-															.split(":");
+													String[] a = mystring .split(":");
 
 													timeminutes = a[0];
 													timeseconds = a[1];
-													System.out
-															.println(timeseconds
-																	+ " the array values are is:"
-																	+ timeminutes);
+													System.out .println(timeseconds + " the array values are is:" + timeminutes);
 												}
 											} while (mCursor3sagi.moveToNext());
 										}
 									}
 								}
 								mCursor3sagi.close();
-								ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-										PosMainActivity.this,
-										android.R.layout.simple_list_item_1,
-										printerlistval);
+								ArrayAdapter<String> adapter = new ArrayAdapter<String>( PosMainActivity.this, android.R.layout.simple_list_item_1, printerlistval);
 								adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
 								fetchprinter.setAdapter(adapter);
-								System.out.println("printer data val is:"
-										+ printerdata);
-								fetchprinter.setSelection(printerlistval
-										.indexOf(printerdata));
+								System.out.println("printer data val is:" + printerdata);
+								fetchprinter.setSelection(printerlistval .indexOf(printerdata));
 								fetchMinutes.setText(timeseconds);
 								ll4rd.addView(roww);
 
@@ -1983,7 +1867,7 @@ public class PosMainActivity extends Activity implements OnDeleteClicked,
 									// TODO Auto-generated method
 									// stub
 									alertDialog.dismiss();
-try{
+									try{
 									mAdapter.notifyDataSetChanged();
 									for (int cccc = 0; cccc < mItemList.size(); cccc++) {
 										long now = System.currentTimeMillis();
@@ -1992,62 +1876,34 @@ try{
 										}else{
 											sqw="0";
 										}
-										now = now
-												+ (Long.valueOf(sqw) * 60 * 1000);
+										now = now + (Long.valueOf(sqw) * 60 * 1000);
 										ContentValues contentValues = new ContentValues();
-										contentValues
-												.put(DatabaseForDemo.COMMANDS_ITEM_NAME,
-														""
-																+ ((TextView) layoutforprint
-																		.findViewById(cccc))
-																		.getText());
-										contentValues
-												.put(DatabaseForDemo.COMMANDS_PRINTER_NAME,
-														""
-																+ ((Spinner) layoutforprint
-																		.findViewById(100 + cccc))
-																		.getSelectedItem());
-										contentValues.put(
-												DatabaseForDemo.COMMANDS_TIME,
-												"" + now);
-										contentValues
-												.put(DatabaseForDemo.COMMANDS_MESSAGE,
-														""
-																+ ((EditText) layoutforprint
-																		.findViewById(10000 + cccc))
-																		.getText());
-										contentValues
-												.put(DatabaseForDemo.COMMANDS_HOLDID,
-														"" + holdidexist);
-										contentValues.put(
-												DatabaseForDemo.UNIQUE_ID,
-												"" + Parameters.randomValue());
-										dbforloginlogoutWritePos
-												.insert(DatabaseForDemo.COMMANDS_PRINTER_TABLE,
-														null, contentValues);
+										contentValues .put(DatabaseForDemo.COMMANDS_ITEM_NAME, "" + ((TextView) layoutforprint .findViewById(cccc)) .getText());
+										contentValues .put(DatabaseForDemo.COMMANDS_PRINTER_NAME, "" + ((Spinner) layoutforprint .findViewById(100 + cccc)) .getSelectedItem());
+										contentValues.put( DatabaseForDemo.COMMANDS_TIME, "" + now);
+										contentValues .put(DatabaseForDemo.COMMANDS_MESSAGE, "" + ((EditText) layoutforprint .findViewById(10000 + cccc)) .getText());
+										contentValues .put(DatabaseForDemo.COMMANDS_HOLDID, "" + holdidexist);
+										contentValues.put( DatabaseForDemo.UNIQUE_ID, "" + Parameters.randomValue());
+										dbforloginlogoutWritePos .insert(DatabaseForDemo.COMMANDS_PRINTER_TABLE, null, contentValues);
 										contentValues.clear();
 									}
 									mItemList.clear();
 									if (mItemList.isEmpty()) {
 										fetchOnHoldButton.setTag("1");
-										fetchOnHoldButton
-												.setText("Fetch On Hold");
+										fetchOnHoldButton .setText("Fetch On Hold");
 										mSubTotal = 0;
 										mTaxTotal = 0;
-										subTotalView.setText(String.valueOf("$"
-												+ mSubTotal));
-										taxTotalview.setText(String.valueOf("$"
-												+ mTaxTotal));
-										grandTotalview.setText(String
-												.valueOf("$" + mSubTotal));
+										subTotalView.setText(String.valueOf("$" + mSubTotal));
+										taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+										grandTotalview.setText(String .valueOf("$" + mSubTotal));
 									}
-} catch (NumberFormatException e) {
-	  e.printStackTrace();
-	} catch (SQLiteException e12) {
-		  e12.printStackTrace();
-		} catch (Exception e1) {
-		  e1.printStackTrace();
-		}
+										} catch (NumberFormatException e) {
+											e.printStackTrace();
+											} catch (SQLiteException e12) {
+												e12.printStackTrace();
+											} catch (Exception e1) {
+												e1.printStackTrace();
+											}
 								}
 							});
 
@@ -2071,12 +1927,9 @@ try{
 								fetchOnHoldButton.setText("Fetch On Hold");
 								mSubTotal = 0;
 								mTaxTotal = 0;
-								subTotalView.setText(String.valueOf("$"
-										+ mSubTotal));
-								taxTotalview.setText(String.valueOf("$"
-										+ mTaxTotal));
-								grandTotalview.setText(String.valueOf("$"
-										+ mSubTotal));
+								subTotalView.setText(String.valueOf("$" + mSubTotal));
+								taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+								grandTotalview.setText(String.valueOf("$" + mSubTotal));
 							}
 
 						}
@@ -2092,8 +1945,7 @@ try{
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
 
-				Intent searchintent = new Intent(PosMainActivity.this,
-						ItemSearchActivity.class);
+				Intent searchintent = new Intent(PosMainActivity.this, ItemSearchActivity.class);
 				startActivity(searchintent);
 
 			}
@@ -2108,17 +1960,12 @@ try{
 					if (mItemList.size() > 0) {
 						if (mSelectedItem != null) {
 
-							final AlertDialog alertDialog1 = new AlertDialog.Builder(
-									PosMainActivity.this).create();
-							LayoutInflater mInflater = LayoutInflater
-									.from(PosMainActivity.this);
-							View layout = mInflater.inflate(
-									R.layout.pricechange_popup, null);
-							final EditText price = (EditText) layout
-									.findViewById(R.id.pricesave);
+							final AlertDialog alertDialog1 = new AlertDialog.Builder(PosMainActivity.this).create();
+							LayoutInflater mInflater = LayoutInflater.from(PosMainActivity.this);
+							View layout = mInflater.inflate(R.layout.pricechange_popup, null);
+							final EditText price = (EditText) layout.findViewById(R.id.pricesave);
 							Button ok = (Button) layout.findViewById(R.id.ok);
-							Button cancel = (Button) layout
-									.findViewById(R.id.cancel);
+							Button cancel = (Button) layout.findViewById(R.id.cancel);
 
 							alertDialog1.setTitle("Enter Price");
 
@@ -2133,9 +1980,7 @@ try{
 										mSubTotal = 0;
 										mTaxTotal = 0;
 										try{
-										getItemDetailspricechange(true,
-												mSelectedItem.getItemNoAdd(),
-												(df.format(Double.valueOf(prii))).toString());
+										getItemDetailspricechange(true,mSelectedItem.getItemNoAdd(),(df.format(Double.valueOf(prii))).toString(),PosMainActivity.this);
 										}catch(NumberFormatException e){
 											e.printStackTrace();
 										}catch (Exception e1) {
@@ -2162,19 +2007,13 @@ try{
 							alertDialog1.setView(layout);
 							alertDialog1.show();
 						} else {
-							Toast.makeText(getApplicationContext(),
-									"Select List Item", 1000).show();
+							Toast.makeText(getApplicationContext(),"Select List Item", 1000).show();
 						}
 					} else {
-						Toast.makeText(getApplicationContext(), "Add Item",
-								Toast.LENGTH_LONG).show();
+						Toast.makeText(getApplicationContext(), "Add Item",Toast.LENGTH_LONG).show();
 					}
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog(PosMainActivity.this,"Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -2187,18 +2026,10 @@ try{
 					if (Parameters.end_cash_transaction_permission) {
 						paymentOptions("Cash");
 					} else {
-						showAlertDialog(
-								PosMainActivity.this,
-								"Sorry",
-								"You are not authenticated to perform this operation.",
-								false);
+						showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 					}
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -2210,11 +2041,7 @@ try{
 				if (Parameters.end_transaction_permission) {
 					paymentOptions("Check");
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -2251,18 +2078,10 @@ try{
 						// creditROdebitPayType();
 						paymentOptions("Credit/Debit");
 					} else {
-						showAlertDialog(
-								PosMainActivity.this,
-								"Sorry",
-								"You are not authenticated to perform this operation.",
-								false);
+						showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 					}
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -2279,17 +2098,12 @@ try{
 				// TODO Auto-generated method stub
 				if (mItemList.size() > 0) {
 					if (mSelectedItem != null) {
-						final AlertDialog alertDialog1 = new AlertDialog.Builder(
-								PosMainActivity.this).create();
-						LayoutInflater mInflater = LayoutInflater
-								.from(PosMainActivity.this);
-						View layout = mInflater.inflate(
-								R.layout.pricechange_popup, null);
-						final EditText price = (EditText) layout
-								.findViewById(R.id.pricesave);
+						final AlertDialog alertDialog1 = new AlertDialog.Builder( PosMainActivity.this).create();
+						LayoutInflater mInflater = LayoutInflater .from(PosMainActivity.this);
+						View layout = mInflater.inflate( R.layout.pricechange_popup, null);
+						final EditText price = (EditText) layout .findViewById(R.id.pricesave);
 						Button ok = (Button) layout.findViewById(R.id.ok);
-						Button cancel = (Button) layout
-								.findViewById(R.id.cancel);
+						Button cancel = (Button) layout .findViewById(R.id.cancel);
 
 						alertDialog1.setTitle("Enter Quantity");
 
@@ -2298,27 +2112,20 @@ try{
 							@Override
 							public void onClick(View arg0) {
 								// TODO Auto-generated method stub
-								String mQuantity1 = price.getText().toString()
-										.trim();
+								String mQuantity1 = price.getText().toString() .trim();
 
-								if (mQuantity1 != null
-										&& mQuantity1.length() > 0) {
+								if (mQuantity1 != null && mQuantity1.length() > 0) {
 
 									if (mSelectedItem != null) {
 										mSubTotal = 0;
 										mTaxTotal = 0;
-										getItemDetails(true,
-												mSelectedItem.getItemNoAdd(),
-												mQuantity1);
+										getItemDetails2(true, mSelectedItem.getItemNoAdd(), mQuantity1);
 										alertDialog1.dismiss();
 									} else {
-										Toast.makeText(getApplicationContext(),
-												"Select List Item", 1000)
-												.show();
+										Toast.makeText(getApplicationContext(), "Select List Item", 1000) .show();
 									}
 								} else {
-									Toast.makeText(getApplicationContext(),
-											"Enter Quantity", 1000).show();
+									Toast.makeText(getApplicationContext(), "Enter Quantity", 1000).show();
 								}
 
 							}
@@ -2334,12 +2141,10 @@ try{
 						alertDialog1.setView(layout);
 						alertDialog1.show();
 					} else {
-						Toast.makeText(getApplicationContext(),
-								"Select List Item", 1000).show();
+						Toast.makeText(getApplicationContext(), "Select List Item", 1000).show();
 					}
 				} else {
-					Toast.makeText(getApplicationContext(), "Add Item",
-							Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 				}
 			}
 		});
@@ -2351,45 +2156,30 @@ try{
 				if (Parameters.invoice_discounts_permission) {
 					if (mItemList.size() > 0) {
 						if (mSelectedItem != null) {
-							final AlertDialog alertDialog1 = new AlertDialog.Builder(
-									PosMainActivity.this).create();
-							LayoutInflater mInflater = LayoutInflater
-									.from(PosMainActivity.this);
-							View layout = mInflater.inflate(
-									R.layout.pricechange_popup, null);
-							final EditText price = (EditText) layout
-									.findViewById(R.id.pricesave);
+							final AlertDialog alertDialog1 = new AlertDialog.Builder( PosMainActivity.this).create();
+							LayoutInflater mInflater = LayoutInflater .from(PosMainActivity.this);
+							View layout = mInflater.inflate( R.layout.pricechange_popup, null);
+							final EditText price = (EditText) layout .findViewById(R.id.pricesave);
 							Button ok = (Button) layout.findViewById(R.id.ok);
-							Button cancel = (Button) layout
-									.findViewById(R.id.cancel);
-							final CheckBox discount_total = (CheckBox) layout
-									.findViewById(R.id.discount_total);
-							final Spinner discount_spinner = (Spinner) layout
-									.findViewById(R.id.discountspinner);
+							Button cancel = (Button) layout .findViewById(R.id.cancel);
+							final CheckBox discount_total = (CheckBox) layout .findViewById(R.id.discount_total);
+							final Spinner discount_spinner = (Spinner) layout .findViewById(R.id.discountspinner);
 							discount_total.setVisibility(View.VISIBLE);
 							discount_spinner.setVisibility(View.INVISIBLE);
-							discount_total
-									.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+							discount_total .setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 										@Override
-										public void onCheckedChanged(
-												CompoundButton buttonView,
-												boolean isChecked) {
+										public void onCheckedChanged( CompoundButton buttonView, boolean isChecked) {
 											// TODO Auto-generated method stub
 											if (isChecked) {
-												discount_spinner
-														.setVisibility(View.VISIBLE);
+												discount_spinner .setVisibility(View.VISIBLE);
 											} else {
-												discount_spinner
-														.setVisibility(View.INVISIBLE);
+												discount_spinner .setVisibility(View.INVISIBLE);
 											}
 										}
 									});
-							final ArrayAdapter<String> typeOfDiscount = new ArrayAdapter<String>(
-									PosMainActivity.this,
-									android.R.layout.simple_spinner_item);
-							typeOfDiscount
-									.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+							final ArrayAdapter<String> typeOfDiscount = new ArrayAdapter<String>( PosMainActivity.this, android.R.layout.simple_spinner_item);
+							typeOfDiscount .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 							typeOfDiscount.add("%");
 							typeOfDiscount.add("$");
 							// typeOfPrinter.add(getString(R.string.printername_p60ii));
@@ -2402,21 +2192,15 @@ try{
 								public void onClick(View arg0) {
 									// TODO Auto-generated method stub
 									try{
-									String discoun = price.getText().toString()
-											.trim();
+									String discoun = price.getText().toString() .trim();
 									if (discoun != null && discoun.length() > 0) {
-										Double discount = Double
-												.valueOf(discoun);
+										Double discount = Double .valueOf(discoun);
 										if (discount_total.isChecked()) {
-											if (discount_spinner
-													.getSelectedItem()
-													.toString().equals("%")) {
+											if (discount_spinner .getSelectedItem() .toString().equals("%")) {
 												if (discount <= 100) {
 													mSelectedItem = null;
-													mItemDiscountList
-															.addAll(mItemList);
-													for (int i = 0; i < mItemDiscountList
-															.size(); i++) {
+													mItemDiscountList .addAll(mItemList);
+													for (int i = 0; i < mItemDiscountList .size(); i++) {
 														Log.v("discountTotal", ""+ mItemDiscountList.get(i).getItemNameAdd());
 														mSelectedPosition=i;
 														mSelectedItem = mItemDiscountList.get(i);
@@ -2424,44 +2208,24 @@ try{
 														mSelectedItem = null;
 													}
 													mItemDiscountList.clear();
-													Log.v("harinath",
-															"chowdary");
+													Log.v("harinath", "chowdary");
 													alertDialog1.dismiss();
-													Log.v("harinath",
-															"chowdary");
+													Log.v("harinath", "chowdary");
 												} else {
 
-													Toast.makeText(
-															getApplicationContext(),
-															"Enter Valid Value",
-															1000).show();
+													Toast.makeText( getApplicationContext(), "Enter Valid Value", 1000).show();
 												}
 											} else {
-												String name = mItemList.get(0)
-														.getItemNameAdd();
+												String name = mItemList.get(0) .getItemNameAdd();
 												if (discount > mGrandTotal) {
-													mItemList
-															.get(0)
-															.setItemNameAdd(
-																	name
-																			+ " OverallDiscount $"
-																			+ mGrandTotal);
+													mItemList .get(0) .setItemNameAdd( name + " OverallDiscount $" + mGrandTotal);
 													mGrandTotal = 0;
 												} else {
-													mItemList
-															.get(0)
-															.setItemNameAdd(
-																	name
-																			+ " OverallDiscount $"
-																			+ discount);
-													mGrandTotal = mGrandTotal
-															- discount;
+													mItemList .get(0) .setItemNameAdd( name + " OverallDiscount $" + discount);
+													mGrandTotal = mGrandTotal - discount;
 												}
-												mGrandTotal = Double.valueOf(df
-														.format(mGrandTotal));
-												grandTotalview.setText(String
-														.valueOf("$"
-																+ mGrandTotal));
+												mGrandTotal = Double.valueOf(df .format(mGrandTotal));
+												grandTotalview.setText(String .valueOf("$" + mGrandTotal));
 												mAdapter.setListener(PosMainActivity.this);
 												mAdapter.notifyDataSetChanged();
 												alertDialog1.dismiss();
@@ -2473,15 +2237,11 @@ try{
 												discountMainMethod(discoun);
 												alertDialog1.dismiss();
 											} else {
-												Toast.makeText(
-														getApplicationContext(),
-														"Enter Valid Discount",
-														1000).show();
+												Toast.makeText( getApplicationContext(), "Enter Valid Discount", 1000).show();
 											}
 										}
 									} else {
-										Toast.makeText(getApplicationContext(),
-												"Enter Discount", 1000).show();
+										Toast.makeText(getApplicationContext(), "Enter Discount", 1000).show();
 									}
 									} catch (NumberFormatException e) {
 										  e.printStackTrace();
@@ -2503,19 +2263,13 @@ try{
 							alertDialog1.setView(layout);
 							alertDialog1.show();
 						} else {
-							Toast.makeText(getApplicationContext(),
-									"Select List Item", 1000).show();
+							Toast.makeText(getApplicationContext(), "Select List Item", 1000).show();
 						}
 					} else {
-						Toast.makeText(getApplicationContext(), "Add Item",
-								Toast.LENGTH_LONG).show();
+						Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 					}
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -2525,12 +2279,9 @@ try{
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
 				if (mItemList.size() > 0) {
-					final AlertDialog alertDialog1 = new AlertDialog.Builder(
-							PosMainActivity.this).create();
-					LayoutInflater mInflater = LayoutInflater
-							.from(PosMainActivity.this);
-					View layout = mInflater
-							.inflate(R.layout.delete_popup, null);
+					final AlertDialog alertDialog1 = new AlertDialog.Builder( PosMainActivity.this).create();
+					LayoutInflater mInflater = LayoutInflater .from(PosMainActivity.this);
+					View layout = mInflater .inflate(R.layout.delete_popup, null);
 					Button ok = (Button) layout.findViewById(R.id.ok);
 					Button cancel = (Button) layout.findViewById(R.id.cancel);
 
@@ -2550,12 +2301,9 @@ try{
 								mTaxTotal = 0;
 								fetchOnHoldButton.setTag("1");
 								fetchOnHoldButton.setText("Fetch On Hold");
-								subTotalView.setText(String.valueOf("$"
-										+ mSubTotal));
-								taxTotalview.setText(String.valueOf("$"
-										+ mTaxTotal));
-								grandTotalview.setText(String.valueOf("$"
-										+ mSubTotal));
+								subTotalView.setText(String.valueOf("$" + mSubTotal));
+								taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+								grandTotalview.setText(String.valueOf("$" + mSubTotal));
 							}
 
 							alertDialog1.dismiss();
@@ -2573,8 +2321,7 @@ try{
 					alertDialog1.setView(layout);
 					alertDialog1.show();
 				} else {
-					Toast.makeText(getApplicationContext(), "Add Item",
-							Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 				}
 			}
 		});
@@ -2585,15 +2332,11 @@ try{
 				// TODO Auto-generated method stub
 				if (Parameters.void_invoices_permission) {
 					if (mItemList.size() > 0) {
-						final AlertDialog alertDialog1 = new AlertDialog.Builder(
-								PosMainActivity.this).create();
-						LayoutInflater mInflater = LayoutInflater
-								.from(PosMainActivity.this);
-						View layout = mInflater.inflate(R.layout.delete_popup,
-								null);
+						final AlertDialog alertDialog1 = new AlertDialog.Builder( PosMainActivity.this).create();
+						LayoutInflater mInflater = LayoutInflater .from(PosMainActivity.this);
+						View layout = mInflater.inflate(R.layout.delete_popup, null);
 						Button ok = (Button) layout.findViewById(R.id.ok);
-						Button cancel = (Button) layout
-								.findViewById(R.id.cancel);
+						Button cancel = (Button) layout .findViewById(R.id.cancel);
 
 						alertDialog1.setTitle("Delete All");
 
@@ -2604,8 +2347,7 @@ try{
 								// TODO Auto-generated method stub
 								if (holdidexist.equals("") && recallidExist.equals("")) {
 									String invoice_id = Parameters.generateRandomNumber();
-									Log.e("invoice", Parameters.generateRandomNumber()
-											+ "  " + invoice_forHold);
+									Log.e("invoice", Parameters.generateRandomNumber() + "  " + invoice_forHold);
 									hold_Status = "void";
 									createPrintRecipt(invoice_id, "", 0.0, 0.0, 0.0, 0.0, "", paymentTypestr);
 									
@@ -2618,14 +2360,10 @@ try{
 										mSubTotal = 0;
 										mTaxTotal = 0;
 										fetchOnHoldButton.setTag("1");
-										fetchOnHoldButton
-												.setText("Fetch On Hold");
-										subTotalView.setText(String.valueOf("$"
-												+ mSubTotal));
-										taxTotalview.setText(String.valueOf("$"
-												+ mTaxTotal));
-										grandTotalview.setText(String
-												.valueOf("$" + mSubTotal));
+										fetchOnHoldButton .setText("Fetch On Hold");
+										subTotalView.setText(String.valueOf("$" + mSubTotal));
+										taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+										grandTotalview.setText(String .valueOf("$" + mSubTotal));
 									}
 									
 								} else {
@@ -2668,14 +2406,10 @@ try{
 										mSubTotal = 0;
 										mTaxTotal = 0;
 										fetchOnHoldButton.setTag("1");
-										fetchOnHoldButton
-												.setText("Fetch On Hold");
-										subTotalView.setText(String.valueOf("$"
-												+ mSubTotal));
-										taxTotalview.setText(String.valueOf("$"
-												+ mTaxTotal));
-										grandTotalview.setText(String
-												.valueOf("$" + mSubTotal));
+										fetchOnHoldButton .setText("Fetch On Hold");
+										subTotalView.setText(String.valueOf("$" + mSubTotal));
+										taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+										grandTotalview.setText(String .valueOf("$" + mSubTotal));
 									}
 								}
 								alertDialog1.dismiss();
@@ -2695,15 +2429,10 @@ try{
 						alertDialog1.setView(layout);
 						alertDialog1.show();
 					} else {
-						Toast.makeText(getApplicationContext(), "Add Item",
-								Toast.LENGTH_LONG).show();
+						Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 					}
 				} else {
-					showAlertDialog(
-							PosMainActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -2753,15 +2482,10 @@ try{
 						if (Parameters.end_transaction_permission) {
 							paymentOptions("Cash");
 						} else {
-							showAlertDialog(
-									PosMainActivity.this,
-									"Sorry",
-									"You are not authenticated to perform this operation.",
-									false);
+							showAlertDialog( PosMainActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 						}
 					} else {
-						Toast.makeText(getApplicationContext(), "Add Item",
-								Toast.LENGTH_LONG).show();
+						Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 					}
 				}
 			}
@@ -2848,24 +2572,18 @@ try{
 							//	String mQuantity1 = price.getText().toString()
 								//		.trim();
 
-								if (mQuantity != null
-										&& mQuantity.length() > 0) {
+								if (mQuantity != null && mQuantity.length() > 0) {
 
 									if (mSelectedItem != null) {
 										mSubTotal = 0;
 										mTaxTotal = 0;
-										getItemDetails(true,
-												mSelectedItem.getItemNoAdd(),
-												mQuantity);
+										getItemDetails(true, mSelectedItem.getItemNoAdd(), mQuantity);
 										//alertDialog1.dismiss();
 									} else {
-										Toast.makeText(getApplicationContext(),
-												"Select List Item", 1000)
-												.show();
+										Toast.makeText(getApplicationContext(), "Select List Item", 1000) .show();
 									}
 								} else {
-									Toast.makeText(getApplicationContext(),
-											"Enter Quantity", 1000).show();
+									Toast.makeText(getApplicationContext(), "Enter Quantity", 1000).show();
 								}
 
 							/*}
@@ -2881,12 +2599,10 @@ try{
 						alertDialog1.setView(layout);
 						alertDialog1.show();*/
 					} else {
-						Toast.makeText(getApplicationContext(),
-								"Select List Item", 1000).show();
+						Toast.makeText(getApplicationContext(), "Select List Item", 1000).show();
 					}
 				} else {
-					Toast.makeText(getApplicationContext(), "Add Item",
-							Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 				}
 				/*System.out.println("barcode val is:"+quantityEdit.getText().toString()+":val is");
 				String mBarcode = barcodeEdit.getText().toString().trim();
@@ -2927,8 +2643,7 @@ try{
 		});
 		itemlistView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
 				// TODO Auto-generated method stub
 				// arg1.setSelected(true);
 				mSelectedPosition = arg2;
@@ -2936,91 +2651,479 @@ try{
 				Log.w("mSelectedPositions",""+arg2);
 			}
 		});
+	//	new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
+	}
+	
+	
+	//Swip card
+	@Override
+	protected void onPause() {
+		if(myUniMagReader!=null)
+		{
+			//stop swipe card when the application go to background
+			myUniMagReader.stopSwipeCard();			
+		}
+		hideTopDialog();
+		hideSwipeTopDialog();
+		super.onPause();
+	}
+
+	public  void AleartForPrice(final Context mContext, final String pricechange, final String itemNo, final boolean isUpdate1, final String mQuantity1) {
+		// TODO Auto-generated method stub
+		if (Parameters.invoice_price_change_permission) {
+		
+					System.out.println("mSelectedItem"+mSelectedItem);
+					final AlertDialog alertDialog1 = new AlertDialog.Builder(mContext).create();
+					LayoutInflater mInflater = LayoutInflater.from(mContext);
+					View layout = mInflater.inflate(R.layout.pricechange_popup, null);
+					final EditText price = (EditText) layout.findViewById(R.id.pricesave);
+					Button ok = (Button) layout.findViewById(R.id.ok);
+					Button cancel = (Button) layout.findViewById(R.id.cancel);
+
+					alertDialog1.setTitle("Enter Price");
+
+					ok.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+							// TODO Auto-generated method stub
+							String prii = price.getText().toString().trim();
+							String  str_price =  pricechange;
+							if (prii != null && prii.length() > 0) {
+								mSubTotal = 0;
+								mTaxTotal = 0;
+								try{
+									try{
+										boolean isUpdate = isUpdate1;
+										String mQuantity = mQuantity1;
+										List<Inventory> itemList = sqq.getAllInventoryList1(itemNo, null, null,null,prii);
+										System.out.println("item list size"+itemList.size());
+
+										System.out.println("item list 1"+itemList.toString());
+										Inventory inv = itemList.get(0);
+										boolean arg2 = getlistViewPostion_Price1(itemNo,prii);
+										mQuantity = getlistViewPostion_quantity(itemNo,prii);
+									
+										if(mQuantity == null){
+											mQuantity = ""+1;
+										}else {
+											double qu = Double.parseDouble(mQuantity)+1;
+											mQuantity = ""+qu;
+											
+										}
+										System.out.println("mQuantity"+mQuantity);
+										if(!arg2)
+										isUpdate = false;
+										double price = Double.valueOf(inv.getPriceYouChange());
+										//			String.valueOf(df.format(price));
+											fetchOnHoldButton.setTag("0");
+											fetchOnHoldButton.setText("Save On Hold");
+											if (itemList == null) {
+												Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000).show();
+											}
+											if (itemList.size() <= 0) {
+												Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000).show();
+											}
+											if (mItemList == null) {
+												mItemList = new ArrayList<Inventory>();
+											}
+											if (!isUpdate) {
+												mItemList.addAll(itemList);
+											} else {
+												mItemList.remove(mSelectedPosition);
+												mSelectedItem.setQuantity(mQuantity);
+												mItemList.add(mSelectedPosition, mSelectedItem);
+											}
+
+											if (mItemList != null && mItemList.size() > 0) {
+
+												for (int i = 0; i < mItemList.size(); i++) {
+													String qtyStr = mItemList.get(i).getQuantity();
+													Double qty = 1.0;
+													if (qtyStr != null && qtyStr.length() > 0) {
+														qty = Double.valueOf(qtyStr);
+													}
+													mSubTotal += ((qty) * Double.valueOf(mItemList.get(i).getPriceYouChange()));
+
+													String taxStr = mItemList.get(i).getInventoryTaxTotal();
+													if (taxStr != null && taxStr.length() > 0) {
+														mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i).getInventoryTaxTotal()));
+													}
+												}
+
+												if (mAdapter == null) {
+													mAdapter = new InventoryListAdapter(PosMainActivity.this,mItemList);
+													mAdapter.setListener(PosMainActivity.this);
+													itemlistView.setAdapter(mAdapter);
+												} else {
+													mAdapter.setListener(PosMainActivity.this);
+													mAdapter.notifyDataSetChanged();
+												}
+												mAdapter.setListener(PosMainActivity.this);
+												itemlistView.setSelection(0);
+											}
+											if (mItemList.isEmpty()) {
+												mSubTotal = 0;
+												mTaxTotal = 0;
+												invoiceidexist = "";
+												holdidexist = "";
+												fetchOnHoldButton.setTag("1");
+												fetchOnHoldButton.setText("Fetch On Hold");
+												subTotalView.setText(String.valueOf("$" + mSubTotal));
+												taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+												grandTotalview.setText(String.valueOf("$" + mSubTotal));
+											}
+											mSubTotal = Double.valueOf(df.format(mSubTotal));
+											mTaxTotal = Double.valueOf(df.format(mTaxTotal));
+											subTotalView.setText(String.valueOf("$" + mSubTotal));
+											taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+											mGrandTotal = mSubTotal + mTaxTotal;
+											mGrandTotal = Double.valueOf(df.format(mGrandTotal));
+											grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+
+										
+									} catch (NumberFormatException e) {
+										e.printStackTrace();
+									} catch (SQLiteException e12) {
+										e12.printStackTrace();
+									} catch (Exception e1) {
+										e1.printStackTrace();
+									}
+								
+								}catch(NumberFormatException e){
+									e.printStackTrace();
+								}catch (Exception e1) {
+									// TODO: handle exception
+									e1.printStackTrace();
+								}
+								alertDialog1.dismiss();
+
+							} else {
+								Toast.makeText(getApplicationContext(),"Enter Price", 1000).show();
+							}
+						}
+					});
+					cancel.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+							// TODO Auto-generated method stub
+							alertDialog1.dismiss();
+						}
+					});
+					alertDialog1.setView(layout);
+					alertDialog1.show();
+		} else {
+			showAlertDialog(mContext,"Sorry","You are not authenticated to perform this operation.",false);
+		}
 	}
 
 	void getItemDetails(boolean isUpdate, String itemNo, String mQuantity) {
+
+		System.out.println("Get item details"+isUpdate+" "+itemNo+" "+mQuantity);
 		try{
-		List<Inventory> itemList = sqq.getAllInventoryList(itemNo, null, null,
-				null);
-		fetchOnHoldButton.setTag("0");
-		fetchOnHoldButton.setText("Save On Hold");
-		if (itemList == null) {
-			Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000).show();
-		}
-		if (itemList.size() <= 0) {
-			Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000).show();
-		}
-		if (mItemList == null) {
-			mItemList = new ArrayList<Inventory>();
-		}
-		if (!isUpdate) {
-			mItemList.addAll(itemList);
-		} else {
-			mItemList.remove(mSelectedPosition);
-			mSelectedItem.setQuantity(mQuantity);
-			mItemList.add(mSelectedPosition, mSelectedItem);
-		}
+			List<Inventory> itemList = sqq.getAllInventoryList(itemNo, null, null,null);
+			System.out.println("item list size"+itemList.size());
 
-		if (mItemList != null && mItemList.size() > 0) {
+			System.out.println("item list 1"+itemList.toString());
+			Inventory inv = itemList.get(0);
 
-			for (int i = 0; i < mItemList.size(); i++) {
-				String qtyStr = mItemList.get(i).getQuantity();
-				Double qty = 1.0;
-				if (qtyStr != null && qtyStr.length() > 0) {
-					qty = Double.valueOf(qtyStr);
+			double price = Double.valueOf(inv.getPriceYouChange());
+			//			String.valueOf(df.format(price));
+			System.out.println("mQuantity firs"+mQuantity);
+			if(price < 0.01 ){
+				AleartForPrice(PosMainActivity.this,""+price, itemNo,isUpdate,mQuantity);
+			}else {
+			
+				fetchOnHoldButton.setTag("0");
+				fetchOnHoldButton.setText("Save On Hold");
+				if (itemList == null) {
+					Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000).show();
 				}
-				mSubTotal += ((qty) * Double.valueOf(mItemList.get(i)
-						.getPriceYouChange()));
-
-				String taxStr = mItemList.get(i).getInventoryTaxTotal();
-				if (taxStr != null && taxStr.length() > 0) {
-					mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i)
-							.getInventoryTaxTotal()));
+				if (itemList.size() <= 0) {
+					Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000).show();
 				}
-			}
+				if (mItemList == null) {
+					mItemList = new ArrayList<Inventory>();
+				}
+				if (!isUpdate) {
+					mItemList.addAll(itemList);
+				} else {
+					mItemList.remove(mSelectedPosition);
+					mSelectedItem.setQuantity(mQuantity);
+					mItemList.add(mSelectedPosition, mSelectedItem);
+				}
 
-			if (mAdapter == null) {
-				mAdapter = new InventoryListAdapter(PosMainActivity.this,
-						mItemList);
-				mAdapter.setListener(PosMainActivity.this);
-				itemlistView.setAdapter(mAdapter);
-			} else {
-				mAdapter.setListener(PosMainActivity.this);
-				mAdapter.notifyDataSetChanged();
+				if (mItemList != null && mItemList.size() > 0) {
+
+					for (int i = 0; i < mItemList.size(); i++) {
+						String qtyStr = mItemList.get(i).getQuantity();
+						Double qty = 1.0;
+						if (qtyStr != null && qtyStr.length() > 0) {
+							qty = Double.valueOf(qtyStr);
+						}
+						mSubTotal += ((qty) * Double.valueOf(mItemList.get(i).getPriceYouChange()));
+
+						String taxStr = mItemList.get(i).getInventoryTaxTotal();
+						if (taxStr != null && taxStr.length() > 0) {
+							mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i).getInventoryTaxTotal()));
+						}
+					}
+
+					if (mAdapter == null) {
+						mAdapter = new InventoryListAdapter(PosMainActivity.this,mItemList);
+						mAdapter.setListener(PosMainActivity.this);
+						itemlistView.setAdapter(mAdapter);
+					} else {
+						mAdapter.setListener(PosMainActivity.this);
+						mAdapter.notifyDataSetChanged();
+					}
+					mAdapter.setListener(PosMainActivity.this);
+					itemlistView.setSelection(0);
+				}
+				if (mItemList.isEmpty()) {
+					mSubTotal = 0;
+					mTaxTotal = 0;
+					invoiceidexist = "";
+					holdidexist = "";
+					fetchOnHoldButton.setTag("1");
+					fetchOnHoldButton.setText("Fetch On Hold");
+					subTotalView.setText(String.valueOf("$" + mSubTotal));
+					taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+					grandTotalview.setText(String.valueOf("$" + mSubTotal));
+				}
+				mSubTotal = Double.valueOf(df.format(mSubTotal));
+				mTaxTotal = Double.valueOf(df.format(mTaxTotal));
+				subTotalView.setText(String.valueOf("$" + mSubTotal));
+				taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+				mGrandTotal = mSubTotal + mTaxTotal;
+				mGrandTotal = Double.valueOf(df.format(mGrandTotal));
+				grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+			
+
+//			if(price < 1){
+//				Integer[] arg2 = getlistViewPostion(itemNo);
+//				mSelectedPosition = arg2[0];
+//				mSelectedItem = (Inventory) mAdapter.getItem(arg2[0]);
+//				AleartForPrice(PosMainActivity.this,""+arg2[1],itemNo);
+//		}
 			}
-			mAdapter.setListener(PosMainActivity.this);
-			itemlistView.setSelection(0);
-		}
-		if (mItemList.isEmpty()) {
-			mSubTotal = 0;
-			mTaxTotal = 0;
-			invoiceidexist = "";
-			holdidexist = "";
-			fetchOnHoldButton.setTag("1");
-			fetchOnHoldButton.setText("Fetch On Hold");
-			subTotalView.setText(String.valueOf("$" + mSubTotal));
-			taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-			grandTotalview.setText(String.valueOf("$" + mSubTotal));
-		}
-		mSubTotal = Double.valueOf(df.format(mSubTotal));
-		mTaxTotal = Double.valueOf(df.format(mTaxTotal));
-		subTotalView.setText(String.valueOf("$" + mSubTotal));
-		taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-		mGrandTotal = mSubTotal + mTaxTotal;
-		mGrandTotal = Double.valueOf(df.format(mGrandTotal));
-		grandTotalview.setText(String.valueOf("$" + mGrandTotal));
-	} catch (NumberFormatException e) {
-		  e.printStackTrace();
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
 		} catch (SQLiteException e12) {
-			  e12.printStackTrace();
-			} catch (Exception e1) {
-				  e1.printStackTrace();
-				}
+			e12.printStackTrace();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 	}
+	
+	void getItemDetails2(boolean isUpdate, String itemNo, String mQuantity) {
+
+		System.out.println("Get item details"+isUpdate+" "+itemNo+" "+mQuantity);
+		try{
+			List<Inventory> itemList = sqq.getAllInventoryList(itemNo, null, null,null);
+			System.out.println("item list size"+itemList.size());
+
+			System.out.println("item list 1"+itemList.toString());
+			Inventory inv = itemList.get(0);
+
+			double price = Double.valueOf(inv.getPriceYouChange());
+			//			String.valueOf(df.format(price));
+			
+				fetchOnHoldButton.setTag("0");
+				fetchOnHoldButton.setText("Save On Hold");
+				if (itemList == null) {
+					Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000).show();
+				}
+				if (itemList.size() <= 0) {
+					Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000).show();
+				}
+				if (mItemList == null) {
+					mItemList = new ArrayList<Inventory>();
+				}
+				if (!isUpdate) {
+					mItemList.addAll(itemList);
+				} else {
+					mItemList.remove(mSelectedPosition);
+					mSelectedItem.setQuantity(mQuantity);
+					mItemList.add(mSelectedPosition, mSelectedItem);
+				}
+
+				if (mItemList != null && mItemList.size() > 0) {
+
+					for (int i = 0; i < mItemList.size(); i++) {
+						String qtyStr = mItemList.get(i).getQuantity();
+						Double qty = 1.0;
+						if (qtyStr != null && qtyStr.length() > 0) {
+							qty = Double.valueOf(qtyStr);
+						}
+						mSubTotal += ((qty) * Double.valueOf(mItemList.get(i).getPriceYouChange()));
+
+						String taxStr = mItemList.get(i).getInventoryTaxTotal();
+						if (taxStr != null && taxStr.length() > 0) {
+							mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i).getInventoryTaxTotal()));
+						}
+					}
+
+					if (mAdapter == null) {
+						mAdapter = new InventoryListAdapter(PosMainActivity.this,mItemList);
+						mAdapter.setListener(PosMainActivity.this);
+						itemlistView.setAdapter(mAdapter);
+					} else {
+						mAdapter.setListener(PosMainActivity.this);
+						mAdapter.notifyDataSetChanged();
+					}
+					mAdapter.setListener(PosMainActivity.this);
+					itemlistView.setSelection(0);
+				}
+				if (mItemList.isEmpty()) {
+					mSubTotal = 0;
+					mTaxTotal = 0;
+					invoiceidexist = "";
+					holdidexist = "";
+					fetchOnHoldButton.setTag("1");
+					fetchOnHoldButton.setText("Fetch On Hold");
+					subTotalView.setText(String.valueOf("$" + mSubTotal));
+					taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+					grandTotalview.setText(String.valueOf("$" + mSubTotal));
+				}
+				mSubTotal = Double.valueOf(df.format(mSubTotal));
+				mTaxTotal = Double.valueOf(df.format(mTaxTotal));
+				subTotalView.setText(String.valueOf("$" + mSubTotal));
+				taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+				mGrandTotal = mSubTotal + mTaxTotal;
+				mGrandTotal = Double.valueOf(df.format(mGrandTotal));
+				grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+			
+
+//			if(price < 1){
+//				Integer[] arg2 = getlistViewPostion(itemNo);
+//				mSelectedPosition = arg2[0];
+//				mSelectedItem = (Inventory) mAdapter.getItem(arg2[0]);
+//			//AleartForPricezeropice(PosMainActivity.this,itemList,isUpdate,mQuantity);
+//				AleartForPrice(PosMainActivity.this,""+arg2[1],itemNo);
+//		}
+			
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (SQLiteException e12) {
+			e12.printStackTrace();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	
+	private Integer[] getlistViewPostion(String itemNo) {
+		Integer[] arr_price = new Integer[2];
+		
+		for(int i = 0;i< itemlistView.getCount() ;i++){
+			View v = itemlistView.getAdapter().getView(i, null, null);
+			TextView tv = (TextView) v.findViewById(R.id.itemNo);
+			
+			TextView price = (TextView) v.findViewById(R.id.changeprice);
+			
+			String strprice = price.getText().toString().trim();
+			if(!strprice.equals("")){
+			int intprice = (int) Double.parseDouble(strprice);
+			arr_price[1] = intprice;
+			}
+			
+			tv.getText().toString().trim();
+			System.out.println("Text view Valule"+tv.getText().toString().trim());
+			
+			if(tv.getText().toString().trim().equalsIgnoreCase(itemNo) && price.getText().toString().trim().equalsIgnoreCase(strprice)){
+				arr_price[0] = i;
+				return arr_price;
+			}
+		}
+		return arr_price;
+	}
+	
+	private Integer[] getlistViewPostion_Price(String itemNo, String prii) {
+		Integer[] arr_price = new Integer[3];
+		
+		for(int i = 0;i< itemlistView.getCount() ;i++){
+			View v = itemlistView.getAdapter().getView(i, null, null);
+			TextView tv = (TextView) v.findViewById(R.id.itemNo);
+			TextView quantity = (TextView) v.findViewById(R.id.quantity);
+			TextView price = (TextView) v.findViewById(R.id.changeprice);
+			
+			String strprice = price.getText().toString().trim();
+			String quantity1 = quantity.getText().toString().trim();
+			if(!strprice.equals("")){
+			int intprice = (int) Double.parseDouble(strprice);
+			arr_price[1] = intprice;
+			}
+			
+			if(!quantity1.equals("")){
+				arr_price[2] = (int) Double.parseDouble(quantity1);
+				}
+			
+			tv.getText().toString().trim();
+			System.out.println("Text view Valule"+tv.getText().toString().trim());
+			
+			if(tv.getText().toString().trim().equalsIgnoreCase(itemNo) && price.getText().toString().trim().equalsIgnoreCase(prii)){
+				arr_price[0] = i;
+				return arr_price;
+			}
+		}
+		return arr_price;
+	}
+	
+	private boolean getlistViewPostion_Price1(String itemNo, String prii) {
+		
+		for(int i = 0;i< itemlistView.getCount() ;i++){
+			View v = itemlistView.getAdapter().getView(i, null, null);
+			TextView tv = (TextView) v.findViewById(R.id.itemNo);
+			TextView quantity = (TextView) v.findViewById(R.id.quantity);
+			TextView price = (TextView) v.findViewById(R.id.changeprice);
+			
+			String strprice = price.getText().toString().trim();
+			String quantity1 = quantity.getText().toString().trim();
+			
+			
+			tv.getText().toString().trim();
+			System.out.println("Text view Valule"+tv.getText().toString().trim());
+			
+			if(tv.getText().toString().trim().equalsIgnoreCase(itemNo) && price.getText().toString().trim().equalsIgnoreCase(prii)){
+				
+				mSelectedPosition = i;
+				mSelectedItem = (Inventory) mAdapter.getItem(i);
+				System.out.println("mSelected  Position"+mSelectedPosition);
+				System.out.println("mSelected   Item"+mSelectedItem);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private String getlistViewPostion_quantity(String itemNo, String prii) {
+		
+		for(int i = 0;i< itemlistView.getCount() ;i++){
+			View v = itemlistView.getAdapter().getView(i, null, null);
+			TextView tv = (TextView) v.findViewById(R.id.itemNo);
+			TextView quantity = (TextView) v.findViewById(R.id.quantity);
+			TextView price = (TextView) v.findViewById(R.id.changeprice);
+			
+			String strprice = price.getText().toString().trim();
+			String quantity1 = quantity.getText().toString().trim();
+			
+			
+			tv.getText().toString().trim();
+			System.out.println("Text view Valule"+tv.getText().toString().trim());
+			
+			if(tv.getText().toString().trim().equalsIgnoreCase(itemNo) && price.getText().toString().trim().equalsIgnoreCase(prii)){
+				if(!quantity1.equals(""))
+				return quantity1;
+			}
+		}
+		return null;
+	}
+
 	void getItemDetailsChangeName(boolean isUpdate, String itemNo, String mQuantity,String Name) {
 		try{
-		List<Inventory> itemList = sqq.getAllInventoryListForName(itemNo, null, null,
-				null,Name);
+		List<Inventory> itemList = sqq.getAllInventoryListForName(itemNo, null, null,null,Name);
 		
 		fetchOnHoldButton.setTag("0");
 		fetchOnHoldButton.setText("Save On Hold");
@@ -3049,19 +3152,16 @@ try{
 				if (qtyStr != null && qtyStr.length() > 0) {
 					qty = Double.valueOf(qtyStr);
 				}
-				mSubTotal += ((qty) * Double.valueOf(mItemList.get(i)
-						.getPriceYouChange()));
+				mSubTotal += ((qty) * Double.valueOf(mItemList.get(i).getPriceYouChange()));
 
 				String taxStr = mItemList.get(i).getInventoryTaxTotal();
 				if (taxStr != null && taxStr.length() > 0) {
-					mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i)
-							.getInventoryTaxTotal()));
+					mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i).getInventoryTaxTotal()));
 				}
 			}
 
 			if (mAdapter == null) {
-				mAdapter = new InventoryListAdapter(PosMainActivity.this,
-						mItemList);
+				mAdapter = new InventoryListAdapter(PosMainActivity.this,mItemList);
 				mAdapter.setListener(PosMainActivity.this);
 				itemlistView.setAdapter(mAdapter);
 			} else {
@@ -3107,24 +3207,16 @@ try{
 		// TODO Auto-generated method stub
 		try{
 		if (paybutton.getText().toString().equals("Pay")) {
-			String qtyStr1 = mItemList.get(Integer.parseInt(string))
-					.getQuantity();
+			String qtyStr1 = mItemList.get(Integer.parseInt(string)) .getQuantity();
 			Double qty1 = 1.0;
 			if (qtyStr1 != null && qtyStr1.length() > 0) {
 				qty1 = Double.valueOf(qtyStr1);
 			}
 			if (mItemList.get(Integer.parseInt(string)).getPriceYouChange() != null) {
-				Double changevalue = qty1
-						* Double.valueOf(mItemList
-								.get(Integer.parseInt(string))
-								.getPriceYouChange());
+				Double changevalue = qty1 * Double.valueOf(mItemList .get(Integer.parseInt(string)) .getPriceYouChange());
 				mSubTotal = mSubTotal - changevalue;
-				if (mItemList.get(Integer.parseInt(string))
-						.getInventoryTaxTotal() != null) {
-					changevalue = qty1
-							* Double.valueOf(mItemList.get(
-									Integer.parseInt(string))
-									.getInventoryTaxTotal());
+				if (mItemList.get(Integer.parseInt(string)) .getInventoryTaxTotal() != null) {
+					changevalue = qty1 * Double.valueOf(mItemList.get( Integer.parseInt(string)) .getInventoryTaxTotal());
 					mTaxTotal = mTaxTotal - changevalue;
 				}
 			}
@@ -3192,23 +3284,35 @@ try{
 		
 	}
 
-	private void getItemDetailspricechange(boolean isUpdate, String itemNo,
-			String price) {
+	private void getItemDetailspricechange(boolean isUpdate, String itemNo,String price, Context mContext) {
+		System.out.println("values of get details"+isUpdate+","+itemNo+","+price);
+		System.out.println("no "+1);
+		
 		try{
-			Log.v("itemNo itemNo", itemNo);
+		System.out.println("no "+2);
+		Log.v("itemNo itemNo", itemNo);
 		Double taxyy = 0.0;
-		List<Inventory> itemList = sqq.getAllInventoryList(itemNo, null, null,
-				null);
-		fetchOnHoldButton.setTag("0");
-		fetchOnHoldButton.setText("Save On Hold");
+		System.out.println("no "+10);
+		sqq = new DatabaseForDemo(mContext);
+		List<Inventory> itemList = sqq.getAllInventoryList(itemNo, null, null,null);
+		
+		Inventory intver = itemList.get(0);
+		intver.setPriceYouChange(price);
+		System.out.println("no 1"+itemList);
+	//	fetchOnHoldButton.setTag("0");
+		System.out.println("no "+12);
+	//	fetchOnHoldButton.setText("Save On Hold");
+		System.out.println("no "+13);
 		if (mItemList == null) {
+			System.out.println("no "+3);
 			mItemList = new ArrayList<Inventory>();
 		}
 		if (!isUpdate) {
+			System.out.println("no "+4);
 			mItemList.addAll(itemList);
 		} else {
 			// Harinath
-			
+			System.out.println("no "+5);
 			  Cursor mCursorchinu = dbforloginlogoutReadPos.rawQuery( "select * from " +
 			  DatabaseForDemo.INVENTORY_TABLE + " where " +
 			  DatabaseForDemo.INVENTORY_ITEM_NO + "=\"" +
@@ -3220,25 +3324,20 @@ try{
 						 /* String catid = mCursor.getString(mCursor
 			  .getColumnIndex(DatabaseForDemo.INVENTORY_TOTAL_TAX));
 						  taxyy =Double.valueOf(catid);*/			
-						  String texss=mCursorchinu.getString(mCursorchinu
-									.getColumnIndex(DatabaseForDemo.INVENTORY_TAXONE));
+						  String texss=mCursorchinu.getString(mCursorchinu .getColumnIndex(DatabaseForDemo.INVENTORY_TAXONE));
 							String[] parts = texss.split(",");
 							String part1 = parts[0]; 
 							Log.v(""+part1,"" +"  hari   "+parts.length);
 							for(int t=0;t<parts.length;t++){
 								String ttt=parts[t]; 
 								Log.e("",""+ttt);
-								String query = "select * from "
-										+ DatabaseForDemo.TAX_TABLE + " where "
-										+ DatabaseForDemo.TAX_NAME + "=\""
-										+ ttt + "\"";
+								String query = "select * from " + DatabaseForDemo.TAX_TABLE + " where " + DatabaseForDemo.TAX_NAME + "=\"" + ttt + "\"";
 								System.out.println(query);
 								Cursor cursortax =  dbforloginlogoutReadPos.rawQuery(query, null);
 								if (cursortax != null) {
 									if (cursortax.moveToFirst()) {
 										do {
-											double taxvalpercent =cursortax.getDouble(cursortax
-													.getColumnIndex(DatabaseForDemo.TAX_VALUE));
+											double taxvalpercent =cursortax.getDouble(cursortax .getColumnIndex(DatabaseForDemo.TAX_VALUE));
 											System.out.println("taxvalpercent     " + taxvalpercent);
 											taxyy += taxvalpercent;
 											System.out.println("tax    " + taxyy);
@@ -3251,29 +3350,26 @@ try{
 					  } 
 				  }
 			  mCursorchinu.close(); 
-			 
 
 			mItemList.remove(mSelectedPosition);
 			mSelectedItem.setPriceYouChange(price);
-			 taxyy = (Double.valueOf(price) * taxyy) / 100;
-			 mSelectedItem.setInventoryTaxTotal(String.valueOf(df.format(taxyy)));
+			taxyy = (Double.valueOf(price) * taxyy) / 100;
+			mSelectedItem.setInventoryTaxTotal(String.valueOf(df.format(taxyy)));
 			mItemList.add(mSelectedPosition, mSelectedItem);
 		}
 
 		if (mItemList != null && mItemList.size() > 0) {
-
+			System.out.println("no "+6);
 			for (int i = 0; i < mItemList.size(); i++) {
 				String qtyStr = mItemList.get(i).getQuantity();
 				Double qty = 1.0;
 				if (qtyStr != null && qtyStr.length() > 0) {
 					qty = Double.valueOf(qtyStr);
 				}
-				mSubTotal += ((qty) * Double.valueOf(mItemList.get(i)
-						.getPriceYouChange()));
+				mSubTotal += ((qty) * Double.valueOf(mItemList.get(i) .getPriceYouChange()));
 				String taxStr = mItemList.get(i).getInventoryTaxTotal();
 				if (taxStr != null && taxStr.length() > 0) {
-					mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i)
-							.getInventoryTaxTotal()));
+					mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i) .getInventoryTaxTotal()));
 				}
 				mSubTotal = Double.valueOf(df.format(mSubTotal));
 				mTaxTotal = Double.valueOf(df.format(mTaxTotal));
@@ -3285,8 +3381,7 @@ try{
 			}
 
 			if (mAdapter == null) {
-				mAdapter = new InventoryListAdapter(PosMainActivity.this,
-						mItemList);
+				mAdapter = new InventoryListAdapter(PosMainActivity.this, mItemList);
 				mAdapter.setListener(PosMainActivity.this);
 				itemlistView.setAdapter(mAdapter);
 			} else {
@@ -3297,11 +3392,15 @@ try{
 			itemlistView.setSelection(0);
 		}
 	} catch (NumberFormatException e) {
+		System.out.println("no "+7);
 		  e.printStackTrace();
 		} catch (SQLiteException e12) {
+			System.out.println("no "+8);
 			  e12.printStackTrace();
 			} catch (Exception e1) {
+				System.out.println("no "+9);
 			  e1.printStackTrace();
+			  Log.d("Emessage", e1.getMessage());
 			}
 	}
 
@@ -3310,22 +3409,16 @@ try{
 		itemsdp.clear();
 		itemsNo.clear();
 		showitemsll.removeAllViews();
-		String selectQuery = "SELECT  * FROM "
-				+ DatabaseForDemo.INVENTORY_TABLE + " WHERE "
+		String selectQuery = "SELECT  * FROM "+ DatabaseForDemo.INVENTORY_TABLE + " WHERE "
 				+ DatabaseForDemo.INVENTORY_DEPARTMENT + "=\"" + name_value
 				+ "\" ORDER BY "+DatabaseForDemo.INVENTORY_ITEM_NAME+";";
-		Cursor cursoraqszx = dbforloginlogoutReadPos.rawQuery(selectQuery,
-				null);
+		Cursor cursoraqszx = dbforloginlogoutReadPos.rawQuery(selectQuery,null);
 		if (cursoraqszx != null) {
 			if (cursoraqszx.moveToFirst()) {
 				do {
-					String catname = cursoraqszx
-							.getString(cursoraqszx
-									.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
-					String catid = cursoraqszx.getString(cursoraqszx
-							.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NO));
-					String itemcheck = cursoraqszx.getString(cursoraqszx
-							.getColumnIndex(DatabaseForDemo.CHECKED_VALUE));
+					String catname = cursoraqszx.getString(cursoraqszx.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
+					String catid = cursoraqszx.getString(cursoraqszx.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NO));
+					String itemcheck = cursoraqszx.getString(cursoraqszx.getColumnIndex(DatabaseForDemo.CHECKED_VALUE));
 					if (itemcheck.equals("true")) {
 						itemsdp.add(catname);
 						itemsNo.add(catid);
@@ -3349,8 +3442,8 @@ try{
 			endLoop = llC * itemcount;
 			final LinearLayout roww = new LinearLayout(PosMainActivity.this);
 			roww.setOrientation(LinearLayout.HORIZONTAL);
-			roww.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-					LayoutParams.WRAP_CONTENT));
+			roww.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
+			roww.setWeightSum(3);
 			roww.setPadding(1, 1, 1, 1);
 
 			if (endLoop >= totalcount) {
@@ -3360,17 +3453,23 @@ try{
 				tvv = new Button(PosMainActivity.this);
 				tvv.setText("" + itemsdp.get(BTn));
 				tvv.setTag("" + itemsNo.get(BTn));
-				tvv.setTextSize(10);
-				LayoutParams lp = new LayoutParams(100, 40);
-				tvv.setPadding(0, 0, 0, 0);
+				tvv.setTextSize(15);
+				tvv.setTypeface(null, Typeface.BOLD);
+				tvv.setSingleLine(true);
+				tvv.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+				int n = 1; // the exact number of lines you want to display
+				tvv.setLines(n);
+				tvv.setSelected(true);
+				
+			//	LayoutParams lp = new LayoutParams(100, 40);
+				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(100,40, 1.0f);
+				tvv.setPadding(5, 5, 5, 5);
 				roww.addView(tvv, lp);
 				tvv.setOnClickListener(new OnClickListener() {
 
 					@Override
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
-						
-						
 						if (paybutton.getText().toString().equals("Pay")) {
 							String str1 = v.getTag().toString();
 							
@@ -3383,9 +3482,7 @@ try{
 								}
 								}
 							} else {
-								Toast.makeText(getApplicationContext(),
-										"Item Number is Null",
-										Toast.LENGTH_LONG).show();
+								Toast.makeText(getApplicationContext(),"Item Number is Null",Toast.LENGTH_LONG).show();
 							}
 						}
 					}
@@ -3414,26 +3511,20 @@ try{
 			lastsavedinvoiceid = null;
 			
 			String[] paytypes = { "Cash", "Check", "Credit/Debit", "Account" };
-			 alertDialogtop = new AlertDialog.Builder(
-					PosMainActivity.this).create();
-			 mInflatertop = LayoutInflater
-					.from(PosMainActivity.this);
+			 alertDialogtop = new AlertDialog.Builder( PosMainActivity.this).create();
+			 mInflatertop = LayoutInflater .from(PosMainActivity.this);
 			  layouttop = mInflatertop.inflate(R.layout.pay_popup, null);
-			final EditText total = (EditText) layouttop
-					.findViewById(R.id.totalsave);
-			final EditText remaining = (EditText) layouttop
-					.findViewById(R.id.remaining);
+			final EditText total = (EditText) layouttop.findViewById(R.id.totalsave);
+			final EditText remaining = (EditText) layouttop .findViewById(R.id.remaining);
 			Button ok = (Button) layouttop.findViewById(R.id.ok);
 			Button cancel = (Button) layouttop.findViewById(R.id.cancel);
-			final Button bigbutton = (Button) layouttop
-					.findViewById(R.id.roundvalue);
+			final Button bigbutton = (Button) layouttop .findViewById(R.id.roundvalue);
 			final Button one = (Button) layouttop.findViewById(R.id.one);
 			final Button five = (Button) layouttop.findViewById(R.id.five);
 			final Button ten = (Button) layouttop.findViewById(R.id.ten);
 			final Button twenty = (Button) layouttop.findViewById(R.id.twenty);
 			final Button fifty = (Button) layouttop.findViewById(R.id.fifty);
-			final Spinner paytypespnr = (Spinner) layouttop
-					.findViewById(R.id.paytypespinner);
+			final Spinner paytypespnr = (Spinner) layouttop .findViewById(R.id.paytypespinner);
 			listviewpayedsofar = (ListView) layouttop.findViewById(R.id.payedsofar);
 
 			/*final ArrayList<String> printernames = new ArrayList<String>();
@@ -3494,17 +3585,14 @@ try{
 			 * Double.valueOf(dtime.format(4556676.4524624565466));
 			 */
 
-			ArrayAdapter<String> adapter123 = new ArrayAdapter<String>(
-					PosMainActivity.this, android.R.layout.simple_spinner_item,
-					paytypes);
+			ArrayAdapter<String> adapter123 = new ArrayAdapter<String>(PosMainActivity.this, android.R.layout.simple_spinner_item,paytypes);
 			paytypespnr.setAdapter(adapter123);
 			paytypespnr.setSelection(adapter123.getPosition(button));
 			
 			paytypespnr.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 				@Override
-				public void onItemSelected(AdapterView<?> arg0, View arg1,
-						int arg2, long arg3) {
+				public void onItemSelected(AdapterView<?> arg0, View arg1,int arg2, long arg3) {
 					// TODO Auto-generated method stub
 					TextView tv = (TextView)arg1.findViewById(android.R.id.text1);
 					System.out.println("spinnervalueis:"+tv.getText().toString());
@@ -3516,6 +3604,15 @@ try{
 						fifty.setEnabled(true);
 						bigbutton.setEnabled(true);
 						paymentTypestr = "Cash";
+					}else if(tv.getText().toString().equals("Credit/Debit")){
+						one.setEnabled(false);
+						five.setEnabled(false);
+						ten.setEnabled(false);
+						twenty.setEnabled(false);
+						fifty.setEnabled(false);
+						bigbutton.setEnabled(false);
+						new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
+						
 					}else{
 						one.setEnabled(false);
 						five.setEnabled(false);
@@ -3540,8 +3637,7 @@ try{
 					// TODO Auto-generated method stub
 					if (remainingamount > 1) {
 						remainingamount = remainingamount - 1;
-						remainingamount = (double) Math
-								.round(remainingamount * 100) / (double) 100;
+						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
 						total.setText("$" + remainingamount);
 						cashpaymentAmount = Math.ceil(remainingamount);
 						bigbutton.setText("" + cashpaymentAmount);
@@ -3554,8 +3650,7 @@ try{
 					} else {
 						change = 1 - remainingamount;
 						alertDialogtop.dismiss();
-						change = (double) Math.round(change * 100)
-								/ (double) 100;
+						change = (double) Math.round(change * 100) / (double) 100;
 						cashPayType(0.0, remaining.getText().toString(), "", "");
 						showchangepopup(change);
 						//cashPayType(change, "", "", "");
@@ -3569,8 +3664,7 @@ try{
 					// TODO Auto-generated method stub
 					if (remainingamount > 5) {
 						remainingamount = remainingamount - 5;
-						remainingamount = (double) Math
-								.round(remainingamount * 100) / (double) 100;
+						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
 						total.setText("$" + remainingamount);
 						
 						cashpaymentAmount = Math.ceil(remainingamount);
@@ -3584,8 +3678,7 @@ try{
 					} else {
 						change = 5 - remainingamount;
 						alertDialogtop.dismiss();
-						change = (double) Math.round(change * 100)
-								/ (double) 100;
+						change = (double) Math.round(change * 100) / (double) 100;
 						cashPayType(0.0, remaining.getText().toString(), "", "");
 						showchangepopup(change);
 						//cashPayType(change, "", "", "");
@@ -3599,8 +3692,7 @@ try{
 					// TODO Auto-generated method stub
 					if (remainingamount > 10) {
 						remainingamount = remainingamount - 10;
-						remainingamount = (double) Math
-								.round(remainingamount * 100) / (double) 100;
+						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
 						total.setText("$" + remainingamount);
 						
 						cashpaymentAmount = Math.ceil(remainingamount);
@@ -3615,8 +3707,7 @@ try{
 					} else {
 						change = 10 - remainingamount;
 						alertDialogtop.dismiss();
-						change = (double) Math.round(change * 100)
-								/ (double) 100;
+						change = (double) Math.round(change * 100) / (double) 100;
 						cashPayType(0.0, remaining.getText().toString(), "", "");
 						showchangepopup(change);
 						//cashPayType(change, "", "", "");
@@ -3630,8 +3721,7 @@ try{
 					// TODO Auto-generated method stub
 					if (remainingamount > 20) {
 						remainingamount = remainingamount - 20;
-						remainingamount = (double) Math
-								.round(remainingamount * 100) / (double) 100;
+						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
 						total.setText("$" + remainingamount);
 						
 						cashpaymentAmount = Math.ceil(remainingamount);
@@ -3645,8 +3735,7 @@ try{
 					} else {
 						change = 20 - remainingamount;
 						alertDialogtop.dismiss();
-						change = (double) Math.round(change * 100)
-								/ (double) 100;
+						change = (double) Math.round(change * 100) / (double) 100;
 						cashPayType(0.0, remaining.getText().toString(), "", "");
 						showchangepopup(change);
 						//cashPayType(change, "", "", "");
@@ -3660,8 +3749,7 @@ try{
 					// TODO Auto-generated method stub
 					if (remainingamount > 50) {
 						remainingamount = remainingamount - 50;
-						remainingamount = (double) Math
-								.round(remainingamount * 100) / (double) 100;
+						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
 						total.setText("$" + remainingamount);
 						
 						cashpaymentAmount = Math.ceil(remainingamount);
@@ -3674,8 +3762,7 @@ try{
 						System.out.println("padma payment type adapter is called"+adapter.getCount());
 					} else {
 						change = 50 - remainingamount;
-						change = (double) Math.round(change * 100)
-								/ (double) 100;
+						change = (double) Math.round(change * 100) / (double) 100;
 						alertDialogtop.dismiss();
 						cashPayType(0.0, remaining.getText().toString(), "", "");
 						showchangepopup(change);
@@ -3690,8 +3777,7 @@ try{
 					// TODO Auto-generated method stub
 					if (cashpaymentAmount >= remainingamount) {
 						change = cashpaymentAmount - remainingamount;
-						change = (double) Math.round(change * 100)
-								/ (double) 100;
+						change = (double) Math.round(change * 100) / (double) 100;
 						alertDialogtop.dismiss();
 						cashPayType(0.0, remaining.getText().toString(), "", "");
 						showchangepopup(change);
@@ -3711,28 +3797,22 @@ try{
 					if (paymentTypestr.equals("Cash")) {
 						
 						if (remaining.getText().toString().trim().length() > 0) {
-							Double given = Double.valueOf(remaining.getText()
-									.toString().trim());
+							Double given = Double.valueOf(remaining.getText() .toString().trim());
 							if (given == null || given == 0.00) {
-								Toast.makeText(getApplicationContext(),
-										"Enter Amount", 1000).show();
+								Toast.makeText(getApplicationContext(), "Enter Amount", 1000).show();
 							} else {
 								if (given >= remainingamount) {
 									change = given - remainingamount;
-									change = (double) Math.round(change * 100)
-											/ (double) 100;
+									change = (double) Math.round(change * 100) / (double) 100;
 									alertDialogtop.dismiss();
 									cashPayType(0.0, remaining.getText().toString(), "", "");
 									showchangepopup(change);
 									//showReciptPopup();
 								} else {
 									remainingamount = remainingamount - given;
-									remainingamount = (int) Math
-											.round(remainingamount * 100)
-											/ (double) 100;
+									remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
 									total.setText("$" + remainingamount);
-									cashpaymentAmount = Math
-											.ceil(remainingamount);
+									cashpaymentAmount = Math .ceil(remainingamount);
 									bigbutton.setText("" + cashpaymentAmount);
 									
 									cashPayTypeforNotComplete(0.0, remaining.getText().toString(), "", "", paymentTypestr);
@@ -3747,34 +3827,27 @@ try{
 								}
 							}
 						} else {
-							Toast.makeText(getApplicationContext(),
-									"Enter Amount", 1000).show();
+							Toast.makeText(getApplicationContext(), "Enter Amount", 1000).show();
 						}
 					} else if (paymentTypestr.equals("Check")) {
 						
 						if (remaining.getText().toString().trim().length() > 0) {
-							Double given = Double.valueOf(remaining.getText()
-									.toString().trim());
+							Double given = Double.valueOf(remaining.getText() .toString().trim());
 							if (given == null || given == 0.00) {
-								Toast.makeText(getApplicationContext(),
-										"Enter Amount", 1000).show();
+								Toast.makeText(getApplicationContext(), "Enter Amount", 1000).show();
 							} else {
 								if (given >= remainingamount) {
 									change = given - remainingamount;
-									change = (double) Math.round(change * 100)
-											/ (double) 100;
+									change = (double) Math.round(change * 100) / (double) 100;
 									//padma
 									checkPayType(0.0, remaining.getText().toString(), "", "");
 									alertDialogtop.dismiss();
 									//showchangepopup(change);
 								} else {
 									remainingamount = remainingamount - given;
-									remainingamount = (int) Math
-											.round(remainingamount * 100)
-											/ (double) 100;
+									remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
 									total.setText("$" + remainingamount);
-									cashpaymentAmount = Math
-											.ceil(remainingamount);
+									cashpaymentAmount = Math .ceil(remainingamount);
 									bigbutton.setText("" + cashpaymentAmount);
 									
 									//padma
@@ -3786,25 +3859,21 @@ try{
 								}
 							}
 						} else {
-							Toast.makeText(getApplicationContext(),
-									"Enter Amount", 1000).show();
+							Toast.makeText(getApplicationContext(), "Enter Amount", 1000).show();
 						}
 						//pathi
 					} else if (paymentTypestr.equals("Credit/Debit")) {
 						
 						if (remaining.getText().toString().trim().length() > 0) {
-							Double given = Double.valueOf(remaining.getText()
-									.toString().trim());
+							Double given = Double.valueOf(remaining.getText() .toString().trim());
 							if (given == null || given == 0.00) {
-								Toast.makeText(getApplicationContext(),
-										"Enter Amount", 1000).show();
+								Toast.makeText(getApplicationContext(), "Enter Amount", 1000).show();
 							} else {
 								if (given >= remainingamount) {
 									if(Parameters.paymentprocesstype.equals("Express Manual")){
 										System.out.println("express manual is encountered");
 										change = given - remainingamount;
-										change = (double) Math.round(change * 100)
-												/ (double) 100;
+										change = (double) Math.round(change * 100) / (double) 100;
 									//	alertDialogtop.dismiss();
 										changeforcredit = 0.0;
 										remainingforcredit = remaining.getText().toString();
@@ -3815,8 +3884,7 @@ try{
 										//showReciptPopup();
 									}else{
 									change = given - remainingamount;
-									change = (double) Math.round(change * 100)
-											/ (double) 100;
+									change = (double) Math.round(change * 100) / (double) 100;
 									//Toast.makeText(PosMainActivity.this, "This is first data payment", Toast.LENGTH_SHORT).show();
 								//	alertDialogtop.dismiss();
 									if(lastsavedinvoiceid!=null){
@@ -3840,12 +3908,9 @@ try{
 									if(Parameters.paymentprocesstype.equals("Express Manual")){
 										System.out.println("express manual is encountered");
 										remainingamount = remainingamount - given;
-										remainingamount = (int) Math
-												.round(remainingamount * 100)
-												/ (double) 100;
+										remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
 										total.setText("$" + remainingamount);
-										cashpaymentAmount = Math
-												.ceil(remainingamount);
+										cashpaymentAmount = Math .ceil(remainingamount);
 										bigbutton.setText("" + cashpaymentAmount);
 										
 										//padma
@@ -3893,49 +3958,39 @@ try{
 								}
 							}
 						} else {
-							Toast.makeText(getApplicationContext(),
-									"Enter Amount", 1000).show();
+							Toast.makeText(getApplicationContext(), "Enter Amount", 1000).show();
 						}
 						/* showReciptPopup();
 						creditROdebitPayType();*/
 
 					} else if (paymentTypestr.equals("Account")) {						
 						if(account == false){
-							Toast.makeText(getApplicationContext(),
-									"Add Coustomer Account", 1000).show();
+							Toast.makeText(getApplicationContext(), "Add Coustomer Account", 1000).show();
 						}else{
 						if (remaining.getText().toString().trim().length() > 0) {
-							Double given = Double.valueOf(remaining.getText()
-									.toString().trim());
+							Double given = Double.valueOf(remaining.getText() .toString().trim());
 							if (given == null || given == 0.00) {
-								Toast.makeText(getApplicationContext(),
-										"Enter Amount", 1000).show();
+								Toast.makeText(getApplicationContext(), "Enter Amount", 1000).show();
 							} else {
 								if (given >= remainingamount) {
 									change = given - remainingamount;
-									change = (double) Math.round(change * 100)
-											/ (double) 100;
+									change = (double) Math.round(change * 100) / (double) 100;
 									alertDialogtop.dismiss();
 									//padma
 									//showReciptPopup();
-									Toast.makeText(getApplicationContext(),
-											"Add Coustomer Account", 1000).show();
+									Toast.makeText(getApplicationContext(), "Add Coustomer Account", 1000).show();
 									/*checkPayType();
 									showReciptPopup();*/
 									//showchangepopup(change);
 								} else {
 									remainingamount = remainingamount - given;
-									remainingamount = (int) Math
-											.round(remainingamount * 100)
-											/ (double) 100;
+									remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
 									total.setText("$" + remainingamount);
-									cashpaymentAmount = Math
-											.ceil(remainingamount);
+									cashpaymentAmount = Math .ceil(remainingamount);
 									bigbutton.setText("" + cashpaymentAmount);
 									
 									//padma
-									Toast.makeText(getApplicationContext(),
-											"Add Coustomer Account", 1000).show();
+									Toast.makeText(getApplicationContext(), "Add Coustomer Account", 1000).show();
 									remaining.setText(""+remainingamount);
 									
 									/*Toast.makeText(getApplicationContext(),
@@ -3944,8 +3999,7 @@ try{
 								}
 							}
 						} else {
-							Toast.makeText(getApplicationContext(),
-									"Enter Amount", 1000).show();
+							Toast.makeText(getApplicationContext(), "Enter Amount", 1000).show();
 						}
 						}
 					}
@@ -3962,12 +4016,10 @@ try{
 				}
 			});
 			alertDialogtop.setView(layouttop);
-			alertDialogtop.getWindow().setSoftInputMode(
-					WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+			alertDialogtop.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 			alertDialogtop.show();
 		} else {
-			Toast.makeText(getApplicationContext(), "Add Item",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 		}
 	} catch (NumberFormatException e) {
 		  e.printStackTrace();
@@ -3992,11 +4044,9 @@ try{
 			myOutWriter.append(name_value);
 			myOutWriter.close();
 			fOut.close();
-			Toast.makeText(getBaseContext(), " Done ", Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(getBaseContext(), " Done ", Toast.LENGTH_SHORT) .show();
 		} catch (Exception e) {
-			Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT) .show();
 		}
 
 	}
@@ -4007,9 +4057,7 @@ try{
 		customer_company = " "; 
 		customer_first = "Cash Customer";
 		customer_last = " ";
-		customerDetailsText.setText("Customer No = " + customer_id
-				+ ", \n Customer Name = " + customer_first + " "
-				+ customer_last);
+		customerDetailsText.setText("Customer No = " + customer_id + ", \n Customer Name = " + customer_first + " " + customer_last);
 		mItemList.clear();
 		mAdapter.notifyDataSetChanged();
 		mSelectedItem = null;
@@ -4165,13 +4213,11 @@ try{
 	customerDetailsText.setText("Customer No = " + customer_id
 			+ ", \n Customer Name = " + customer_first + " "
 			+ customer_last);
-	final AlertDialog alertDialog12 = new AlertDialog.Builder(
-			PosMainActivity.this).create();
+	final AlertDialog alertDialog12 = new AlertDialog.Builder( PosMainActivity.this).create();
 	LayoutInflater mInflater2 = LayoutInflater.from(PosMainActivity.this);
 	View layout2 = mInflater2.inflate(R.layout.change_show, null);
 	alertDialog12.setTitle("Remaining Change");
-	final EditText totalchange = (EditText) layout2
-			.findViewById(R.id.changedit);
+	final EditText totalchange = (EditText) layout2 .findViewById(R.id.changedit);
 	totalchange.setText("" + change);
 	Button okchange = (Button) layout2.findViewById(R.id.changeok);
 	okchange.setOnClickListener(new OnClickListener() {
@@ -4185,8 +4231,7 @@ try{
 		}
 	});
 	alertDialog12.setView(layout2);
-	alertDialog12.getWindow().setSoftInputMode(
-			WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+	alertDialog12.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 	alertDialog12.show();
 	}
 
@@ -4203,8 +4248,7 @@ try{
 			}else{
 				System.out.println("invoice id exist value is padmavathi555555555555555"+ invoiceidexist);
 			String invoice_id =  Parameters.generateRandomNumber();
-			Log.e("invoice", Parameters.generateRandomNumber() + "  "
-					+ invoice_forHold);
+			Log.e("invoice", Parameters.generateRandomNumber() + "  " + invoice_forHold);
 			hold_Status = "complete";
 			lastsavedinvoiceid = invoice_id;
 			System.out.println("last saved invoice id is:"+lastsavedinvoiceid);
@@ -4246,8 +4290,7 @@ try{
 			if(invoiceidexist.equals("")){
 			if(lastsavedinvoiceid == null){
 				String invoice_id =  Parameters.generateRandomNumber();
-				Log.e("invoice", Parameters.generateRandomNumber() + "  "
-						+ invoice_forHold);
+				Log.e("invoice", Parameters.generateRandomNumber() + "  " + invoice_forHold);
 				hold_Status = "incomplete";
 				paymentTypestr = "multiple";
 				lastsavedinvoiceid = invoice_id;
@@ -4423,8 +4466,7 @@ try{
 			if(invoiceidexist.equals("")){
 			if(lastsavedinvoiceid == null){
 				String invoice_id =  Parameters.generateRandomNumber();
-				Log.e("invoice", invoice_id + "  "
-						+ invoice_forHold);
+				Log.e("invoice", invoice_id + "  " + invoice_forHold);
 				hold_Status = "incomplete";
 				paymentTypestr = "multiple";
 				lastsavedinvoiceid = invoice_id;
@@ -4535,8 +4577,7 @@ try{
 			if(invoiceidexist.equals("")){
 			if(lastsavedinvoiceid == null){
 				String invoice_id =  Parameters.generateRandomNumber();
-				Log.e("invoice", invoice_id + "  "
-						+ invoice_forHold);
+				Log.e("invoice", invoice_id + "  " + invoice_forHold);
 				hold_Status = "incomplete";
 				paymentTypestr = "multiple";
 				lastsavedinvoiceid = invoice_id;
@@ -4674,57 +4715,28 @@ try{
 				do {
 					try {
 						JSONObject jsonobj = new JSONObject();
-						String itemnoval = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_ID));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_ID,
-								itemnoval);
-						String department = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_PROFIT));
-						jsonobj.put(DatabaseForDemo.INVOICE_PROFIT,
-								department);
-						String itemname = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_TOTAL_AMT));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_TOTAL_AMT,
-								itemname);
-						String desc = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_STATUS));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_STATUS,
-								desc);
-						String avgcost = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_EMPLOYEE,
-								avgcost);
-						String pricechange = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_CUSTOMER,
-								pricechange);
-						String taxprice = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_PAYMENT_TYPE));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_PAYMENT_TYPE,
-								taxprice);
-						String instock = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_TOTAL_AVG));
-						jsonobj.put(DatabaseForDemo.INVOICE_TOTAL_AVG,
-								instock);
-						String vendor = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_STORE_ID));
-						jsonobj.put(DatabaseForDemo.INVOICE_STORE_ID,
-								vendor);
-						String taxone = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.INVOICE_HOLD_ID));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_HOLD_ID,
-								taxone);
-						String uniqueidval = mCursorforvendor2.getString(mCursorforvendor2
-								.getColumnIndex(DatabaseForDemo.UNIQUE_ID));
-						jsonobj.put(DatabaseForDemo.UNIQUE_ID,
-								uniqueidval);
+						String itemnoval = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_ID));
+						jsonobj.put( DatabaseForDemo.INVOICE_ID, itemnoval);
+						String department = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_PROFIT));
+						jsonobj.put(DatabaseForDemo.INVOICE_PROFIT, department);
+						String itemname = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_TOTAL_AMT));
+						jsonobj.put( DatabaseForDemo.INVOICE_TOTAL_AMT, itemname);
+						String desc = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_STATUS));
+						jsonobj.put( DatabaseForDemo.INVOICE_STATUS, desc);
+						String avgcost = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE));
+						jsonobj.put( DatabaseForDemo.INVOICE_EMPLOYEE, avgcost);
+						String pricechange = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER));
+						jsonobj.put( DatabaseForDemo.INVOICE_CUSTOMER, pricechange);
+						String taxprice = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_PAYMENT_TYPE));
+						jsonobj.put( DatabaseForDemo.INVOICE_PAYMENT_TYPE, taxprice);
+						String instock = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_TOTAL_AVG));
+						jsonobj.put(DatabaseForDemo.INVOICE_TOTAL_AVG, instock);
+						String vendor = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_STORE_ID));
+						jsonobj.put(DatabaseForDemo.INVOICE_STORE_ID, vendor);
+						String taxone = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.INVOICE_HOLD_ID));
+						jsonobj.put( DatabaseForDemo.INVOICE_HOLD_ID, taxone);
+						String uniqueidval = mCursorforvendor2.getString(mCursorforvendor2 .getColumnIndex(DatabaseForDemo.UNIQUE_ID));
+						jsonobj.put(DatabaseForDemo.UNIQUE_ID, uniqueidval);
 						getlist.add(jsonobj);
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
@@ -4769,49 +4781,28 @@ try{
 						System.out.println("response test is:"
 								+ response);
 						try {
-							JSONObject obj = new JSONObject(
-									response);
-							JSONArray array = obj
-									.getJSONArray("insert-queries");
-							System.out
-									.println("array list length for insert is:"
-											+ array.length());
-							JSONArray array2 = obj
-									.getJSONArray("delete-queries");
-							System.out
-									.println("array2 list length for delete is:"
-											+ array2.length());
-							for (int jj = 0, ii = 0; jj < array2
-									.length()
-									&& ii < array.length(); jj++, ii++) {
-								String deletequerytemp = array2
-										.getString(jj);
-								String deletequery1 = deletequerytemp
-										.replace("'", "\"");
-								String deletequery = deletequery1
-										.replace("\\\"", "'");
-								System.out.println("delete query"
-										+ jj + " is :"
-										+ deletequery);
+							JSONObject obj = new JSONObject( response);
+							JSONArray array = obj .getJSONArray("insert-queries");
+							System.out .println("array list length for insert is:" + array.length());
+							JSONArray array2 = obj .getJSONArray("delete-queries");
+							System.out .println("array2 list length for delete is:" + array2.length());
+							for (int jj = 0, ii = 0; jj < array2 .length() && ii < array.length(); jj++, ii++) {
+								String deletequerytemp = array2 .getString(jj);
+								String deletequery1 = deletequerytemp .replace("'", "\"");
+								String deletequery = deletequery1 .replace("\\\"", "'");
+								System.out.println("delete query" + jj + " is :" + deletequery);
 
-								String insertquerytemp = array
-										.getString(ii);
-								String insertquery1 = insertquerytemp
-										.replace("'", "\"");
-								String insertquery = insertquery1
-										.replace("\\\"", "'");
-								System.out.println("delete query"
-										+ jj + " is :"
-										+ insertquery);
+								String insertquerytemp = array .getString(ii);
+								String insertquery1 = insertquerytemp .replace("'", "\"");
+								String insertquery = insertquery1 .replace("\\\"", "'");
+								System.out.println("delete query" + jj + " is :" + insertquery);
 try{
 								dbforloginlogoutWritePos.execSQL(deletequery);
 								dbforloginlogoutWritePos.execSQL(insertquery);
 }catch(SQLiteException qq){
 	qq.printStackTrace();
 }
-								System.out
-										.println("queries executed"
-												+ ii);
+								System.out .println("queries executed" + ii);
 
 							}
 						} catch (JSONException e) {
@@ -4822,22 +4813,13 @@ try{
 				}).start();
 			} else {
 				ContentValues contentValues1 = new ContentValues();
-				contentValues1.put(DatabaseForDemo.QUERY_TYPE,
-						"update");
-				contentValues1.put(DatabaseForDemo.PENDING_USER_ID,
-						Parameters.userid);
-				contentValues1.put(DatabaseForDemo.PAGE_URL,
-						"saveinfo.php");
-				contentValues1.put(
-						DatabaseForDemo.TABLE_NAME_PENDING,
-						DatabaseForDemo.INVOICE_TOTAL_TABLE);
-				contentValues1.put(
-						DatabaseForDemo.CURRENT_TIME_PENDING,
-						Parameters.currentTime());
-				contentValues1.put(DatabaseForDemo.PARAMETERS,
-						dataval);
-				dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE,
-						null, contentValues1);
+				contentValues1.put(DatabaseForDemo.QUERY_TYPE, "update");
+				contentValues1.put(DatabaseForDemo.PENDING_USER_ID, Parameters.userid);
+				contentValues1.put(DatabaseForDemo.PAGE_URL, "saveinfo.php");
+				contentValues1.put( DatabaseForDemo.TABLE_NAME_PENDING, DatabaseForDemo.INVOICE_TOTAL_TABLE);
+				contentValues1.put( DatabaseForDemo.CURRENT_TIME_PENDING, Parameters.currentTime());
+				contentValues1.put(DatabaseForDemo.PARAMETERS, dataval);
+				dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE, null, contentValues1);
 			}
 		}
 		
@@ -4866,83 +4848,40 @@ try{
 				do {
 					try {
 						JSONObject jsonobj = new JSONObject();
-						String itemnoval = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_ID));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_ID,
-								itemnoval);
-						String department = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_ITEM_ID));
-						jsonobj.put(DatabaseForDemo.INVOICE_ITEM_ID,
-								department);
-						String itemname = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_ITEM_NAME));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_ITEM_NAME,
-								itemname);
-						String desc = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_YOUR_COST));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_YOUR_COST,
-								desc);
-						String avgcost = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_AVG_COST));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_AVG_COST,
-								avgcost);
-						String pricechange = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_DISCOUNT));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_DISCOUNT,
-								pricechange);
-						String taxprice = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_TAX));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_TAX,
-								taxprice);
-						String instock = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_DEPARTMETNT));
-						jsonobj.put(DatabaseForDemo.INVOICE_DEPARTMETNT,
-								instock);
-						String vendor = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_VENDOR));
-						jsonobj.put(DatabaseForDemo.INVOICE_VENDOR,
-								vendor);
-						String taxone = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_STATUS));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_STATUS,
-								taxone);
-						String instock1 = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_QUANTITY));
-						jsonobj.put(DatabaseForDemo.INVOICE_QUANTITY,
-								instock1);
-						String vendor1 = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_STORE_ID));
-						jsonobj.put(DatabaseForDemo.INVOICE_STORE_ID,
-								vendor1);
-						String taxone1 = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_PAYMENT_TYPE));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_PAYMENT_TYPE,
-								taxone1);
-						String uniqueidval = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.UNIQUE_ID));
-						jsonobj.put(DatabaseForDemo.UNIQUE_ID,
-								uniqueidval);
-						String vendor2 = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE));
-						jsonobj.put(DatabaseForDemo.INVOICE_EMPLOYEE,
-								vendor2);
-						String taxone2 = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER));
-						jsonobj.put(
-								DatabaseForDemo.INVOICE_CUSTOMER,
-								taxone2);
-						String uniqueidval2 = mCursorforvendor3.getString(mCursorforvendor3
-								.getColumnIndex(DatabaseForDemo.INVOICE_DISCRIPTION));
-						jsonobj.put(DatabaseForDemo.INVOICE_DISCRIPTION,
-								uniqueidval2);
+						String itemnoval = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_ID));
+						jsonobj.put( DatabaseForDemo.INVOICE_ID, itemnoval);
+						String department = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_ITEM_ID));
+						jsonobj.put(DatabaseForDemo.INVOICE_ITEM_ID, department);
+						String itemname = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_ITEM_NAME));
+						jsonobj.put( DatabaseForDemo.INVOICE_ITEM_NAME, itemname);
+						String desc = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_YOUR_COST));
+						jsonobj.put( DatabaseForDemo.INVOICE_YOUR_COST, desc);
+						String avgcost = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_AVG_COST));
+						jsonobj.put( DatabaseForDemo.INVOICE_AVG_COST, avgcost);
+						String pricechange = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_DISCOUNT));
+						jsonobj.put( DatabaseForDemo.INVOICE_DISCOUNT, pricechange);
+						String taxprice = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_TAX));
+						jsonobj.put( DatabaseForDemo.INVOICE_TAX, taxprice);
+						String instock = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_DEPARTMETNT));
+						jsonobj.put(DatabaseForDemo.INVOICE_DEPARTMETNT, instock);
+						String vendor = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_VENDOR));
+						jsonobj.put(DatabaseForDemo.INVOICE_VENDOR, vendor);
+						String taxone = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_STATUS));
+						jsonobj.put( DatabaseForDemo.INVOICE_STATUS, taxone);
+						String instock1 = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_QUANTITY));
+						jsonobj.put(DatabaseForDemo.INVOICE_QUANTITY, instock1);
+						String vendor1 = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_STORE_ID));
+						jsonobj.put(DatabaseForDemo.INVOICE_STORE_ID, vendor1);
+						String taxone1 = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_PAYMENT_TYPE));
+						jsonobj.put( DatabaseForDemo.INVOICE_PAYMENT_TYPE, taxone1);
+						String uniqueidval = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.UNIQUE_ID));
+						jsonobj.put(DatabaseForDemo.UNIQUE_ID, uniqueidval);
+						String vendor2 = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE));
+						jsonobj.put(DatabaseForDemo.INVOICE_EMPLOYEE, vendor2);
+						String taxone2 = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER));
+						jsonobj.put( DatabaseForDemo.INVOICE_CUSTOMER, taxone2);
+						String uniqueidval2 = mCursorforvendor3.getString(mCursorforvendor3 .getColumnIndex(DatabaseForDemo.INVOICE_DISCRIPTION));
+						jsonobj.put(DatabaseForDemo.INVOICE_DISCRIPTION, uniqueidval2);
 						getlistforitem.add(jsonobj);
 					} catch (JSONException e) {
 						// TODO Auto-generated catch block
@@ -4984,43 +4923,23 @@ try{
 										Parameters.currentTime(),
 										Parameters.currentTime(),
 										dataval, "true");
-						System.out.println("response test is:"
-								+ response);
+						System.out.println("response test is:" + response);
 						try {
-							JSONObject obj = new JSONObject(
-									response);
-							JSONArray array = obj
-									.getJSONArray("insert-queries");
-							System.out
-									.println("array list length for insert is:"
-											+ array.length());
-							JSONArray array2 = obj
-									.getJSONArray("delete-queries");
-							System.out
-									.println("array2 list length for delete is:"
-											+ array2.length());
-							for (int jj = 0, ii = 0; jj < array2
-									.length()
-									&& ii < array.length(); jj++, ii++) {
-								String deletequerytemp = array2
-										.getString(jj);
-								String deletequery1 = deletequerytemp
-										.replace("'", "\"");
-								String deletequery = deletequery1
-										.replace("\\\"", "'");
-								System.out.println("delete query"
-										+ jj + " is :"
-										+ deletequery);
+							JSONObject obj = new JSONObject( response);
+							JSONArray array = obj .getJSONArray("insert-queries");
+							System.out .println("array list length for insert is:" + array.length());
+							JSONArray array2 = obj .getJSONArray("delete-queries");
+							System.out .println("array2 list length for delete is:" + array2.length());
+							for (int jj = 0, ii = 0; jj < array2 .length() && ii < array.length(); jj++, ii++) {
+								String deletequerytemp = array2 .getString(jj);
+								String deletequery1 = deletequerytemp .replace("'", "\"");
+								String deletequery = deletequery1 .replace("\\\"", "'");
+								System.out.println("delete query" + jj + " is :" + deletequery);
 
-								String insertquerytemp = array
-										.getString(ii);
-								String insertquery1 = insertquerytemp
-										.replace("'", "\"");
-								String insertquery = insertquery1
-										.replace("\\\"", "'");
-								System.out.println("delete query"
-										+ jj + " is :"
-										+ insertquery);
+								String insertquerytemp = array .getString(ii);
+								String insertquery1 = insertquerytemp .replace("'", "\"");
+								String insertquery = insertquery1 .replace("\\\"", "'");
+								System.out.println("delete query" + jj + " is :" + insertquery);
 try{
 								dbforloginlogoutWritePos.execSQL(deletequery);
 								dbforloginlogoutWritePos.execSQL(insertquery);
@@ -5028,9 +4947,7 @@ try{
 								qq.printStackTrace();
 							}
 									
-								System.out
-										.println("queries executed"
-												+ ii);
+								System.out .println("queries executed" + ii);
 
 							}
 						} catch (JSONException e) {
@@ -5041,22 +4958,13 @@ try{
 				}).start();
 			} else {
 				ContentValues contentValues1 = new ContentValues();
-				contentValues1.put(DatabaseForDemo.QUERY_TYPE,
-						"update");
-				contentValues1.put(DatabaseForDemo.PENDING_USER_ID,
-						Parameters.userid);
-				contentValues1.put(DatabaseForDemo.PAGE_URL,
-						"saveinfo.php");
-				contentValues1.put(
-						DatabaseForDemo.TABLE_NAME_PENDING,
-						DatabaseForDemo.INVOICE_ITEMS_TABLE);
-				contentValues1.put(
-						DatabaseForDemo.CURRENT_TIME_PENDING,
-						Parameters.currentTime());
-				contentValues1.put(DatabaseForDemo.PARAMETERS,
-						dataval);
-				dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE,
-						null, contentValues1);
+				contentValues1.put(DatabaseForDemo.QUERY_TYPE, "update");
+				contentValues1.put(DatabaseForDemo.PENDING_USER_ID, Parameters.userid);
+				contentValues1.put(DatabaseForDemo.PAGE_URL, "saveinfo.php");
+				contentValues1.put( DatabaseForDemo.TABLE_NAME_PENDING, DatabaseForDemo.INVOICE_ITEMS_TABLE);
+				contentValues1.put( DatabaseForDemo.CURRENT_TIME_PENDING, Parameters.currentTime());
+				contentValues1.put(DatabaseForDemo.PARAMETERS, dataval);
+				dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE, null, contentValues1);
 			}
 		}
 		} catch (NumberFormatException e) {
@@ -5123,58 +5031,24 @@ try{
 					public void run() {
 
 						JsonPostMethod jsonpost = new JsonPostMethod();
-						String response = jsonpost
-								.postmethodfordirect(
-										"admin",
-										"abcdefg",
-										DatabaseForDemo.SPLIT_INVOICE_TABLE,
-										Parameters
-												.currentTime(),
-										Parameters
-												.currentTime(),
-										dataval, "");
-						System.out
-								.println("response test is:"
-										+ response);
+						String response = jsonpost .postmethodfordirect( "admin", "abcdefg", DatabaseForDemo.SPLIT_INVOICE_TABLE, Parameters .currentTime(), Parameters .currentTime(), dataval, "");
+						System.out .println("response test is:" + response);
 						try {
-							JSONObject obj = new JSONObject(
-									response);
-							JSONArray array = obj
-									.getJSONArray("insert-queries");
-							System.out.println("array list length for insert is:"
-									+ array.length());
-							JSONArray array2 = obj
-									.getJSONArray("delete-queries");
-							System.out.println("array2 list length for delete is:"
-									+ array2.length());
-							for (int jj = 0, ii = 0; jj < array2
-									.length()
-									&& ii < array.length(); jj++, ii++) {
-								String deletequerytemp = array2
-										.getString(jj);
-								String deletequery1 = deletequerytemp
-										.replace("'", "\"");
-								String deletequery = deletequery1
-										.replace("\\\"",
-												"'");
-								System.out
-										.println("delete query"
-												+ jj
-												+ " is :"
-												+ deletequery);
+							JSONObject obj = new JSONObject( response);
+							JSONArray array = obj .getJSONArray("insert-queries");
+							System.out.println("array list length for insert is:" + array.length());
+							JSONArray array2 = obj .getJSONArray("delete-queries");
+							System.out.println("array2 list length for delete is:" + array2.length());
+							for (int jj = 0, ii = 0; jj < array2 .length() && ii < array.length(); jj++, ii++) {
+								String deletequerytemp = array2 .getString(jj);
+								String deletequery1 = deletequerytemp .replace("'", "\"");
+								String deletequery = deletequery1 .replace("\\\"", "'");
+								System.out .println("delete query" + jj + " is :" + deletequery);
 
-								String insertquerytemp = array
-										.getString(ii);
-								String insertquery1 = insertquerytemp
-										.replace("'", "\"");
-								String insertquery = insertquery1
-										.replace("\\\"",
-												"'");
-								System.out
-										.println("delete query"
-												+ jj
-												+ " is :"
-												+ insertquery);
+								String insertquerytemp = array .getString(ii);
+								String insertquery1 = insertquerytemp .replace("'", "\"");
+								String insertquery = insertquery1 .replace("\\\"", "'");
+								System.out .println("delete query" + jj + " is :" + insertquery);
 try{
 								dbforloginlogoutWritePos.execSQL(deletequery);
 								dbforloginlogoutWritePos.execSQL(insertquery);
@@ -5182,9 +5056,7 @@ try{
 	qq.printStackTrace();
 }
 		
-								System.out
-										.println("queries executed"
-												+ ii);
+								System.out .println("queries executed" + ii);
 							}
 						} catch (JSONException e) {
 							// TODO Auto-generated catch
@@ -5197,27 +5069,13 @@ try{
 			} else {
 
 				ContentValues contentValues1 = new ContentValues();
-				contentValues1.put(
-						DatabaseForDemo.QUERY_TYPE,
-						"insert");
-				contentValues1.put(
-						DatabaseForDemo.PENDING_USER_ID,
-						Parameters.userid);
-				contentValues1.put(
-						DatabaseForDemo.PAGE_URL,
-						"saveinfo.php");
-				contentValues1.put(
-						DatabaseForDemo.TABLE_NAME_PENDING,
-						DatabaseForDemo.SPLIT_INVOICE_TABLE);
-				contentValues1
-						.put(DatabaseForDemo.CURRENT_TIME_PENDING,
-								Parameters.currentTime());
-				contentValues1
-						.put(DatabaseForDemo.PARAMETERS,
-								dataval);
-				dbforloginlogoutWritePos.insert(
-						DatabaseForDemo.PENDING_QUERIES_TABLE,
-						null, contentValues1);
+				contentValues1.put( DatabaseForDemo.QUERY_TYPE, "insert");
+				contentValues1.put( DatabaseForDemo.PENDING_USER_ID, Parameters.userid);
+				contentValues1.put( DatabaseForDemo.PAGE_URL, "saveinfo.php");
+				contentValues1.put( DatabaseForDemo.TABLE_NAME_PENDING, DatabaseForDemo.SPLIT_INVOICE_TABLE);
+				contentValues1 .put(DatabaseForDemo.CURRENT_TIME_PENDING, Parameters.currentTime());
+				contentValues1 .put(DatabaseForDemo.PARAMETERS, dataval);
+				dbforloginlogoutWritePos.insert( DatabaseForDemo.PENDING_QUERIES_TABLE, null, contentValues1);
 				dataval = "";
 			}
 
@@ -5236,15 +5094,11 @@ try{
 	void checkPayType(Double change, final String remaining, final String accountno, final String chequeno) {
 		try{
 		if (mItemList.size() > 0) {
-			final AlertDialog alertDialogCheck = new AlertDialog.Builder(
-					PosMainActivity.this).create();
-			LayoutInflater mInflaterCheck = LayoutInflater
-					.from(PosMainActivity.this);
-			View layoutCheck = mInflaterCheck.inflate(R.layout.change_show,
-					null);
+			final AlertDialog alertDialogCheck = new AlertDialog.Builder( PosMainActivity.this).create();
+			LayoutInflater mInflaterCheck = LayoutInflater .from(PosMainActivity.this);
+			View layoutCheck = mInflaterCheck.inflate(R.layout.change_show, null);
 			alertDialogCheck.setTitle("Enter Check Number");
-			final EditText totalchange = (EditText) layoutCheck
-					.findViewById(R.id.changedit);
+			final EditText totalchange = (EditText) layoutCheck .findViewById(R.id.changedit);
 			// createPrintRecipt();
 			Button okchange = (Button) layoutCheck.findViewById(R.id.changeok);
 			okchange.setOnClickListener(new OnClickListener() {
@@ -5263,8 +5117,7 @@ try{
 								updateTheInvoice(lastsavedinvoiceid, remaining, accountno, value, paymenttypeval);
 							}else{
 							String invoice_id =  Parameters.generateRandomNumber();
-							Log.e("invoice", Parameters.generateRandomNumber() + "  "
-									+ invoice_forHold);
+							Log.e("invoice", Parameters.generateRandomNumber() + "  " + invoice_forHold);
 							hold_Status = "complete";
 							lastsavedinvoiceid = invoice_id;
 							System.out.println("last saved invoice id is:"+lastsavedinvoiceid);
@@ -5317,13 +5170,11 @@ try{
 				}
 			});
 			alertDialogCheck.setView(layoutCheck);
-			alertDialogCheck.getWindow().setSoftInputMode(
-					WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+			alertDialogCheck.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 			alertDialogCheck.show();
 
 		} else {
-			Toast.makeText(getApplicationContext(), "Add Item",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 		}
 		} catch (NumberFormatException e) {
 			  e.printStackTrace();
@@ -5337,15 +5188,11 @@ try{
 	void checkPayTypeforNotComplete(Double change, final String remaining, final String accountno, final String chequeno, final String paymenttypeval) {
 		try{
 		if (mItemList.size() > 0) {
-			final AlertDialog alertDialogCheck = new AlertDialog.Builder(
-					PosMainActivity.this).create();
-			LayoutInflater mInflaterCheck = LayoutInflater
-					.from(PosMainActivity.this);
-			View layoutCheck = mInflaterCheck.inflate(R.layout.change_show,
-					null);
+			final AlertDialog alertDialogCheck = new AlertDialog.Builder( PosMainActivity.this).create();
+			LayoutInflater mInflaterCheck = LayoutInflater .from(PosMainActivity.this);
+			View layoutCheck = mInflaterCheck.inflate(R.layout.change_show, null);
 			alertDialogCheck.setTitle("Enter Check Number");
-			final EditText totalchange = (EditText) layoutCheck
-					.findViewById(R.id.changedit);
+			final EditText totalchange = (EditText) layoutCheck .findViewById(R.id.changedit);
 			// createPrintRecipt();
 			Button okchange = (Button) layoutCheck.findViewById(R.id.changeok);
 			okchange.setOnClickListener(new OnClickListener() {
@@ -5358,8 +5205,7 @@ try{
 							if(invoiceidexist.equals("")){
 							if(lastsavedinvoiceid == null){
 								String invoice_id =  Parameters.generateRandomNumber();
-								Log.e("invoice", Parameters.generateRandomNumber() + "  "
-										+ invoice_forHold);
+								Log.e("invoice", Parameters.generateRandomNumber() + "  " + invoice_forHold);
 								hold_Status = "incomplete";
 								paymentTypestr = "multiple";
 								lastsavedinvoiceid = invoice_id;
@@ -5464,13 +5310,11 @@ try{
 				}
 			});
 			alertDialogCheck.setView(layoutCheck);
-			alertDialogCheck.getWindow().setSoftInputMode(
-					WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+			alertDialogCheck.getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 			alertDialogCheck.show();
 
 		} else {
-			Toast.makeText(getApplicationContext(), "Add Item",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 		}
 		} catch (NumberFormatException e) {
 			  e.printStackTrace();
@@ -5483,12 +5327,10 @@ try{
 
 	void accountPayType() {
 		if (mItemList.size() > 0) {
-			Toast.makeText(getApplicationContext(), "Add Coustomer Account",
-					1000).show();
+			Toast.makeText(getApplicationContext(), "Add Coustomer Account", 1000).show();
 
 		} else {
-			Toast.makeText(getApplicationContext(), "Add Item",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
 		}
 
 	}
@@ -5566,13 +5408,11 @@ try{
 			contentValues.put(DatabaseForDemo.UNIQUE_ID, u_id0);
 			contentValues.put(DatabaseForDemo.INVOICE_QUANTITY, "" + Qtty);
 			contentValues.put(DatabaseForDemo.INVOICE_STORE_ID, "" + Parameters.store_id);
-			contentValues.put(DatabaseForDemo.INVOICE_PAYMENT_TYPE, ""
-					+ paymenttype);
+			contentValues.put(DatabaseForDemo.INVOICE_PAYMENT_TYPE, "" + paymenttype);
 			contentValues.put(DatabaseForDemo.INVOICE_EMPLOYEE, "" + Parameters.usertypeloginvalue);
 			contentValues.put(DatabaseForDemo.INVOICE_CUSTOMER, "" + customer_id);
 			contentValues.put(DatabaseForDemo.INVOICE_DISCRIPTION, Description);
-			dbforloginlogoutWritePos.insert(DatabaseForDemo.INVOICE_ITEMS_TABLE, null,
-					contentValues);
+			dbforloginlogoutWritePos.insert(DatabaseForDemo.INVOICE_ITEMS_TABLE, null, contentValues);
 			Log.w("errrorr","insert");
 			contentValues.clear();
 			}catch(SQLiteException e){
@@ -5597,10 +5437,8 @@ try{
 					jsonobj.put(DatabaseForDemo.INVOICE_STORE_ID, "" + Parameters.store_id);
 					jsonobj.put(DatabaseForDemo.INVOICE_EMPLOYEE, "" + Parameters.usertypeloginvalue);
 					jsonobj.put(DatabaseForDemo.INVOICE_CUSTOMER, "" + customer_id);
-					jsonobj.put(DatabaseForDemo.INVOICE_PAYMENT_TYPE, ""
-							+ paymenttype);
-					jsonobj.put(DatabaseForDemo.INVOICE_DISCRIPTION,
-							Description);
+					jsonobj.put(DatabaseForDemo.INVOICE_PAYMENT_TYPE, "" + paymenttype);
+					jsonobj.put(DatabaseForDemo.INVOICE_DISCRIPTION, Description);
 					JSONArray fields = new JSONArray();
 					fields.put(0, jsonobj);
 					data.put("fields", fields);
@@ -5612,78 +5450,84 @@ try{
 				if (Parameters.OriginalUrl.equals("")) {
 					System.out.println("there is no server url val");
 				} else {
-				 boolean isnet = Parameters
-						  .isNetworkAvailable(getApplicationContext()); if (isnet) { new
-						  Thread(new Runnable() {
-						  
-						  @Override public void run() { JsonPostMethod jsonpost = new
-						  JsonPostMethod(); String response =
-						  jsonpost.postmethodfordirect("admin", "abcdefg",
-						  DatabaseForDemo.INVOICE_ITEMS_TABLE, Parameters.currentTime(),
-						  Parameters.currentTime(), dataval, "");
-						  System.out.println("response test is:" + response);
-						   String servertiem = null; try {
-						  JSONObject obj = new JSONObject(response); JSONObject responseobj
-						  = obj .getJSONObject("response"); servertiem =
-						  responseobj.getString("server-time");
-						  System.out.println("servertime is:" + servertiem); JSONArray
-						  array = obj .getJSONArray("insert-queries"); System.out
-						  .println("array list length for insert is:" + array.length());
-						  JSONArray array2 = obj .getJSONArray("delete-queries");
-						  System.out .println("array2 list length for delete is:" +
-						  array2.length()); for (int jj = 0, ii = 0; jj < array2.length()
-						  && ii < array.length(); jj++, ii++) { String deletequerytemp =
-						  array2.getString(jj); String deletequery1 =
-						  deletequerytemp.replace( "'", "\""); String deletequery =
-						  deletequery1.replace( "\\\"", "'");
-						  System.out.println("delete query" + jj + " is :" + deletequery);
-						  
-						  String insertquerytemp = array.getString(ii); String insertquery1
-						  = insertquerytemp.replace( "'", "\""); String insertquery =
-						  insertquery1.replace( "\\\"", "'");
-						  System.out.println("delete query" + jj + " is :" + insertquery);
-						  try{
-						  dbforloginlogoutWritePos.execSQL(deletequery); dbforloginlogoutWritePos.execSQL(insertquery);
-						  }catch(SQLiteException qq){
-								qq.printStackTrace();
+				 boolean isnet = Parameters .isNetworkAvailable(getApplicationContext());
+				 if (isnet) 
+ {
+						new Thread(new Runnable() {
+
+							@Override
+							public void run() {
+								JsonPostMethod jsonpost = new JsonPostMethod();
+								String response = jsonpost.postmethodfordirect(
+										"admin", "abcdefg",
+										DatabaseForDemo.INVOICE_ITEMS_TABLE,
+										Parameters.currentTime(),
+										Parameters.currentTime(), dataval, "");
+								System.out.println("response test is:" + response);
+								String servertiem = null;
+								try {
+									JSONObject obj = new JSONObject(response);
+									JSONObject responseobj = obj .getJSONObject("response");
+									servertiem = responseobj .getString("server-time");
+									System.out.println("servertime is:" + servertiem);
+									JSONArray array = obj .getJSONArray("insert-queries");
+									System.out .println("array list length for insert is:" + array.length());
+									JSONArray array2 = obj .getJSONArray("delete-queries");
+									System.out .println("array2 list length for delete is:" + array2.length());
+									for (int jj = 0, ii = 0; jj < array2 .length() && ii < array.length(); jj++, ii++) {
+										String deletequerytemp = array2 .getString(jj);
+										String deletequery1 = deletequerytemp .replace("'", "\"");
+										String deletequery = deletequery1 .replace("\\\"", "'");
+										System.out.println("delete query" + jj + " is :" + deletequery);
+
+										String insertquerytemp = array .getString(ii);
+										String insertquery1 = insertquerytemp .replace("'", "\"");
+										String insertquery = insertquery1 .replace("\\\"", "'");
+										System.out.println("delete query" + jj + " is :" + insertquery);
+										try {
+											dbforloginlogoutWritePos .execSQL(deletequery);
+											dbforloginlogoutWritePos .execSQL(insertquery);
+										} catch (SQLiteException qq) {
+											qq.printStackTrace();
+										}
+
+										System.out.println("queries executed" + ii);
+									}
+								} catch (JSONException e) { // TODO
+															// Auto-generated
+															// catch block
+									e.printStackTrace();
+								}
+
+								String select = "select *from " + DatabaseForDemo.MISCELLANEOUS_TABLE;
+								Cursor cursor = dbforloginlogoutReadPos .rawQuery(select, null);
+								if (cursor.getCount() > 0) {
+									dbforloginlogoutWritePos
+											.execSQL("update "
+													+ DatabaseForDemo.MISCELLANEOUS_TABLE
+													+ " set "
+													+ DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL
+													+ "=\"" + servertiem + "\"");
+								} else {
+									ContentValues contentValues1 = new ContentValues();
+									contentValues1.put( DatabaseForDemo.MISCEL_STORE, "store1");
+									contentValues1 .put(DatabaseForDemo.MISCEL_PAGEURL, "http://www.mydata.ws/aoneposws/webserviceoriginal/saveinfo.php");
+									contentValues1 .put(DatabaseForDemo.MISCEL_UPDATE_LOCAL, Parameters.currentTime());
+									contentValues1 .put(DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL, Parameters.currentTime());
+									dbforloginlogoutWritePos .insert(DatabaseForDemo.MISCELLANEOUS_TABLE, null, contentValues1);
+								}
+								dataval = "";
 							}
-									
-						  System.out.println("queries executed" + ii); } } catch
-						  (JSONException e) { // TODO Auto-generated catch block
-						  e.printStackTrace(); }
-						  
-						  String select = "select *from " + DatabaseForDemo.MISCELLANEOUS_TABLE; 
-						  Cursor cursor =
-								  dbforloginlogoutReadPos.rawQuery(select, null);
-						  if (cursor.getCount() > 0) {
-									  dbforloginlogoutWritePos.execSQL("update " + DatabaseForDemo.MISCELLANEOUS_TABLE +
-						  " set " + DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL + "=\"" +
-						  servertiem + "\"");
-									  } else { 
-							  ContentValues contentValues1 = new
-						  ContentValues(); 
-							  contentValues1.put(DatabaseForDemo.MISCEL_STORE, "store1"); 
-							  contentValues1 .put(DatabaseForDemo.MISCEL_PAGEURL,"http://www.mydata.ws/aoneposws/webserviceoriginal/saveinfo.php");
-							  contentValues1.put( DatabaseForDemo.MISCEL_UPDATE_LOCAL, Parameters.currentTime());
-							  contentValues1.put(DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL, Parameters.currentTime());
-						  dbforloginlogoutWritePos.insert(DatabaseForDemo.MISCELLANEOUS_TABLE, null, contentValues1);
-						  } dataval = "";
-						  }
-						  }).start();
-						  } else {
+						}).start();
+					} else {
 						
 						ContentValues contentValues1 = new ContentValues();
 						contentValues1.put(DatabaseForDemo.QUERY_TYPE, "insert");
-						contentValues1.put(DatabaseForDemo.PENDING_USER_ID,
-								Parameters.userid);
+						contentValues1.put(DatabaseForDemo.PENDING_USER_ID, Parameters.userid);
 						contentValues1.put(DatabaseForDemo.PAGE_URL, "saveinfo.php");
-						contentValues1.put(DatabaseForDemo.TABLE_NAME_PENDING,
-								DatabaseForDemo.INVOICE_TOTAL_TABLE);
-						contentValues1.put(DatabaseForDemo.CURRENT_TIME_PENDING,
-								Parameters.currentTime());
-						contentValues1.put(DatabaseForDemo.PARAMETERS, dataval);
-						dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE, null,
-								contentValues1);
+						contentValues1.put(DatabaseForDemo.TABLE_NAME_PENDING, DatabaseForDemo.INVOICE_TOTAL_TABLE);
+						contentValues1.put(DatabaseForDemo.CURRENT_TIME_PENDING, Parameters.currentTime());
+						contentValues1.put(DatabaseForDemo.PARAMETERS, dataval); dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE, null, contentValues1);
 						dataval = "";
 						 }
 				}
@@ -5694,8 +5538,7 @@ try{
 		String u_id = Parameters.randomValue();
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DatabaseForDemo.INVOICE_ID, invoice_id);
-		contentValues.put(DatabaseForDemo.INVOICE_PROFIT, ""
-				+ mTaxTotal);
+		contentValues.put(DatabaseForDemo.INVOICE_PROFIT, "" + mTaxTotal);
 		contentValues.put(DatabaseForDemo.UNIQUE_ID, u_id);
 		contentValues.put(DatabaseForDemo.INVOICE_TOTAL_AMT, "" + mGrandTotal);
 		contentValues.put(DatabaseForDemo.INVOICE_STATUS, hold_Status);
@@ -5707,21 +5550,18 @@ try{
 		contentValues.put(DatabaseForDemo.INVOICE_EMPLOYEE, "" + Parameters.usertypeloginvalue);
 		contentValues.put(DatabaseForDemo.INVOICE_CUSTOMER, "" + customer_id);
 		contentValues.put(DatabaseForDemo.INVOICE_CHEQUE_NO, chequeno);
-		dbforloginlogoutWritePos.insert(DatabaseForDemo.INVOICE_TOTAL_TABLE, null,
-				contentValues);
+		dbforloginlogoutWritePos.insert(DatabaseForDemo.INVOICE_TOTAL_TABLE, null, contentValues);
 		contentValues.clear();
 		System.out.println("hold id is saved in local data");
 			try {
 				JSONObject data = new JSONObject();
 				JSONObject jsonobj = new JSONObject();
 				jsonobj.put(DatabaseForDemo.INVOICE_ID, invoice_id);
-				jsonobj.put(DatabaseForDemo.INVOICE_PROFIT, ""
-						+mTaxTotal);
+				jsonobj.put(DatabaseForDemo.INVOICE_PROFIT, "" +mTaxTotal);
 				jsonobj.put(DatabaseForDemo.INVOICE_TOTAL_AMT, "" + mGrandTotal);
 				jsonobj.put(DatabaseForDemo.INVOICE_STATUS, hold_Status);
 				jsonobj.put(DatabaseForDemo.INVOICE_HOLD_ID, hold_id);
-				jsonobj.put(DatabaseForDemo.INVOICE_PAYMENT_TYPE,
-						paymenttype);
+				jsonobj.put(DatabaseForDemo.INVOICE_PAYMENT_TYPE, paymenttype);
 				jsonobj.put(DatabaseForDemo.UNIQUE_ID, u_id);
 				jsonobj.put(DatabaseForDemo.INVOICE_TOTAL_AVG, "" + mSubTotal);
 				jsonobj.put(DatabaseForDemo.CREATED_DATE, "" + timeC);
@@ -5742,75 +5582,83 @@ try{
 			if (Parameters.OriginalUrl.equals("")) {
 				System.out.println("there is no server url val");
 			} else {
-			  boolean isnet = Parameters
-			  .isNetworkAvailable(getApplicationContext()); if (isnet) { new
-			  Thread(new Runnable() {
-			  
-			  @Override public void run() { JsonPostMethod jsonpost = new
-			  JsonPostMethod(); String response =
-			  jsonpost.postmethodfordirect("admin", "abcdefg",
-			  DatabaseForDemo.INVOICE_TOTAL_TABLE, Parameters.currentTime(),
-			  Parameters.currentTime(), dataval, "");
-			  System.out.println("response test is:" + response);
-			  String servertiem = null; try {
-			  JSONObject obj = new JSONObject(response); JSONObject responseobj
-			  = obj .getJSONObject("response"); servertiem =
-			  responseobj.getString("server-time");
-			  System.out.println("servertime is:" + servertiem); JSONArray
-			  array = obj .getJSONArray("insert-queries"); System.out
-			  .println("array list length for insert is:" + array.length());
-			  JSONArray array2 = obj .getJSONArray("delete-queries");
-			  System.out .println("array2 list length for delete is:" +
-			  array2.length()); for (int jj = 0, ii = 0; jj < array2.length()
-			  && ii < array.length(); jj++, ii++) { String deletequerytemp =
-			  array2.getString(jj); String deletequery1 =
-			  deletequerytemp.replace( "'", "\""); String deletequery =
-			  deletequery1.replace( "\\\"", "'");
-			  System.out.println("delete query" + jj + " is :" + deletequery);
-			  
-			  String insertquerytemp = array.getString(ii); String insertquery1
-			  = insertquerytemp.replace( "'", "\""); String insertquery =
-			  insertquery1.replace( "\\\"", "'");
-			  System.out.println("delete query" + jj + " is :" + insertquery);
-			  try{
-			  dbforloginlogoutWritePos.execSQL(deletequery); dbforloginlogoutWritePos.execSQL(insertquery);
-			  }catch(SQLiteException qq){
-					qq.printStackTrace();
-				}
-			  System.out.println("queries executed" + ii); } } catch
-			  (JSONException e) { // TODO Auto-generated catch block
-			  e.printStackTrace(); }
-			  
-			  String select = "select *from " +
-			  DatabaseForDemo.MISCELLANEOUS_TABLE; Cursor cursor =
-					  dbforloginlogoutReadPos.rawQuery(select, null); if (cursor.getCount() > 0) {
-						  dbforloginlogoutWritePos.execSQL("update " + DatabaseForDemo.MISCELLANEOUS_TABLE +
-			  " set " + DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL + "=\"" +
-			  servertiem + "\"");  } else {  ContentValues contentValues1 = new
-			  ContentValues(); contentValues1.put(DatabaseForDemo.MISCEL_STORE,
-			  "store1"); contentValues1 .put(DatabaseForDemo.MISCEL_PAGEURL,
-			  "http://www.mydata.ws/aoneposws/webserviceoriginal/saveinfo.php"
-			  ); contentValues1.put( DatabaseForDemo.MISCEL_UPDATE_LOCAL,
-			  Parameters.currentTime()); contentValues1.put(
-			  DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL,
-			  Parameters.currentTime());
-			  dbforloginlogoutWritePos.insert(DatabaseForDemo.MISCELLANEOUS_TABLE, null,
-			  contentValues1); } dataval = ""; }
-			  }).start(); } else {
+			  boolean isnet = Parameters .isNetworkAvailable(getApplicationContext());
+				if (isnet) {
+					new Thread(new Runnable() {
+
+						@Override
+						public void run() {
+							JsonPostMethod jsonpost = new JsonPostMethod();
+							String response = jsonpost.postmethodfordirect(
+									"admin", "abcdefg",
+									DatabaseForDemo.INVOICE_TOTAL_TABLE,
+									Parameters.currentTime(),
+									Parameters.currentTime(), dataval, "");
+							System.out.println("response test is:" + response);
+							String servertiem = null;
+							try {
+								JSONObject obj = new JSONObject(response);
+								JSONObject responseobj = obj .getJSONObject("response");
+								servertiem = responseobj .getString("server-time");
+								System.out.println("servertime is:" + servertiem);
+								JSONArray array = obj .getJSONArray("insert-queries");
+								System.out .println("array list length for insert is:" + array.length());
+								JSONArray array2 = obj .getJSONArray("delete-queries");
+								System.out .println("array2 list length for delete is:" + array2.length());
+								for (int jj = 0, ii = 0; jj < array2.length() && ii < array.length(); jj++, ii++) {
+									String deletequerytemp = array2 .getString(jj);
+									String deletequery1 = deletequerytemp .replace("'", "\"");
+									String deletequery = deletequery1.replace( "\\\"", "'");
+									System.out.println("delete query" + jj + " is :" + deletequery);
+
+									String insertquerytemp = array .getString(ii);
+									String insertquery1 = insertquerytemp .replace("'", "\"");
+									String insertquery = insertquery1.replace( "\\\"", "'");
+									System.out.println("delete query" + jj + " is :" + insertquery);
+									try {
+										dbforloginlogoutWritePos .execSQL(deletequery);
+										dbforloginlogoutWritePos .execSQL(insertquery);
+									} catch (SQLiteException qq) {
+										qq.printStackTrace();
+									}
+									System.out.println("queries executed" + ii);
+								}
+							} catch (JSONException e) { // TODO Auto-generated
+														// catch block
+								e.printStackTrace();
+							}
+
+							String select = "select *from " + DatabaseForDemo.MISCELLANEOUS_TABLE;
+							Cursor cursor = dbforloginlogoutReadPos.rawQuery( select, null);
+							if (cursor.getCount() > 0) {
+								dbforloginlogoutWritePos
+										.execSQL("update "
+												+ DatabaseForDemo.MISCELLANEOUS_TABLE
+												+ " set "
+												+ DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL
+												+ "=\"" + servertiem + "\"");
+							} else {
+								ContentValues contentValues1 = new ContentValues();
+								contentValues1.put( DatabaseForDemo.MISCEL_STORE, "store1");
+								contentValues1 .put(DatabaseForDemo.MISCEL_PAGEURL, "http://www.mydata.ws/aoneposws/webserviceoriginal/saveinfo.php");
+								contentValues1.put( DatabaseForDemo.MISCEL_UPDATE_LOCAL, Parameters.currentTime());
+								contentValues1 .put(DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL, Parameters.currentTime());
+								dbforloginlogoutWritePos.insert( DatabaseForDemo.MISCELLANEOUS_TABLE, null, contentValues1);
+							}
+							dataval = "";
+						}
+					}).start();
+				} else {
 			 
 
 			ContentValues contentValues1 = new ContentValues();
 			contentValues1.put(DatabaseForDemo.QUERY_TYPE, "insert");
-			contentValues1.put(DatabaseForDemo.PENDING_USER_ID,
-					Parameters.userid);
+			contentValues1.put(DatabaseForDemo.PENDING_USER_ID, Parameters.userid);
 			contentValues1.put(DatabaseForDemo.PAGE_URL, "saveinfo.php");
-			contentValues1.put(DatabaseForDemo.TABLE_NAME_PENDING,
-					DatabaseForDemo.INVOICE_TOTAL_TABLE);
-			contentValues1.put(DatabaseForDemo.CURRENT_TIME_PENDING,
-					Parameters.currentTime());
+			contentValues1.put(DatabaseForDemo.TABLE_NAME_PENDING, DatabaseForDemo.INVOICE_TOTAL_TABLE);
+			contentValues1.put(DatabaseForDemo.CURRENT_TIME_PENDING, Parameters.currentTime());
 			contentValues1.put(DatabaseForDemo.PARAMETERS, dataval);
-			dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE, null,
-					contentValues1);
+			dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE, null, contentValues1);
 			dataval = "";
 			 }
 		}
@@ -5830,18 +5678,15 @@ try{
 			totalcredit = 0.0;
 			totalaccount = 0.0;
 			Boolean boolvalue=true;
-			String selectQuery = "SELECT  * FROM "
-					+ DatabaseForDemo.SPLIT_INVOICE_TABLE+" where "+DatabaseForDemo.SPLIT_INVOICE_ID+"='"+invoice_id+"'"; 
+			String selectQuery = "SELECT  * FROM " + DatabaseForDemo.SPLIT_INVOICE_TABLE+" where "+DatabaseForDemo.SPLIT_INVOICE_ID+"='"+invoice_id+"'";
 			Cursor mCursorade1 = dbforloginlogoutReadPos.rawQuery(selectQuery, null);
 			if (mCursorade1 != null) {
 				if (mCursorade1.getCount() > 0) {
 					if (mCursorade1.moveToFirst()) {
 						do {
 							boolvalue=false;
-							String paymenttype=mCursorade1.getString(mCursorade1
-									.getColumnIndex(DatabaseForDemo.SPLIT_PAYMENT_TYPE));
-							String paytype=mCursorade1.getString(mCursorade1
-									.getColumnIndex(DatabaseForDemo.SPLIT_AMOUNT));
+							String paymenttype=mCursorade1.getString(mCursorade1 .getColumnIndex(DatabaseForDemo.SPLIT_PAYMENT_TYPE));
+							String paytype=mCursorade1.getString(mCursorade1 .getColumnIndex(DatabaseForDemo.SPLIT_AMOUNT));
 							Double valuee=Double.valueOf(paytype);
 							if(paymenttype.equals("Cash")){
 								totalcash = totalcash+valuee;
@@ -5859,8 +5704,7 @@ try{
 				}
 			
 			if(boolvalue){
-				String selectQuery12 = "SELECT  * FROM "
-						+ DatabaseForDemo.INVOICE_TOTAL_TABLE+" where "+DatabaseForDemo.INVOICE_ID+"='"+invoice_id+"'"; 
+				String selectQuery12 = "SELECT  * FROM " + DatabaseForDemo.INVOICE_TOTAL_TABLE+" where "+DatabaseForDemo.INVOICE_ID+"='"+invoice_id+"'";
 				Cursor mCursormang = dbforloginlogoutReadPos.rawQuery(selectQuery12, null);
 				if (mCursormang != null) {
 					if (mCursormang.getCount() > 0) {
@@ -5964,8 +5808,7 @@ try{
 		try{
 		boolean forprintid = false;
 		ArrayList<String> printVal = new ArrayList<String>();
-			String selectQuery = "SELECT  * FROM "
-					+ DatabaseForDemo.PRINTER_TABLE; // + " where "+
+			String selectQuery = "SELECT  * FROM " + DatabaseForDemo.PRINTER_TABLE; // + " where "+
 														// DatabaseForDemo.PRINTER_ID
 														// + "='" + printerid +
 														// "'";
@@ -5980,9 +5823,7 @@ try{
 					if (mCursordwe2kop1.moveToFirst()) {
 						Log.e("Rama", "parddhu3");
 						do {
-							if (printerid
-									.equals(mCursordwe2kop1.getString(mCursordwe2kop1
-											.getColumnIndex(DatabaseForDemo.PRINTER_ID)))) {
+							if (printerid .equals(mCursordwe2kop1.getString(mCursordwe2kop1 .getColumnIndex(DatabaseForDemo.PRINTER_ID)))) {
 								for (int i = 0; i < count; i++) {
 									String value = mCursordwe2kop1.getString(i);
 									printVal.add(value);
@@ -6003,8 +5844,7 @@ try{
 						}
 					}
 				} else {
-					Toast.makeText(getApplicationContext(),
-							"Set The Printer Settings", 1000).show();
+					Toast.makeText(getApplicationContext(), "Set The Printer Settings", 1000).show();
 				}
 			}
 			mCursordwe2kop1.close();
@@ -6055,8 +5895,7 @@ try{
 				// create builder
 				method = "Builder";
 				try {
-					builder = new Builder("" + printVal.get(12), 0,
-							getApplicationContext());
+					builder = new Builder("" + printVal.get(12), 0, getApplicationContext());
 				} catch (Exception e) {
 
 				}
@@ -6111,23 +5950,18 @@ try{
 					try {
 						Log.e("Rama", "parddhu11");
 						printer = new Print(PosMainActivity.this);
-						printer.openPrinter(deviceType, "" + printVal.get(13),
-								Print.TRUE, 1000);
+						printer.openPrinter(deviceType, "" + printVal.get(13), Print.TRUE, 1000);
 
 					} catch (Exception e) {
 						Log.e("Rama", "parddhu12");
-						ShowMsg.showException(e, "openPrinter",
-								PosMainActivity.this);
+						ShowMsg.showException(e, "openPrinter", PosMainActivity.this);
 						return;
 					}
-					printer.sendData(builder, Constants.SEND_TIMEOUT, status,
-							battery);
+					printer.sendData(builder, Constants.SEND_TIMEOUT, status, battery);
 					printer.closePrinter();
 					Log.e("Rama", "parddhu13");
 				} catch (EposException e) {
-					ShowMsg.showStatus(e.getErrorStatus(),
-							e.getPrinterStatus(), e.getBatteryStatus(),
-							PosMainActivity.this);
+					ShowMsg.showStatus(e.getErrorStatus(), e.getPrinterStatus(), e.getBatteryStatus(), PosMainActivity.this);
 					printer.closePrinter();
 				}
 			} catch (Exception e) {
@@ -6204,11 +6038,22 @@ try{
 			}
 			Parameters.mSearchItemStatus = false;
 		}
+		
+
+		if(myUniMagReader!=null)
+		{
+			if(isSaveLogOptionChecked==true)
+				myUniMagReader.setSaveLogEnable(true);
+			else
+				myUniMagReader.setSaveLogEnable(false);
+		}
+		if(itemStartSC!=null)
+			itemStartSC.setEnabled(true); 
+		isWaitingForCommandResult=false;
 	}
 
 	@SuppressWarnings("deprecation")
-	public void showAlertDialog(Context context, String title, String message,
-			Boolean status) {
+	public void showAlertDialog(Context context, String title, String message, Boolean status) {
 		AlertDialog alertDialog = new AlertDialog.Builder(context).create();
 		alertDialog.setTitle(title);
 		alertDialog.setMessage(message);
@@ -6222,8 +6067,7 @@ try{
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void showAlertDialogforcredit(Context context, String title, String message,
-			Boolean status) {
+	public void showAlertDialogforcredit(Context context, String title, String message, Boolean status) {
 		AlertDialog alertDialog = new AlertDialog.Builder(context).create();
 		alertDialog.setTitle(title);
 		alertDialog.setMessage(message);
@@ -6257,8 +6101,7 @@ try{
 	}
 
 	private void savePreferences(String key, String value) {
-		SharedPreferences sharedPreferences = PreferenceManager
-				.getDefaultSharedPreferences(this);
+		SharedPreferences sharedPreferences = PreferenceManager .getDefaultSharedPreferences(this);
 		Editor editor = sharedPreferences.edit();
 		editor.putString(key, value);
 		editor.commit();
@@ -6291,8 +6134,7 @@ try{
 		invoiceidexist = "";
 		holdidexist = "";
 		
-		alertDialogDismiss = new AlertDialog.Builder(PosMainActivity.this,
-				android.R.style.Theme_Translucent_NoTitleBar).create();
+		alertDialogDismiss = new AlertDialog.Builder(PosMainActivity.this,android.R.style.Theme_Translucent_NoTitleBar).create();
 		LayoutInflater mInflater2 = LayoutInflater.from(PosMainActivity.this);
 		View layout2 = mInflater2.inflate(R.layout.view_details, null);
 		final ListView list = (ListView) layout2.findViewById(R.id.listView1);
@@ -6300,50 +6142,36 @@ try{
 		head.setText("Hold_Details");
 		
 
-		String selectQuery = "SELECT  * FROM "
-				+ DatabaseForDemo.INVOICE_TOTAL_TABLE + " where "
-				+ DatabaseForDemo.INVOICE_STATUS + "=\"hold\"";
+		String selectQuery = "SELECT  * FROM " + DatabaseForDemo.INVOICE_TOTAL_TABLE + " where " + DatabaseForDemo.INVOICE_STATUS + "=\"hold\"";
 
 		Cursor mCursordgsdfg = dbforloginlogoutReadPos.rawQuery(selectQuery, null);
 		if (mCursordgsdfg != null) {
 			if (mCursordgsdfg.moveToFirst()) {
 				System.out.println(mCursordgsdfg.getCount() + "hariiiiiiiiii");
 				do {
-					if (mCursordgsdfg.isNull(mCursordgsdfg
-							.getColumnIndex(DatabaseForDemo.INVOICE_HOLD_ID))) {
+					if (mCursordgsdfg.isNull(mCursordgsdfg .getColumnIndex(DatabaseForDemo.INVOICE_HOLD_ID))) {
 						hold_invoice_id.add("");
 					} else {
-						String hold = mCursordgsdfg
-								.getString(mCursordgsdfg
-										.getColumnIndex(DatabaseForDemo.INVOICE_HOLD_ID));
+						String hold = mCursordgsdfg .getString(mCursordgsdfg .getColumnIndex(DatabaseForDemo.INVOICE_HOLD_ID));
 						hold_invoice_id.add(hold);
 					}
-					String invoiceid = mCursordgsdfg.getString(mCursordgsdfg
-							.getColumnIndex(DatabaseForDemo.INVOICE_ID));
+					String invoiceid = mCursordgsdfg.getString(mCursordgsdfg .getColumnIndex(DatabaseForDemo.INVOICE_ID));
 					invoice_id.add(invoiceid);
-					String dateandtime = mCursordgsdfg.getString(mCursordgsdfg
-							.getColumnIndex(DatabaseForDemo.CREATED_DATE));
+					String dateandtime = mCursordgsdfg.getString(mCursordgsdfg .getColumnIndex(DatabaseForDemo.CREATED_DATE));
 					create_date.add(dateandtime);
-					if (mCursordgsdfg.isNull(mCursordgsdfg
-							.getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE))) {
+					if (mCursordgsdfg.isNull(mCursordgsdfg .getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE))) {
 						employee_invoice.add("");
 					} else {
-						String ip = mCursordgsdfg
-								.getString(mCursordgsdfg
-										.getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE));
+						String ip = mCursordgsdfg .getString(mCursordgsdfg .getColumnIndex(DatabaseForDemo.INVOICE_EMPLOYEE));
 						employee_invoice.add(ip);
 					}
-					if (mCursordgsdfg.isNull(mCursordgsdfg
-							.getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER))) {
+					if (mCursordgsdfg.isNull(mCursordgsdfg .getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER))) {
 						customer_invoice.add("");
 					} else {
-						String name = mCursordgsdfg
-								.getString(mCursordgsdfg
-										.getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER));
+						String name = mCursordgsdfg .getString(mCursordgsdfg .getColumnIndex(DatabaseForDemo.INVOICE_CUSTOMER));
 						customer_invoice.add(name);
 					}
-					String ip1 = mCursordgsdfg.getString(mCursordgsdfg
-							.getColumnIndex(DatabaseForDemo.INVOICE_TOTAL_AMT));
+					String ip1 = mCursordgsdfg.getString(mCursordgsdfg .getColumnIndex(DatabaseForDemo.INVOICE_TOTAL_AMT));
 					invoice_total.add(ip1);
 
 				} while (mCursordgsdfg.moveToNext());
@@ -6351,33 +6179,25 @@ try{
 		}
 		mCursordgsdfg.close();
 		list.setItemsCanFocus(false);
-		ImageAdapterForHold adapter = new ImageAdapterForHold(
-				PosMainActivity.this, hold_invoice_id, invoice_id, create_date,
-				employee_invoice, customer_invoice, invoice_total);
+		ImageAdapterForHold adapter = new ImageAdapterForHold( PosMainActivity.this, hold_invoice_id, invoice_id, create_date, employee_invoice, customer_invoice, invoice_total);
 		adapter.setListener(PosMainActivity.this);
 		list.setAdapter(adapter);
 		list.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
 				// TODO Auto-generated method stub
 				mSubTotal = 0;
 				mTaxTotal = 0;
 				invoiceidexist = invoice_id.get(arg2);
 				holdidexist = hold_invoice_id.get(arg2);
-				String selectQuery = "SELECT  * FROM "
-						+ DatabaseForDemo.INVOICE_ITEMS_TABLE + " where "
-						+ DatabaseForDemo.INVOICE_ID + "=\""
-						+ invoice_id.get(arg2) + "\"";
+				String selectQuery = "SELECT  * FROM "+ DatabaseForDemo.INVOICE_ITEMS_TABLE + " where "+ DatabaseForDemo.INVOICE_ID + "=\""+ invoice_id.get(arg2) + "\"";
 
 				Cursor mCursorsfasdsp = dbforloginlogoutReadPos.rawQuery(selectQuery, null);
-				System.out.println("cusor countis jariskflskjfjsf:"
-						+ mCursorsfasdsp.getCount());
+				System.out.println("cusor countis jariskflskjfjsf:"+ mCursorsfasdsp.getCount());
 				if (mCursorsfasdsp != null) {
 					if (mCursorsfasdsp.moveToFirst()) {
 						do {
-							String name = mCursorsfasdsp.getString(mCursorsfasdsp
-									.getColumnIndex(DatabaseForDemo.INVOICE_ITEM_ID));
+							String name = mCursorsfasdsp.getString(mCursorsfasdsp.getColumnIndex(DatabaseForDemo.INVOICE_ITEM_ID));
 							getIvoiceItemDetails(name, invoice_id.get(arg2));
 						} while (mCursorsfasdsp.moveToNext());
 						fetchOnHoldButton.setTag("0");
@@ -6398,8 +6218,7 @@ try{
 		List<Inventory> itemList = sqq.getSelectInvoiceItemList(itemNo,
 				invoiceid);
 		if (itemList == null) {
-			Toast.makeText(getApplicationContext(), "Wrong Barcode", 1000)
-					.show();
+			Toast.makeText(getApplicationContext(), "Wrong Barcode", 1000) .show();
 		}
 		if (mItemList == null) {
 			mItemList = new ArrayList<Inventory>();
@@ -6416,19 +6235,16 @@ try{
 					qty = Double.valueOf(qtyStr);
 				}
 
-				mSubTotal += ((qty) * Double.valueOf(mItemList.get(i)
-						.getPriceYouChange()));
+				mSubTotal += ((qty) * Double.valueOf(mItemList.get(i).getPriceYouChange()));
 
 				String taxStr = mItemList.get(i).getInventoryTaxTotal();
 				if (taxStr != null && taxStr.length() > 0) {
-					mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i)
-							.getInventoryTaxTotal()));
+					mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i).getInventoryTaxTotal()));
 				}
 			}
 
 			if (mAdapter == null) {
-				mAdapter = new InventoryListAdapter(PosMainActivity.this,
-						mItemList);
+				mAdapter = new InventoryListAdapter(PosMainActivity.this,mItemList);
 				mAdapter.setListener(PosMainActivity.this);
 				itemlistView.setAdapter(mAdapter);
 
@@ -6475,8 +6291,7 @@ try{
 				}
 				if (sentValue >= remainingamount) {
 					change =sentValue- remainingamount;
-					change = (double) Math.round(change * 100)
-							/ (double) 100;
+					change = (double) Math.round(change * 100) / (double) 100;
 					directpayment = true;
 					alertDialogtop.dismiss();
 					/* HashMap<String, String> map = new HashMap<String, String>();
@@ -6510,20 +6325,14 @@ try{
 					showReciptPopup();
 				} else {
 					remainingamount = remainingamount - sentValue;
-					remainingamount = (int) Math
-							.round(remainingamount * 100)
-							/ (double) 100;
-					  EditText total = (EditText) layouttop
-								.findViewById(R.id.totalsave);
-							  total.setText(""+remainingamount);
-						 EditText remaining = (EditText) layouttop
-								.findViewById(R.id.remaining);
-						 remaining.setText(""+remainingamount);
+					remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
+					  EditText total = (EditText) layouttop .findViewById(R.id.totalsave);
+							   total.setText(""+remainingamount);
+					  EditText remaining = (EditText) layouttop .findViewById(R.id.remaining);
+						       remaining.setText(""+remainingamount);
 					total.setText("$" + remainingamount);
-					cashpaymentAmount = Math
-							.ceil(remainingamount);
-					 Button bigbutton = (Button) layouttop
-							.findViewById(R.id.roundvalue);
+					cashpaymentAmount = Math .ceil(remainingamount);
+					Button bigbutton = (Button) layouttop .findViewById(R.id.roundvalue);
 					bigbutton.setText("" + cashpaymentAmount);
 					directpayment = false;
 					changeforcredit = 0.0;
@@ -6758,12 +6567,121 @@ try{
 }else if (resultCode == 123456) {
 	System.out.println("payment is not done in 6");
 }*/
-	}
+		
 
+
+        if (resultCode == Activity.RESULT_OK) {
+
+        	String strTmpFileName = data.getStringExtra(FileDialog.RESULT_PATH);;
+            if (requestCode == REQUEST_GET_XML_FILE) {
+	    		
+	    		if(!isFileExist(strTmpFileName))
+	    		{ 
+	    			headerTextView.setText("Warning");
+	    			textAreaTop.setText("Please copy the XML file 'IDT_uniMagCfg.xml' into root path of SD card.");
+	    			textAreaBottom.setText("");
+	    			return  ;
+	    		}
+	    		if (!strTmpFileName.endsWith(".xml")){
+	    			headerTextView.setText("Warning");
+	    			textAreaTop.setText("Please select a file with .xml file extension.");
+	    			textAreaBottom.setText("");
+	    			return  ;
+	    		}
+	    		
+	    		/////////////////////////////////////////////////////////////////////////////////
+	    		// loadingConfigurationXMLFile() method may connect to server to download xml file.
+	    		// Network operation is prohibited in the UI Thread if target API is 11 or above.
+	    		// If target API is 11 or above, please use AsyncTask to avoid errors.
+	    	    myUniMagReader.setXMLFileNameWithPath(strTmpFileName);
+	    	    if (myUniMagReader.loadingConfigurationXMLFile(false)) {
+		    	    headerTextView.setText("Command Info");
+		    	    textAreaTop.setText("Reload XML file succeeded.");
+		    	    textAreaBottom.setText("");
+	    	    }
+	    	    else {
+	    			headerTextView.setText("Warning");
+	    			textAreaTop.setText("Please select a correct file and try again.");
+	    			textAreaBottom.setText("");
+	    	    }
+            } 
+            else if (requestCode == REQUEST_GET_BIN_FILE)
+            {
+ 	    		if(!isFileExist(strTmpFileName))
+	    		{ 
+ 	    			headerTextView.setText("Warning");
+ 	    			textAreaTop.setText("Please copy the BIN file into the SD card root path.");
+ 	    			textAreaBottom.setText("");
+	    			return  ;
+	    		} 
+				//set BIN file
+		        if(true==firmwareUpdateTool.setFirmwareBINFile(strTmpFileName))
+		        {
+		        	headerTextView.setText("Command Info");
+		        	textAreaTop.setText("Set the BIN file succeeded.");
+		        	textAreaBottom.setText("");
+	    		}
+		        else
+		        {
+		        	headerTextView.setText("Command Info");
+		        	textAreaTop.setText("Failed to set the BIN file, please check the file format.");
+		        	textAreaBottom.setText("");
+		        }
+            }
+            else if(requestCode == REQUEST_GET_ENCRYPTED_BIN_FILE)
+            {
+
+ 	    		if(!isFileExist(strTmpFileName))
+	    		{ 
+ 	    			headerTextView.setText("Warning");
+ 	    			textAreaTop.setText("Please copy the BIN file into the SD card root path.");
+ 	    			textAreaBottom.setText("");
+	    			return  ;
+	    		} 
+				//set BIN file
+		        if(true==firmwareUpdateTool.setFirmwareEncryptedBINFile(strTmpFileName))
+		        {
+		        	headerTextView.setText("Command Info");
+		        	textAreaTop.setText("Set the Encrypted BIN file succeeded.");
+		        	textAreaBottom.setText("");
+	    		}
+		        else
+		        {
+		        	headerTextView.setText("Command Info");
+		        	textAreaTop.setText("Failed to set the Encrypted BIN file, please check the file format.");
+		        	textAreaBottom.setText("");
+		        }
+            }
+        }
+        
+        
+        if (requestCode == 1000 && resultCode == RESULT_OK && data!=null) 
+		{
+			String strArray = data.getStringExtra("result");
+			System.out.println("resulttttttttttttttt"+strArray);
+			
+			if(strArray.equalsIgnoreCase("Success")){
+				System.out.println("Clear_all_display result");
+				Clear_all_display();
+			}else {
+				Toast.makeText(PosMainActivity.this, "Transation fail", Toast.LENGTH_LONG).show();
+			}
+		}
+
+	}
+	
 	@Override
 	public void onDestroy() {
 		stopService(new Intent(this, PayPalService.class));
 		super.onDestroy();
+
+	//	myUniMagReader.release();
+		profileDatabase.closeDB();
+		if (isExitButtonPressed)
+		{
+			android.os.Process.killProcess(android.os.Process.myPid());
+		}
+    
 	}
 
 	public interface OnHoldButtonClicked {
@@ -6792,19 +6710,13 @@ try{
 		if (mCudfhdfrsor != null) {
 			if (mCudfhdfrsor.moveToFirst()) {
 				do {
-					String name = mCudfhdfrsor
-							.getString(mCudfhdfrsor
-									.getColumnIndex(DatabaseForDemo.COMMANDS_ITEM_NAME));
+					String name = mCudfhdfrsor .getString(mCudfhdfrsor .getColumnIndex(DatabaseForDemo.COMMANDS_ITEM_NAME));
 					print_itemname.add(name);
-					name = mCudfhdfrsor
-							.getString(mCudfhdfrsor
-									.getColumnIndex(DatabaseForDemo.COMMANDS_PRINTER_NAME));
+					name = mCudfhdfrsor .getString(mCudfhdfrsor .getColumnIndex(DatabaseForDemo.COMMANDS_PRINTER_NAME));
 					print_printername.add(name);
-					name = mCudfhdfrsor.getString(mCudfhdfrsor
-							.getColumnIndex(DatabaseForDemo.COMMANDS_TIME));
+					name = mCudfhdfrsor.getString(mCudfhdfrsor .getColumnIndex(DatabaseForDemo.COMMANDS_TIME));
 					print_time.add(name);
-					name = mCudfhdfrsor.getString(mCudfhdfrsor
-							.getColumnIndex(DatabaseForDemo.COMMANDS_MESSAGE));
+					name = mCudfhdfrsor.getString(mCudfhdfrsor .getColumnIndex(DatabaseForDemo.COMMANDS_MESSAGE));
 					print_message.add(name);
 
 				} while (mCudfhdfrsor.moveToNext());
@@ -6831,15 +6743,11 @@ try{
 			grandTotalview.setText(String.valueOf("$" + mSubTotal));
 		}
 
-		final AlertDialog alertDialog = new AlertDialog.Builder(
-				PosMainActivity.this,
-				android.R.style.Theme_Translucent_NoTitleBar).create();
+		final AlertDialog alertDialog = new AlertDialog.Builder( PosMainActivity.this, android.R.style.Theme_Translucent_NoTitleBar).create();
 		LayoutInflater mInflater2 = LayoutInflater.from(PosMainActivity.this);
-		final View layoutforprint = mInflater2.inflate(R.layout.send_print,
-				null);
+		final View layoutforprint = mInflater2.inflate(R.layout.send_print, null);
 
-		final LinearLayout ll4rd = (LinearLayout) layoutforprint
-				.findViewById(R.id.listView1);
+		final LinearLayout ll4rd = (LinearLayout) layoutforprint .findViewById(R.id.listView1);
 		Button save = (Button) layoutforprint.findViewById(R.id.save);
 		Button cancel = (Button) layoutforprint.findViewById(R.id.cancel);
 
@@ -6847,26 +6755,22 @@ try{
 		for (int count = 0; count < print_itemname.size(); count++) {
 			final LinearLayout roww = new LinearLayout(PosMainActivity.this);
 			roww.setOrientation(LinearLayout.HORIZONTAL);
-			roww.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-					LayoutParams.WRAP_CONTENT));
+			roww.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			roww.setPadding(1, 1, 1, 1);
 			fetchTextView = new TextView(PosMainActivity.this);
 			fetchTextView.setText(print_itemname.get(count));
 
 			fetchTextView.setId(count);
-			fetchTextView.setLayoutParams(new LinearLayout.LayoutParams(200,
-					LayoutParams.WRAP_CONTENT));
+			fetchTextView.setLayoutParams(new LinearLayout.LayoutParams(200, LayoutParams.WRAP_CONTENT));
 			roww.addView(fetchTextView);
 
 			fetchprinter = new Spinner(PosMainActivity.this);
 			fetchprinter.setId(100 + count);
-			fetchprinter
-					.setLayoutParams(new LinearLayout.LayoutParams(150, 45));
+			fetchprinter .setLayoutParams(new LinearLayout.LayoutParams(150, 45));
 			roww.addView(fetchprinter);
 
 			fetchMinutes = new EditText(PosMainActivity.this);
-			fetchMinutes.setLayoutParams(new LinearLayout.LayoutParams(100,
-					LayoutParams.WRAP_CONTENT));
+			fetchMinutes.setLayoutParams(new LinearLayout.LayoutParams(100, LayoutParams.WRAP_CONTENT));
 			fetchMinutes.setTextSize(14);
 			fetchMinutes.setId(1000 + count);
 			fetchMinutes.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -6874,8 +6778,7 @@ try{
 			roww.addView(fetchMinutes);
 
 			fetchEdittext = new EditText(PosMainActivity.this);
-			fetchEdittext.setLayoutParams(new LinearLayout.LayoutParams(500,
-					LayoutParams.WRAP_CONTENT));
+			fetchEdittext.setLayoutParams(new LinearLayout.LayoutParams(500, LayoutParams.WRAP_CONTENT));
 			fetchEdittext.setText(print_message.get(count));
 			fetchEdittext.setTextSize(14);
 			fetchEdittext.setId(10000 + count);
@@ -6892,14 +6795,10 @@ try{
 				if (cursdfhdfhor != null) {
 					if (cursdfhdfhor.moveToFirst()) {
 						do {
-							if (cursdfhdfhor
-									.isNull(cursdfhdfhor
-											.getColumnIndex(DatabaseForDemo.PRINTER_ID))) {
+							if (cursdfhdfhor .isNull(cursdfhdfhor .getColumnIndex(DatabaseForDemo.PRINTER_ID))) {
 
 							} else {
-								String catid = cursdfhdfhor
-										.getString(cursdfhdfhor
-												.getColumnIndex(DatabaseForDemo.PRINTER_ID));
+								String catid = cursdfhdfhor .getString(cursdfhdfhor .getColumnIndex(DatabaseForDemo.PRINTER_ID));
 								printerlistval.add(catid);
 							}
 						} while (cursdfhdfhor.moveToNext());
@@ -6908,13 +6807,10 @@ try{
 			}
 			cursdfhdfhor.close();
 
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-					PosMainActivity.this, android.R.layout.simple_list_item_1,
-					printerlistval);
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>( PosMainActivity.this, android.R.layout.simple_list_item_1, printerlistval);
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
 			fetchprinter.setAdapter(adapter);
-			fetchprinter.setSelection(printerlistval.indexOf(print_printername
-					.get(count)));
+			fetchprinter.setSelection(printerlistval.indexOf(print_printername .get(count)));
 			long current = System.currentTimeMillis();
 			current = Long.valueOf(print_time.get(count)) - current;
 			current = current / 60000;
@@ -6931,42 +6827,20 @@ try{
 				alertDialog.dismiss();
 				
 				String here = DatabaseForDemo.COMMANDS_HOLDID + "=?";
-				dbforloginlogoutWritePos.delete(DatabaseForDemo.COMMANDS_PRINTER_TABLE,
-						here, new String[] { stringhold });
+				dbforloginlogoutWritePos.delete(DatabaseForDemo.COMMANDS_PRINTER_TABLE, here, new String[] { stringhold });
 				mAdapter.notifyDataSetChanged();
 				for (int cccc = 0; cccc < print_itemname.size(); cccc++) {
 					long now = System.currentTimeMillis();
-					now = now
-							+ (Long.valueOf(((EditText) layoutforprint
-									.findViewById(1000 + cccc)).getText()
-									.toString().trim()) * 60 * 1000);
+					now = now + (Long.valueOf(((EditText) layoutforprint .findViewById(1000 + cccc)).getText() .toString().trim()) * 60 * 1000);
 
 					ContentValues contentValues = new ContentValues();
-					contentValues.put(
-							DatabaseForDemo.COMMANDS_ITEM_NAME,
-							""
-									+ ((TextView) layoutforprint
-											.findViewById(cccc)).getText());
-					contentValues.put(
-							DatabaseForDemo.COMMANDS_PRINTER_NAME,
-							""
-									+ ((Spinner) layoutforprint
-											.findViewById(100 + cccc))
-											.getSelectedItem());
+					contentValues.put( DatabaseForDemo.COMMANDS_ITEM_NAME, "" + ((TextView) layoutforprint .findViewById(cccc)).getText());
+					contentValues.put( DatabaseForDemo.COMMANDS_PRINTER_NAME, "" + ((Spinner) layoutforprint .findViewById(100 + cccc)) .getSelectedItem());
 					contentValues.put(DatabaseForDemo.COMMANDS_TIME, "" + now);
-					contentValues.put(
-							DatabaseForDemo.COMMANDS_MESSAGE,
-							""
-									+ ((EditText) layoutforprint
-											.findViewById(10000 + cccc))
-											.getText());
-					contentValues.put(DatabaseForDemo.COMMANDS_HOLDID, ""
-							+ stringhold);
-					contentValues.put(DatabaseForDemo.UNIQUE_ID, ""
-							+ Parameters.randomValue());
-					dbforloginlogoutWritePos.insert(
-							DatabaseForDemo.COMMANDS_PRINTER_TABLE, null,
-							contentValues);
+					contentValues.put( DatabaseForDemo.COMMANDS_MESSAGE, "" + ((EditText) layoutforprint .findViewById(10000 + cccc)) .getText());
+					contentValues.put(DatabaseForDemo.COMMANDS_HOLDID, "" + stringhold);
+					contentValues.put(DatabaseForDemo.UNIQUE_ID, "" + Parameters.randomValue());
+					dbforloginlogoutWritePos.insert( DatabaseForDemo.COMMANDS_PRINTER_TABLE, null, contentValues);
 					contentValues.clear();
 				}
 				mItemList.clear();
@@ -7049,8 +6923,7 @@ try{
 
 	void deleteInvoice(String stringhold) {
 		String where = DatabaseForDemo.COMMANDS_HOLDID + "=?";
-		dbforloginlogoutWritePos.delete(DatabaseForDemo.COMMANDS_PRINTER_TABLE, where,
-				new String[] { stringhold });
+		dbforloginlogoutWritePos.delete(DatabaseForDemo.COMMANDS_PRINTER_TABLE, where, new String[] { stringhold });
 		String selectQuery = "SELECT  * FROM "
 				+ DatabaseForDemo.INVOICE_TOTAL_TABLE + " where "
 				+ DatabaseForDemo.INVOICE_HOLD_ID + "=\"" + stringhold + "\"";
@@ -7059,20 +6932,17 @@ try{
 		if (mCurqkldeovsor != null) {
 			if (mCurqkldeovsor.moveToFirst()) {
 				do {
-					name = mCurqkldeovsor.getString(mCurqkldeovsor
-							.getColumnIndex(DatabaseForDemo.INVOICE_ID));
+					name = mCurqkldeovsor.getString(mCurqkldeovsor .getColumnIndex(DatabaseForDemo.INVOICE_ID));
 
 				} while (mCurqkldeovsor.moveToNext());
 			}
 		}
 		mCurqkldeovsor.close();
 		String bhere = DatabaseForDemo.INVOICE_ID + "=?";
-		dbforloginlogoutWritePos.delete(DatabaseForDemo.INVOICE_ITEMS_TABLE, bhere,
-				new String[] { name });
+		dbforloginlogoutWritePos.delete(DatabaseForDemo.INVOICE_ITEMS_TABLE, bhere, new String[] { name });
 
 		String here = DatabaseForDemo.INVOICE_HOLD_ID + "=?";
-		dbforloginlogoutWritePos.delete(DatabaseForDemo.INVOICE_TOTAL_TABLE, here,
-				new String[] { stringhold });
+		dbforloginlogoutWritePos.delete(DatabaseForDemo.INVOICE_TOTAL_TABLE, here, new String[] { stringhold });
 	}
 
 	
@@ -7092,14 +6962,10 @@ try{
 				if (cufdfdhrsor1 != null) {
 					if (cufdfdhrsor1.moveToFirst()) {
 						do {
-							if (cufdfdhrsor1
-									.isNull(cufdfdhrsor1
-											.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT))) {
+							if (cufdfdhrsor1 .isNull(cufdfdhrsor1 .getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT))) {
 
 							} else {
-								deptid = cufdfdhrsor1
-										.getString(cufdfdhrsor1
-												.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT));
+								deptid = cufdfdhrsor1 .getString(cufdfdhrsor1 .getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT));
 							}
 						} while (cufdfdhrsor1.moveToNext());
 					}
@@ -7115,14 +6981,10 @@ try{
 				if (mCurseksdhor3 != null) {
 					if (mCurseksdhor3.moveToFirst()) {
 						do {
-							if (mCurseksdhor3
-									.isNull(mCurseksdhor3
-											.getColumnIndex(DatabaseForDemo.PrinterForDept))) {
+							if (mCurseksdhor3 .isNull(mCurseksdhor3 .getColumnIndex(DatabaseForDemo.PrinterForDept))) {
 								printerdata = "None";
 							} else {
-								printerdata = mCurseksdhor3
-										.getString(mCurseksdhor3
-												.getColumnIndex(DatabaseForDemo.PrinterForDept));
+								printerdata = mCurseksdhor3 .getString(mCurseksdhor3 .getColumnIndex(DatabaseForDemo.PrinterForDept));
 							}
 						} while (mCurseksdhor3.moveToNext());
 					}
@@ -7131,8 +6993,7 @@ try{
 			mCurseksdhor3.close();
 			if (!printerdata.equals("None")) {
 				printTimer = true;
-				Log.e("", printTimer + "      printer data val is:  "
-						+ printerdata);
+				Log.e("", printTimer + "      printer data val is:  " + printerdata);
 				break;
 			}
 			Log.e("", printTimer + "      printer data val is:  " + printerdata);
@@ -7140,8 +7001,7 @@ try{
 		return printTimer;
 	}
 
-	void getItemDetailsAndQuantitiy(boolean isUpdate, String itemNo,
-			String mQuantity) {
+	void getItemDetailsAndQuantitiy(boolean isUpdate, String itemNo, String mQuantity) {
 		try{
 		Log.v("" + itemNo, "" + mQuantity);
 
@@ -7157,8 +7017,7 @@ try{
 			Log.v("hai", "srat  not");
 			if (itemList.size() <= 0) {
 				Log.v("hai", "srat  tata");
-				Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000)
-						.show();
+				Toast.makeText(PosMainActivity.this, "Wrong Barcode", 2000) .show();
 			} else {
 				Log.v("hai", "srat  " + itemList.size());
 				mEnterItemInventory = itemList.get(0);
@@ -7191,19 +7050,16 @@ try{
 				if (qtyStr != null && qtyStr.length() > 0) {
 					qty = Double.valueOf(qtyStr);
 				}
-				mSubTotal += ((qty) * Double.valueOf(mItemList.get(i)
-						.getPriceYouChange()));
+				mSubTotal += ((qty) * Double.valueOf(mItemList.get(i) .getPriceYouChange()));
 
 				String taxStr = mItemList.get(i).getInventoryTaxTotal();
 				if (taxStr != null && taxStr.length() > 0) {
-					mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i)
-							.getInventoryTaxTotal()));
+					mTaxTotal += ((qty) * Double.valueOf(mItemList.get(i) .getInventoryTaxTotal()));
 				}
 			}
 
 			if (mAdapter == null) {
-				mAdapter = new InventoryListAdapter(PosMainActivity.this,
-						mItemList);
+				mAdapter = new InventoryListAdapter(PosMainActivity.this, mItemList);
 				mAdapter.setListener(PosMainActivity.this);
 				itemlistView.setAdapter(mAdapter);
 			} else {
@@ -7242,9 +7098,7 @@ try{
 		if (mCubdfhdfgqrsor != null) {
 			if (mCubdfhdfgqrsor.moveToFirst()) {
 				do {
-					String catid = mCubdfhdfgqrsor
-							.getString(mCubdfhdfgqrsor
-									.getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_CHANGE));
+					String catid = mCubdfhdfgqrsor .getString(mCubdfhdfgqrsor .getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_CHANGE));
 					pric = Double.valueOf(catid);
 				} while (mCubdfhdfgqrsor.moveToNext());
 			}
@@ -7264,8 +7118,7 @@ try{
 		} else {
 			mSelectedItem.setItemNameAdd(nameee + " Discount " + discoun + "%");
 		}
-		getItemDetailspricechange(true, mSelectedItem.getItemNoAdd(),
-				(df.format(pric)).toString());
+		getItemDetailspricechange(true, mSelectedItem.getItemNoAdd(), (df.format(pric)).toString(),PosMainActivity.this);
 		} catch (NumberFormatException e) {
 			  e.printStackTrace();
 			} catch (SQLiteException e12) {
@@ -7280,11 +7133,9 @@ try{
 
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DatabaseForDemo.SPILT_HOLDID, "" + holdidexist);
-		contentValues.put(DatabaseForDemo.SPILT_HOLDID_UNIQE,
-				"" + Parameters.generateRandomNumber());
+		contentValues.put(DatabaseForDemo.SPILT_HOLDID_UNIQE, "" + Parameters.generateRandomNumber());
 		contentValues.put(DatabaseForDemo.SPILT_LIST, "" + mItemDiscountList);
-		dbforloginlogoutWritePos.insert(DatabaseForDemo.SPILT_LOCAL_TABLE, null,
-				contentValues);
+		dbforloginlogoutWritePos.insert(DatabaseForDemo.SPILT_LOCAL_TABLE, null, contentValues);
 		Log.v("hari","januuuu");
 		contentValues.clear();
 	}
@@ -7301,11 +7152,9 @@ try{
 				System.out.println("html written successfully..");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-				showAlertDialog(PosMainActivity.this, "Print Text", "Getting an Error" ,
-						false);
+				showAlertDialog(PosMainActivity.this, "Print Text", "Getting an Error" , false);
 			} catch (IOException e) {
-				showAlertDialog(PosMainActivity.this, "Print Text", "Getting an Error" ,
-						false);
+				showAlertDialog(PosMainActivity.this, "Print Text", "Getting an Error" , false);
 				e.printStackTrace();
 			}
 			billPrint.loadUrl("file://"+Environment.getExternalStorageDirectory()+"/printData/billFile.html");
@@ -7342,8 +7191,7 @@ try{
 	    return bitmap;
 	}
 	@SuppressWarnings("deprecation")
-	public void showAlertDialogforPrint(Context context, String title,
-			String message, Boolean status,final String printername, final String print_text,final Bitmap map) {
+	public void showAlertDialogforPrint(Context context, String title, String message, Boolean status,final String printername, final String print_text,final Bitmap map) {
 		AlertDialog alertDialog = new AlertDialog.Builder(context).create();
 
 		alertDialog.setTitle(title);
@@ -7370,15 +7218,12 @@ try{
 		Boolean boolValue = false;
 		 
 		modifierItemArr.clear();
-		String selectQuerysrii= "SELECT  * FROM " + DatabaseForDemo.INVENTORY_TABLE + " WHERE "
-				+ DatabaseForDemo.INVENTORY_ITEM_NO + "=\"" + itemnum + "\";";
+		String selectQuerysrii= "SELECT  * FROM " + DatabaseForDemo.INVENTORY_TABLE + " WHERE " + DatabaseForDemo.INVENTORY_ITEM_NO + "=\"" + itemnum + "\";";
 		Cursor mCursorsrii = dbforloginlogoutReadPos.rawQuery(selectQuerysrii, null);
 		if (mCursorsrii != null) {
 			if (mCursorsrii.moveToFirst()) {
 				do {
-					itemidrrrr = mCursorsrii
-							.getString(mCursorsrii
-									.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
+					itemidrrrr = mCursorsrii.getString(mCursorsrii.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
 				} while (mCursorsrii.moveToNext());
 			}
 		}
@@ -7392,16 +7237,10 @@ try{
 			if (mCursoiwiwiwr.moveToFirst()) {
 				do {
 					HashMap<String, String> map = new HashMap<String, String>();
-					String itemid = mCursoiwiwiwr
-							.getString(mCursoiwiwiwr
-									.getColumnIndex(DatabaseForDemo.MODIFIER_ITEM_NO));
-					String itemname = mCursoiwiwiwr
-							.getString(mCursoiwiwiwr
-									.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
-					map.put("itemno",
-							itemid);
-					map.put("itemname",
-							itemname);
+					String itemid = mCursoiwiwiwr.getString(mCursoiwiwiwr.getColumnIndex(DatabaseForDemo.MODIFIER_ITEM_NO));
+					String itemname = mCursoiwiwiwr.getString(mCursoiwiwiwr.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
+					map.put("itemno",itemid);
+					map.put("itemname",itemname);
 					modifierItemArr.add(map);
 					Log.v("modifyers",""+map);
 				} while (mCursoiwiwiwr.moveToNext());
@@ -7412,7 +7251,7 @@ if(modifierItemArr.size()>0){
 		final AlertDialog alertDialog1fff = new AlertDialog.Builder(PosMainActivity.this).create();
 		LayoutInflater mInflater = LayoutInflater.from(this);
 		View layout = mInflater.inflate(R.layout.modifiers_item, null);
-		 showmodifiers = (LinearLayout) layout.findViewById(R.id.showmodifiers);
+		showmodifiers = (LinearLayout) layout.findViewById(R.id.showmodifiers);
 		Button ok = (Button) layout.findViewById(R.id.m_ok);
 		Button cancel = (Button) layout.findViewById(R.id.m_cancel);
 		alertDialog1fff.setTitle("Please Select The Modifiers");
@@ -7432,8 +7271,7 @@ if(modifierItemArr.size()>0){
 			endLoop = llC * itemcount;
 			 LinearLayout rowlayout = new LinearLayout(PosMainActivity.this);
 			rowlayout.setOrientation(LinearLayout.HORIZONTAL);
-			rowlayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-					LayoutParams.WRAP_CONTENT));
+			rowlayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 			rowlayout.setPadding(10, 10, 20, 10);
 
 			if (endLoop >= totalcount) {
@@ -7441,10 +7279,8 @@ if(modifierItemArr.size()>0){
 			}
 			for (int BTn = stLoop; BTn < endLoop; BTn++) {
 				modiferiemtButton = new Button(PosMainActivity.this);
-				modiferiemtButton.setText("" + modifierItemArr.get(BTn)
-						.get("itemname"));
-				modiferiemtButton.setTag("" + modifierItemArr.get(BTn)
-						.get("itemno"));
+				modiferiemtButton.setText("" + modifierItemArr.get(BTn) .get("itemname"));
+				modiferiemtButton.setTag("" + modifierItemArr.get(BTn) .get("itemno"));
 				modiferiemtButton.setTextSize(15);
 				LayoutParams lp = new LayoutParams(130, 60);
 				modiferiemtButton.setPadding(0, 0, 0, 0);
@@ -7522,79 +7358,37 @@ if(modifierItemArr.size()>0){
 					do {
 						try {
 							JSONObject jsonobj = new JSONObject();
-							String departmentforproduct = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_DEPARTMENT,
-									departmentforproduct);
-							String itemnos = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NO));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_ITEM_NO,
-									itemnos);
-							String itemname = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_ITEM_NAME,
-									itemname);
-							String desc2 = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_SECOND_DESCRIPTION));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_SECOND_DESCRIPTION,
-									desc2);
-							String cost = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_AVG_COST));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_AVG_COST,
-									cost);
-							String pricecharge = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_CHANGE));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_PRICE_CHANGE,
-									pricecharge);
-							String pricetax = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_TAX));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_PRICE_TAX,
-									pricetax);
-							String instock = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_IN_STOCK));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_IN_STOCK,
-									instock);
+							String departmentforproduct = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_DEPARTMENT));
+							jsonobj.put( DatabaseForDemo.INVENTORY_DEPARTMENT, departmentforproduct);
+							String itemnos = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NO));
+							jsonobj.put( DatabaseForDemo.INVENTORY_ITEM_NO, itemnos);
+							String itemname = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
+							jsonobj.put( DatabaseForDemo.INVENTORY_ITEM_NAME, itemname);
+							String desc2 = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_SECOND_DESCRIPTION));
+							jsonobj.put( DatabaseForDemo.INVENTORY_SECOND_DESCRIPTION, desc2);
+							String cost = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_AVG_COST));
+							jsonobj.put( DatabaseForDemo.INVENTORY_AVG_COST, cost);
+							String pricecharge = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_CHANGE));
+							jsonobj.put( DatabaseForDemo.INVENTORY_PRICE_CHANGE, pricecharge);
+							String pricetax = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_TAX));
+							jsonobj.put( DatabaseForDemo.INVENTORY_PRICE_TAX, pricetax);
+							String instock = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_IN_STOCK));
+							jsonobj.put( DatabaseForDemo.INVENTORY_IN_STOCK, instock);
 							Log.v("instock",""+instock);
-							String vendor = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_VENDOR));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_VENDOR,
-									vendor);
-							String taxprod = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_TAX));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_PRICE_TAX,
-									taxprod);
-							String uniqueid = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.UNIQUE_ID));
-							jsonobj.put(DatabaseForDemo.UNIQUE_ID,
-									uniqueid);
-							String taxone = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_TAXONE));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_TAXONE,
-									taxone);
-							String notes = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_NOTES));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_NOTES,
-									notes);
+							String vendor = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_VENDOR));
+							jsonobj.put( DatabaseForDemo.INVENTORY_VENDOR, vendor);
+							String taxprod = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_TAX));
+							jsonobj.put( DatabaseForDemo.INVENTORY_PRICE_TAX, taxprod);
+							String uniqueid = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.UNIQUE_ID));
+							jsonobj.put(DatabaseForDemo.UNIQUE_ID, uniqueid);
+							String taxone = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_TAXONE));
+							jsonobj.put( DatabaseForDemo.INVENTORY_TAXONE, taxone);
+							String notes = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_NOTES));
+							jsonobj.put( DatabaseForDemo.INVENTORY_NOTES, notes);
 							
-							jsonobj.put(DatabaseForDemo.CHECKED_VALUE,
-									"true");
-							String quantity = mCursorforvendor1.getString(mCursorforvendor1
-									.getColumnIndex(DatabaseForDemo.INVENTORY_QUANTITY));
-							jsonobj.put(
-									DatabaseForDemo.INVENTORY_QUANTITY,
-									quantity);
+							jsonobj.put(DatabaseForDemo.CHECKED_VALUE, "true");
+							String quantity = mCursorforvendor1.getString(mCursorforvendor1 .getColumnIndex(DatabaseForDemo.INVENTORY_QUANTITY));
+							jsonobj.put( DatabaseForDemo.INVENTORY_QUANTITY, quantity);
 							getlist.add(jsonobj);
 						} catch (JSONException e) {
 							// TODO Auto-generated catch block
@@ -7634,50 +7428,27 @@ if(modifierItemArr.size()>0){
 											Parameters.currentTime(),
 											Parameters.currentTime(),
 											dataval, "true");
-							System.out.println("response test is:"
-									+ response);
+							System.out.println("response test is:" + response);
 							String servertiem = null;
 							try {
-								JSONObject obj = new JSONObject(
-										response);
-								JSONObject responseobj = obj
-										.getJSONObject("response");
-								servertiem = responseobj
-										.getString("server-time");
-								System.out.println("servertime is:"
-										+ servertiem);
-								JSONArray array = obj
-										.getJSONArray("insert-queries");
-								System.out
-										.println("array list length for insert is:"
-												+ array.length());
-								JSONArray array2 = obj
-										.getJSONArray("delete-queries");
-								System.out
-										.println("array2 list length for delete is:"
-												+ array2.length());
-								for (int jj = 0, ii = 0; jj < array2
-										.length()
-										&& ii < array.length(); jj++, ii++) {
-									String deletequerytemp = array2
-											.getString(jj);
-									String deletequery1 = deletequerytemp
-											.replace("'", "\"");
-									String deletequery = deletequery1
-											.replace("\\\"", "'");
-									System.out.println("delete query"
-											+ jj + " is :"
-											+ deletequery);
+								JSONObject obj = new JSONObject( response);
+								JSONObject responseobj = obj .getJSONObject("response");
+								servertiem = responseobj .getString("server-time");
+								System.out.println("servertime is:" + servertiem);
+								JSONArray array = obj .getJSONArray("insert-queries");
+								System.out .println("array list length for insert is:" + array.length());
+								JSONArray array2 = obj .getJSONArray("delete-queries");
+								System.out .println("array2 list length for delete is:" + array2.length());
+								for (int jj = 0, ii = 0; jj < array2 .length() && ii < array.length(); jj++, ii++) {
+									String deletequerytemp = array2 .getString(jj);
+									String deletequery1 = deletequerytemp .replace("'", "\"");
+									String deletequery = deletequery1 .replace("\\\"", "'");
+									System.out.println("delete query" + jj + " is :" + deletequery);
 
-									String insertquerytemp = array
-											.getString(ii);
-									String insertquery1 = insertquerytemp
-											.replace("'", "\"");
-									String insertquery = insertquery1
-											.replace("\\\"", "'");
-									System.out.println("delete query"
-											+ jj + " is :"
-											+ insertquery);
+									String insertquerytemp = array .getString(ii);
+									String insertquery1 = insertquerytemp .replace("'", "\"");
+									String insertquery = insertquery1 .replace("\\\"", "'");
+									System.out.println("delete query" + jj + " is :" + insertquery);
 try{
 									dbforloginlogoutWritePos.execSQL(deletequery);
 									dbforloginlogoutWritePos.execSQL(insertquery);
@@ -7685,9 +7456,7 @@ try{
 	qq.printStackTrace();
 }
 		
-									System.out
-											.println("queries executed"
-													+ ii);
+									System.out .println("queries executed" + ii);
 
 								}
 							} catch (JSONException e) {
@@ -7696,8 +7465,7 @@ try{
 							}
 							dataval = "";
 
-							String select = "select *from "
-									+ DatabaseForDemo.MISCELLANEOUS_TABLE;
+							String select = "select *from " + DatabaseForDemo.MISCELLANEOUS_TABLE;
 							Cursor cursoqmjgfr = dbforloginlogoutWritePos.rawQuery(select, null);
 							if (cursoqmjgfr.getCount() > 0) {
 								dbforloginlogoutWritePos.execSQL("update "
@@ -7709,23 +7477,11 @@ try{
 							} else {
 								
 								ContentValues contentValues1 = new ContentValues();
-								contentValues1.put(
-										DatabaseForDemo.MISCEL_STORE,
-										"store1");
-								contentValues1.put(
-										DatabaseForDemo.MISCEL_PAGEURL,
-										"");
-								contentValues1
-										.put(DatabaseForDemo.MISCEL_UPDATE_LOCAL,
-												Parameters
-														.currentTime());
-								contentValues1
-										.put(DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL,
-												Parameters
-														.currentTime());
-								dbforloginlogoutWritePos.insert(
-										DatabaseForDemo.MISCELLANEOUS_TABLE,
-										null, contentValues1);
+								contentValues1.put( DatabaseForDemo.MISCEL_STORE, "store1");
+								contentValues1.put( DatabaseForDemo.MISCEL_PAGEURL, "");
+								contentValues1 .put(DatabaseForDemo.MISCEL_UPDATE_LOCAL, Parameters .currentTime());
+								contentValues1 .put(DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL, Parameters .currentTime());
+								dbforloginlogoutWritePos.insert( DatabaseForDemo.MISCELLANEOUS_TABLE, null, contentValues1);
 							}
 							cursoqmjgfr.close();
 						}
@@ -7733,25 +7489,1739 @@ try{
 				} else {
 
 					ContentValues contentValues1 = new ContentValues();
-					contentValues1.put(DatabaseForDemo.QUERY_TYPE,
-							"insert");
-					contentValues1.put(DatabaseForDemo.PENDING_USER_ID,
-							Parameters.userid);
-					contentValues1.put(DatabaseForDemo.PAGE_URL,
-							"saveinfo.php");
-					contentValues1.put(
-							DatabaseForDemo.TABLE_NAME_PENDING,
-							DatabaseForDemo.VENDOR_TABLE);
-					contentValues1.put(
-							DatabaseForDemo.CURRENT_TIME_PENDING,
-							Parameters.currentTime());
-					contentValues1.put(DatabaseForDemo.PARAMETERS,
-							dataval);
-					dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE,
-							null, contentValues1);
+					contentValues1.put(DatabaseForDemo.QUERY_TYPE, "insert");
+					contentValues1.put(DatabaseForDemo.PENDING_USER_ID, Parameters.userid);
+					contentValues1.put(DatabaseForDemo.PAGE_URL, "saveinfo.php");
+					contentValues1.put( DatabaseForDemo.TABLE_NAME_PENDING, DatabaseForDemo.VENDOR_TABLE);
+					contentValues1.put( DatabaseForDemo.CURRENT_TIME_PENDING, Parameters.currentTime());
+					contentValues1.put(DatabaseForDemo.PARAMETERS, dataval);
+					dbforloginlogoutWritePos.insert(DatabaseForDemo.PENDING_QUERIES_TABLE, null, contentValues1);
 					dataval = "";
 				}
 			}
 	}
 
+	
+	private void initializeReader()
+	{
+		if(myUniMagReader!=null){
+			myUniMagReader.unregisterListen();
+			myUniMagReader.release();
+			myUniMagReader = null;
+		}
+		if (isConnectWithCommand)
+			myUniMagReader = new uniMagReader(this,this,true);
+		else 
+			myUniMagReader = new uniMagReader(this,this);
+		
+		myUniMagReader.setVerboseLoggingEnable(true);
+        myUniMagReader.registerListen();
+        
+        //load the XML configuratin file
+        String fileNameWithPath = getConfigurationFileFromRaw();
+        if(!isFileExist(fileNameWithPath)) { 
+        	fileNameWithPath = null; 
+        }
+
+        if (isUseAutoConfigProfileChecked) {
+			if (profileDatabase.updateProfileFromDB()) {
+				this.profile = profileDatabase.getProfile();
+				Toast.makeText(this, "AutoConfig profile has been loaded.", Toast.LENGTH_LONG).show();
+				handler.post(doConnectUsingProfile);
+			}
+			else {
+				Toast.makeText(this, "No profile found. Please run AutoConfig first.", Toast.LENGTH_LONG).show();
+			}
+        } else {
+	        /////////////////////////////////////////////////////////////////////////////////
+			// Network operation is prohibited in the UI Thread if target API is 11 or above.
+			// If target API is 11 or above, please use AsyncTask to avoid errors.
+	        myUniMagReader.setXMLFileNameWithPath(fileNameWithPath);
+	        myUniMagReader.loadingConfigurationXMLFile(true);
+		    /////////////////////////////////////////////////////////////////////////////////
+        }
+        //Initializing SDKTool for firmware update
+        firmwareUpdateTool = new uniMagSDKTools(this,this);
+        firmwareUpdateTool.setUniMagReader(myUniMagReader);
+        myUniMagReader.setSDKToolProxy(firmwareUpdateTool.getSDKToolProxy());
+	}
+	private String getConfigurationFileFromRaw( ){
+		return getXMLFileFromRaw("idt_unimagcfg_default.xml");
+		}
+	private String getAutoConfigProfileFileFromRaw( ){
+		//share the same copy with the configuration file
+		return getXMLFileFromRaw("idt_unimagcfg_default.xml");
+		}
+	    
+	// If 'idt_unimagcfg_default.xml' file is found in the 'raw' folder, it returns the file path.
+	private String getXMLFileFromRaw(String fileName ){
+		//the target filename in the application path
+		String fileNameWithPath = null;
+		fileNameWithPath = fileName;
+	
+		try {
+			InputStream in = getResources().openRawResource(R.raw.idt_unimagcfg_default);
+			int length = in.available();
+			byte [] buffer = new byte[length];
+			in.read(buffer);    	   
+			in.close();
+			deleteFile(fileNameWithPath);
+			FileOutputStream fout = openFileOutput(fileNameWithPath, MODE_PRIVATE);
+			fout.write(buffer);
+			fout.close();
+    	   
+			// to refer to the application path
+			File fileDir = this.getFilesDir();
+			fileNameWithPath = fileDir.getParent() + java.io.File.separator + fileDir.getName();
+			fileNameWithPath += java.io.File.separator+"idt_unimagcfg_default.xml";
+	   	   
+		} catch(Exception e){
+			e.printStackTrace();
+			fileNameWithPath = null;
+		}
+		return fileNameWithPath;
+	}
+	
+    @Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+    	if ((keyCode == KeyEvent.KEYCODE_BACK||KeyEvent.KEYCODE_HOME==keyCode||KeyEvent.KEYCODE_SEARCH==keyCode)){
+			return false;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
+   	if ((keyCode == KeyEvent.KEYCODE_BACK||KeyEvent.KEYCODE_HOME==keyCode||KeyEvent.KEYCODE_SEARCH==keyCode)){
+    		 
+			return false;
+		}	return super.onKeyMultiple(keyCode, repeatCount, event);
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+    	if ((keyCode == KeyEvent.KEYCODE_BACK||KeyEvent.KEYCODE_HOME==keyCode||KeyEvent.KEYCODE_SEARCH==keyCode)){
+ 			return false;
+		}
+    	return super.onKeyUp(keyCode, event);
+	}
+
+    @Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+    	switch(item.getItemId())
+	    {
+       		// when the 'swipe card' menu item clicked
+	    	case (START_SWIPE_CARD):
+	    	{
+	    		headerTextView.setText("MSR Data");
+	    		textAreaTop.setText("");
+	    		textAreaBottom.setText("");
+        		//itemStartSC.setEnabled(false); 
+        	
+        		if(myUniMagReader!=null)
+        			myUniMagReader.startSwipeCard();
+	    		break;
+	    	}
+	    	// when the 'exit' menu item clicked
+	    	case (EXIT_IDT_APP):
+	    	{
+	    		isExitButtonPressed = true;
+        		if(myUniMagReader!=null)
+        		{
+        			myUniMagReader.unregisterListen();
+        			myUniMagReader.stopSwipeCard();
+        			myUniMagReader.release();
+        		}
+        		finish();
+	    		break;
+	    	}
+	    	// If save log option is already enabled, put a check mark whenever settings menu is clicked.   
+	    	case (SETTINGS_ITEM):
+	    	{
+	    		if(itemSubSaveLog!=null)
+	    			itemSubSaveLog.setChecked(isSaveLogOptionChecked);
+	    		if(itemSubUseAutoConfigProfile!=null)
+	    			itemSubUseAutoConfigProfile.setChecked(isUseAutoConfigProfileChecked);
+	    		if(itemSubUseCommandToConnect!=null)
+	    			itemSubUseCommandToConnect.setChecked(isConnectWithCommand);
+	    		break;
+	    	}
+	    	// deleting log files in the sd card.
+	    	case (DELETE_LOG_ITEM):
+	    	{
+        		if(myUniMagReader!=null)
+        			myUniMagReader.deleteLogs();
+	    		break;		    		
+	    	}
+	    	// showing manufacturer, model number, SDK version, and OS Version information if clicked.
+	    	case (ABOUT_ITEM):
+	    	{
+	    		showAboutInfo();
+	    		break;		    		
+	    	}
+	    	// user can manually load a configuration file (xml), which should be located in the sd card.  
+	    	case (SUB_LOAD_XML):
+	    	{
+	    		String strTmpFileName = getMyStorageFilePath();
+	    		if (strTmpFileName == null)
+	    		{
+	    			headerTextView.setText("Warning");
+	    			textAreaTop.setText("Please insert SD card.");
+	    			textAreaBottom.setText("");
+	    			return false;
+	    		}
+            	FileDialog fileDialog = new FileDialog();
+            	Intent intent = new Intent( getBaseContext(), fileDialog.getClass());
+				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+				startActivityForResult(intent, REQUEST_GET_XML_FILE);
+	    		break;
+	    	}
+	    	// in order to update firmware of reader, user needs to set a firmware file (.bin) first.
+	    	// this menu allows to user to update firmware from v1.x to later version (v2.x or v3.x).
+	    	case (SUB_LOAD_BIN):
+	    	{
+	    		headerTextView.setText("Command Info");
+	    		String strTmpFileName = getMyStorageFilePath();
+	    		if (strTmpFileName == null)
+	    		{
+	    			headerTextView.setText("Warning");
+	    			textAreaTop.setText("Please insert SD card.");
+	    			textAreaBottom.setText("");
+	    			return false;
+	    		}
+            	FileDialog fileDialog = new FileDialog();
+            	Intent intent = new Intent( getBaseContext(), fileDialog.getClass());
+				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+				startActivityForResult(intent, REQUEST_GET_BIN_FILE);
+	    		break;
+	    	}
+	    	// Bin file should be encrypted in order to update from v2.x or v3.x to later version. 
+	    	case (SUB_LOAD_ENCRYPTED_BIN):
+	    	{
+	    		headerTextView.setText("Command Info");
+
+	    		String strTmpFileName = getMyStorageFilePath();
+	    		if (strTmpFileName == null)
+	    		{
+	    			headerTextView.setText("Warning");
+	    			textAreaTop.setText("Please insert SD card.");
+	    			textAreaBottom.setText("");
+	    			return false;
+	    		}
+            	FileDialog fileDialog = new FileDialog();
+            	Intent intent = new Intent( getBaseContext(), fileDialog.getClass());
+				intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
+				startActivityForResult(intent, REQUEST_GET_ENCRYPTED_BIN_FILE);
+	    		break;
+	    	}
+	    	case (SUB_START_AUTOCONFIG):
+	    	{
+	    		String fileNameWithPath = getAutoConfigProfileFileFromRaw();
+    	        if(!isFileExist(fileNameWithPath)) {
+    	        	fileNameWithPath = null; 
+    	        }  
+	    		boolean startAcRet = myUniMagReader.startAutoConfig(fileNameWithPath,true);
+	    		if (startAcRet)
+	    		{
+    	    		strProgressInfo=null;
+    	    		handler.post(doUpdateAutoConfigProgressInfo);
+    	    		percent = 0;
+    	    		beginTime = getCurrentTime();  
+    	    		autoconfig_running = true;
+	    		}
+	    		break;
+	    	}
+	    	case (SUB_STOP_AUTOCONFIG):
+	    	{
+	    		if(autoconfig_running==true)
+	    		{
+		    		myUniMagReader.stopAutoConfig();
+		    		myUniMagReader.unregisterListen();
+		    		myUniMagReader.release();                       
+	
+		    		percent = 0;
+		    		// Reinitialize the reader if AutoConfig has been stopped.
+		    		initializeReader();
+		    		autoconfig_running = false;
+	    		}
+	    		break;
+	    	}  
+	    	// when the 'save option' menu item clicked 
+	    	case (SUB_SAVE_LOG_ITEM):
+	    	{
+	    		if(item.isChecked())
+	    		{
+	    			myUniMagReader.setSaveLogEnable(false);		   
+	    			item.setChecked(false);
+	    			isSaveLogOptionChecked = false;
+	    		}
+	    		else
+	    		{
+	    			//cannot enable the item when you are swiping the card.
+	    			if(myUniMagReader.isSwipeCardRunning()==true)
+	    			{
+	    				item.setChecked(true);
+	    				myUniMagReader.setSaveLogEnable(true);
+	    				isSaveLogOptionChecked = true;
+	    			}
+	    		} 
+	    		break;
+	    	}
+	    	
+	    	case (SUB_USE_AUTOCONFIG_PROFILE):
+	    	{
+	    		if (!isReaderConnected) {
+		    		if (item.isChecked()) {
+		    			item.setChecked(false);
+		    			isUseAutoConfigProfileChecked = false;
+		    			
+		    			profileDatabase.uncheckOnUseAutoConfigProfile();
+		    			// change back to default profile
+	    				initializeReader();
+	    				
+		    		} else {
+		    			if (profileDatabase.updateProfileFromDB()) {
+		    				this.profile = profileDatabase.getProfile();
+		    				item.setChecked(true);
+		    				isUseAutoConfigProfileChecked = true;
+		    				profileDatabase.checkOnUseAutoConfigProfile();
+		    			} else {
+		    				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		    				builder.setTitle("Warning");
+		    				builder.setMessage("No profile found. Please run AutoConfig first.");
+		    				builder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int which) {
+								}
+							});
+		    				AlertDialog alert = builder.create();		
+		    				alert.show();	 		    				
+		    			}
+		    		}
+	    		} else {
+    				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    				builder.setTitle("Warning");
+    				builder.setMessage("Please detach the reader in order to change a profile.");
+    				builder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					});
+    				AlertDialog alert = builder.create();		
+    				alert.show();		    			
+	    		}
+	    		
+	    		break;
+	    	}
+	    	case (SUB_USE_COMMAND_TO_CONNECT):
+	    	{
+	    		if (!isReaderConnected) {
+	    			if (item.isChecked()) {
+	    				isConnectWithCommand = false;
+	    				initializeReader();
+	    			} else {
+//	    				isConnectWithCommand = true;
+//	    				initializeReader();
+	    				
+	    				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    				builder.setTitle("Caution");
+	    				builder.setMessage("Please note that older generation of UniMag Readers (UniMag & UniMag Pro) won't be connected if this option checked.");
+	    				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {
+							}
+						});
+	    				
+	    				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							
+							public void onClick(DialogInterface dialog, int which) {
+			    				isConnectWithCommand = true;
+			    				initializeReader();
+							}
+						});
+	    				AlertDialog alert = builder.create();		
+	    				alert.show();
+	    			}
+	    		} else {
+    				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    				builder.setTitle("Information");
+    				builder.setMessage("Please detach the reader in order to change the setting.");
+    				builder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					});
+
+    				AlertDialog alert = builder.create();		
+    				alert.show();	    			
+	    		}
+	    		
+		    	break;
+	    	}
+	    	// displays attached reader type
+	    	case SUB_ATTACHED_TYPE:
+	    		ReaderType art = myUniMagReader.getAttachedReaderType();
+	    		if(art==ReaderType.UNKNOWN)
+	    		{
+		    		textAreaTop.setText("To get Attached Reader type, waiting for response.");
+		    		textAreaBottom.setText("");
+ 	    		}
+	    		else
+	    		{
+		    		textAreaTop.setText("Attached Reader:\n   "+getReaderName(art));
+		    		textAreaBottom.setText("");
+	    		}
+	    		break;
+	    	// displays support status of all ID Tech readers  
+	    	case SUB_SUPPORT_STATUS:
+	    		//print a list of reader:supported status pairs
+	    		textAreaTop.setText("Reader support status from cfg:\n");
+	    		for (ReaderType rt : ReaderType.values()) {
+	    			if (rt!=ReaderType.UNKNOWN && rt!=ReaderType.UM_OR_PRO)
+	    				textAreaTop.append(getReaderName(rt)+" : "+myUniMagReader.getSupportStatus(rt)+"\n");
+	    		}
+	    		textAreaBottom.setText("");
+	    		break;
+    	}
+       	return super.onOptionsItemSelected(item);
+	}
+
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		itemStartSC = menu.add(0,START_SWIPE_CARD, Menu.NONE, "Swipe Card");
+		itemStartSC.setEnabled(true); 
+		sub = menu.addSubMenu(0,SETTINGS_ITEM,Menu.NONE,"Settings");
+		itemSubSaveLog = sub.add(0,SUB_SAVE_LOG_ITEM,Menu.NONE,"Save Log option");
+		itemSubUseAutoConfigProfile = sub.add(1, SUB_USE_AUTOCONFIG_PROFILE, Menu.NONE, "Use AutoConfig profile");
+		itemSubUseCommandToConnect = sub.add(1, SUB_USE_COMMAND_TO_CONNECT, Menu.NONE, "Command to Connect");
+		itemSubLoadXML = sub.add(1,SUB_LOAD_XML,Menu.NONE,"Reload XML");
+		itemSubSetBinFile = sub.add(2,SUB_LOAD_BIN,Menu.NONE,"Set BIN file");
+		itemSubSetEncryptedBinFile = sub.add(3,SUB_LOAD_ENCRYPTED_BIN,Menu.NONE,"Set Encrypted BIN file");
+		
+		itemSubStartAutoConfig = sub.add(4,SUB_START_AUTOCONFIG,Menu.NONE,"Start AutoConfig");
+		itemSubStopAutoConfig = sub.add(6,SUB_STOP_AUTOCONFIG,Menu.NONE,"Stop AutoConfig");
+		sub.add(Menu.NONE,SUB_ATTACHED_TYPE,Menu.NONE,"Get attached type");
+		sub.add(Menu.NONE,SUB_SUPPORT_STATUS,Menu.NONE,"Get support status");
+		itemSubSaveLog.setCheckable(true);
+		itemSubUseAutoConfigProfile.setCheckable(true);
+		itemSubUseCommandToConnect.setCheckable(true);
+		itemSubLoadXML.setEnabled(true); 
+		itemSubSetBinFile.setEnabled(true); 
+		itemSubSetEncryptedBinFile.setEnabled(true); 
+		
+		itemSubStartAutoConfig.setEnabled(true); 
+		itemSubStopAutoConfig.setEnabled(true); 
+		itemDelLogs = menu.add(0,DELETE_LOG_ITEM,Menu.NONE,"Delete Logs");
+		itemDelLogs.setEnabled(true); 
+		itemAbout = menu.add(0,ABOUT_ITEM,Menu.NONE,"About");
+		itemAbout.setEnabled(true); 
+		itemExitApp = menu.add(0,EXIT_IDT_APP,Menu.NONE,"Exit");
+		itemExitApp.setEnabled(true); 
+		return super.onCreateOptionsMenu(menu);
+	}
+
+    // Returns reader name based on abbreviations 
+    private String getReaderName(ReaderType rt){
+    	switch(rt){
+    	case UM:
+    		return "UniMag";
+    	case UM_PRO:
+    		return "UniMag Pro";
+    	case UM_II:
+    		return "UniMag II";
+    	case SHUTTLE:
+    		return "Shuttle";
+    	case UM_OR_PRO:
+    		return "UniMag or UniMag Pro";
+    	}
+    	return "Unknown";
+    	
+    }
+    //for uniMagReader.getAttachedReaderType()
+    public ReaderType getAttachedReaderType(int uniMagUnit) {
+    	switch (uniMagUnit) {
+    	case StateList.uniMag2G3GPro:
+    		return ReaderType.UM_OR_PRO;
+    	case StateList.uniMagII:
+    		return ReaderType.UM_II;
+    	case StateList.uniMagShuttle:
+    		return ReaderType.SHUTTLE;
+    	case StateList.uniMagUnkown:
+    	default:
+    		return ReaderType.UNKNOWN;
+    	}
+    }
+    private void showAboutInfo()
+    {
+		String strManufacture = myUniMagReader.getInfoManufacture();
+		String strModel = myUniMagReader.getInfoModel();
+		String strSDKVerInfo = myUniMagReader.getSDKVersionInfo();
+		String strXMLVerInfo = myUniMagReader.getXMLVersionInfo();
+
+		headerTextView.setText("SDK Info");
+		textAreaBottom.setText("");
+		String strOSVerInfo = android.os.Build.VERSION.RELEASE;
+    	textAreaTop.setText("Phone: "+strManufacture+"\n"+"Model: "+strModel+"\n"+"SDK Ver: "+strSDKVerInfo+"\nXML Ver: "+strXMLVerInfo+"\nOS Version: "+strOSVerInfo);
+
+    }    
+	private Runnable doShowTimeoutMsg = new Runnable()
+	{
+		public void run()
+		{
+			if(itemStartSC!=null&&enableSwipeCard==true)
+				itemStartSC.setEnabled(true); 
+			enableSwipeCard = false;
+			showDialog(popupDialogMsg);
+		}
+
+	};
+	// shows messages on the popup dialog
+	private void showDialog(String strTitle)
+	{
+		try
+		{
+	        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	        builder.setTitle("UniMag");
+	        builder.setMessage(strTitle);
+	        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+	
+	            public void onClick(DialogInterface dialog, int which) {
+	                dialog.dismiss();
+	            }
+	        });
+	        builder.create().show();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	};	
+ 
+	private Runnable doShowTopDlg = new Runnable()
+	{
+		public void run()
+		{
+			showTopDialog(popupDialogMsg);
+		}
+	};	
+	private Runnable doHideTopDlg = new Runnable()
+	{
+		public void run()
+		{
+			hideTopDialog( );
+		}
+
+	};	
+	private Runnable doShowSwipeTopDlg = new Runnable()
+	{
+		public void run()
+		{
+			showSwipeTopDialog( );
+		}
+	};	
+	private Runnable doShowYESNOTopDlg = new Runnable()
+	{
+		public void run()
+		{
+			showYesNoDialog( );
+		}
+	};	
+	private Runnable doHideSwipeTopDlg = new Runnable()
+	{
+		public void run()
+		{
+			hideSwipeTopDialog( );
+		}
+	};	
+	// displays result of commands, autoconfig, timeouts, firmware update progress and results.
+	private Runnable doUpdateStatus = new Runnable()
+	{
+		public void run()
+		{
+			try
+			{
+				textAreaTop.setText(statusText);
+				headerTextView.setText("Command Info");
+	    		if(msrData!=null)
+	    		{
+	            StringBuffer hexString = new StringBuffer();
+	            
+	            hexString.append("<");
+	            String fix = null;
+	            for (int i = 0; i < msrData.length; i++) {
+	            	fix = Integer.toHexString(0xFF & msrData[i]);
+	            	if(fix.length()==1)
+	            		fix = "0"+fix;
+	                hexString.append(fix);
+	                if((i+1)%4==0&&i!=(msrData.length-1))
+	                	hexString.append(' ');
+	            }
+	            hexString.append(">");
+	            textAreaBottom.setText(hexString.toString());
+	            
+	            
+	            System.out.println("hexString data "+hexString.toString());
+	    		}
+	    		else
+	    			textAreaBottom.setText("");
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				
+			}
+		}
+	};
+	// displays result of commands, autoconfig, timeouts, firmware update progress and results.
+	private Runnable doUpdateAutoConfigProgress = new Runnable()
+	{
+		public void run()
+		{
+			try
+			{
+				textAreaTop.setText(statusText);
+				headerTextView.setText("Command Info");
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				
+			}
+		}
+	};
+	String strProgressInfo = "";
+	// displays result of commands, autoconfig, timeouts, firmware update progress and results.
+	private Runnable doUpdateAutoConfigProgressInfo = new Runnable()
+	{
+		public void run()
+		{
+			try
+			{
+	    		if(strProgressInfo!=null)
+	    		{
+	            textAreaBottom.setText(strProgressInfo);
+	    		}
+	    		else
+	    			textAreaBottom.setText("");
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				
+			}
+		}
+	};
+	// displays result of get challenge command 
+	private Runnable doUpdateChallengeData = new Runnable()
+	{
+		public void run()
+		{
+			try
+			{
+				textAreaTop.setText(statusText);
+				headerTextView.setText("Command Info");
+	    		if(cmdGetChallenge_Succeed_WithChallengData==challengeResult)
+	    		{
+	    			textAreaBottom.setText("");
+					textAreaBottom.setText( textAreaBottom.getText(), BufferType.EDITABLE);
+					textAreaBottom.setEnabled(true);
+					textAreaBottom.setClickable(true);
+					textAreaBottom.setFocusable(true);
+				}
+	    		else if (cmdGetChallenge_Succeed_WithFileVersion==challengeResult)
+	    		{
+	    			textAreaBottom.setText("");
+	    			textAreaBottom.setText( textAreaBottom.getText(), BufferType.EDITABLE);
+	    			textAreaBottom.setEnabled(true);
+	    			textAreaBottom.setClickable(true);
+	    			textAreaBottom.setFocusable(true);
+				}
+	    		else
+	    			textAreaBottom.setText("");
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+				
+			}
+		}
+	};
+	// displays data from card swiping
+	private Runnable doUpdateTVS = new Runnable()
+	{
+		public void run()
+		{
+			try
+			{
+				CardData cd = new CardData(msrData);
+				if(itemStartSC!=null)
+					itemStartSC.setEnabled(true);
+				textAreaTop.setText(strMsrData);
+				
+		    	System.out.println("hexString data text1 "+strMsrData.substring(2,strMsrData.indexOf("^")));
+		    	
+		    	System.out.println("hexString data year "+strMsrData.split("\\/\\^")[1].substring(0, 2));
+		    	
+		    	System.out.println("hexString data month "+strMsrData.split("\\/\\^")[1].substring(2, 4));
+				 
+//		    	editText_CreditCard.setText(""+strMsrData.substring(2,strMsrData.indexOf("^")));
+//		    	
+//		    	editText_ExpMonth.setText(""+strMsrData.split("\\/\\^")[1].substring(2, 4));
+//				 
+//		    	editText_ExpYear.setText(""+strMsrData.split("\\/\\^")[1].substring(0, 2)); 
+		    	
+		    	setSwipcard(strMsrData);
+				 
+	            StringBuffer hexString = new StringBuffer();
+	            hexString.append("<");
+	            String fix = null;
+	            for (int i = 0; i < msrData.length; i++) {
+	            	fix = Integer.toHexString(0xFF & msrData[i]);
+	            	if(fix.length()==1)
+	            		fix = "0"+fix;
+	                hexString.append(fix);
+	                if((i+1)%4==0&&i!=(msrData.length-1))
+	                	hexString.append(' ');
+	            }
+	            hexString.append(">");
+	            textAreaBottom.setText(hexString.toString()+"\n\n"+cd.toString());
+	            
+	            System.out.println("hexString data 1 "+hexString.toString()+"\n\n"+cd.toString());
+				adjustTextView();
+//				myUniMagReader.WriteLogIntoFile(hexString.toString());
+				myUniMagReader.WriteLogIntoFile(cd.toString());				
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+	};
+	private void adjustTextView()
+	{
+		int height = (textAreaTop.getHeight()+ textAreaBottom.getHeight())/2;
+		textAreaTop.setHeight(height);
+		textAreaBottom.setHeight(height);
+	}	
+	// displays a connection status of UniMag reader
+	private Runnable doUpdateTV = new Runnable()
+	{
+		public void run()
+		{
+			if(!isReaderConnected)
+				connectStatusTextView.setText("DISCONNECTED");
+			else
+				connectStatusTextView.setText("CONNECTED");
+		}
+	};
+	private Runnable doUpdateToast = new Runnable()
+	{
+		public void run()
+		{
+			try{
+				Context context = getApplicationContext();
+				String msg = null;//"To start record the mic.";
+				if(isReaderConnected)
+				{
+					msg = "<<CONNECTED>>";	
+					int duration = Toast.LENGTH_SHORT ;
+					Toast.makeText(context, msg, duration).show();
+					if(itemStartSC!=null)
+						itemStartSC.setEnabled(true); 
+					if (myUniMagReader!=null)
+					{	
+						if (!isWaitingForCommandResult) 
+						{
+							if(myUniMagReader.startSwipeCard())
+							{
+								headerTextView.setText("MSR Data");
+								textAreaTop.setText("");
+								textAreaBottom.setText("");
+								Log.d("Demo Info  1 >>>>>","to startSwipeCard");
+								System.out.println("Demo Info  1  to startSwipeCard");
+							}
+							else
+								Log.d("Demo Info  1 >>>>>","cannot startSwipeCard");
+							System.out.println("Demo Info  1  cannot startSwipeCard");
+						}
+					}
+				}
+			}catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+	};
+	private Runnable doConnectUsingProfile = new Runnable()
+	{
+		public void run() {
+			if (myUniMagReader != null)
+			{
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				myUniMagReader.connectWithProfile(profile);
+			}
+		}
+	};
+
+	/***
+	 * Class: UniMagTopDialog
+	 * Author: Eric Yang
+	 * Date: 2010.10.12
+	 * Function: to show the dialog on the top of the desktop.
+	 * 
+	 * *****/
+	private class UniMagTopDialog extends Dialog{
+
+		public UniMagTopDialog(Context context) {
+			super(context);
+		}
+
+	    @Override
+		public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    	if ((keyCode == KeyEvent.KEYCODE_BACK||KeyEvent.KEYCODE_HOME==keyCode||KeyEvent.KEYCODE_SEARCH==keyCode)){
+				return false;
+			}
+			return super.onKeyDown(keyCode, event);
+		}
+
+		@Override
+		public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
+	    	if ((keyCode == KeyEvent.KEYCODE_BACK||KeyEvent.KEYCODE_HOME==keyCode||KeyEvent.KEYCODE_SEARCH==keyCode)){
+	    		 
+				return false;
+			}	return super.onKeyMultiple(keyCode, repeatCount, event);
+		}
+
+		@Override
+		public boolean onKeyUp(int keyCode, KeyEvent event) {
+	    	if ((keyCode == KeyEvent.KEYCODE_BACK||KeyEvent.KEYCODE_HOME==keyCode||KeyEvent.KEYCODE_SEARCH==keyCode)){
+	 			return false;
+			}
+	    	return super.onKeyUp(keyCode, event);
+		}
+	}
+	private class UniMagTopDialogYESNO extends Dialog{
+
+		public UniMagTopDialogYESNO(Context context) {
+			super(context);
+		}
+
+	    @Override
+		public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    	if ((keyCode == KeyEvent.KEYCODE_BACK||KeyEvent.KEYCODE_HOME==keyCode||KeyEvent.KEYCODE_SEARCH==keyCode)){
+				return false;
+			}
+			return super.onKeyDown(keyCode, event);
+		}
+
+		@Override
+		public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
+	    	if ((keyCode == KeyEvent.KEYCODE_BACK||KeyEvent.KEYCODE_HOME==keyCode||KeyEvent.KEYCODE_SEARCH==keyCode)){
+	    		 
+				return false;
+			}	return super.onKeyMultiple(keyCode, repeatCount, event);
+		}
+
+		@Override
+		public boolean onKeyUp(int keyCode, KeyEvent event) {
+	    	if ((keyCode == KeyEvent.KEYCODE_BACK||KeyEvent.KEYCODE_HOME==keyCode||KeyEvent.KEYCODE_SEARCH==keyCode)){
+	 			return false;
+			}
+	    	return super.onKeyUp(keyCode, event);
+		}
+	}
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+	    
+	    if (newConfig.orientation ==
+	        Configuration.ORIENTATION_LANDSCAPE)
+	    {
+	    	//you can make sure if you would change it
+	    }
+	    if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+	    {
+	    	//you can make sure if you would change it
+	    }
+	    if (newConfig.keyboardHidden == Configuration.KEYBOARDHIDDEN_NO)
+	    {
+	    	//you can make sure if you need change it
+	    }
+		super.onConfigurationChanged(newConfig);
+	}
+
+	private void showTopDialog(String strTitle)
+	{
+		hideTopDialog();
+		if(dlgTopShow==null)
+			dlgTopShow = new UniMagTopDialog(this);
+		try
+		{
+			Window win = dlgTopShow.getWindow();
+			win.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+			dlgTopShow.setTitle("UniMag");
+			dlgTopShow.setContentView(R.layout.dlgtopview );
+			TextView myTV = (TextView)dlgTopShow.findViewById(R.id.TView_Info);
+			
+			myTV.setText(popupDialogMsg);
+//			dlgTopShow.setOnKeyListener(new OnKeyListener(){
+//				public boolean onKey(DialogInterface dialog, int keyCode,
+//						KeyEvent event) {
+//					if ((keyCode == KeyEvent.KEYCODE_BACK)){
+//						return false;
+//					}
+//					return true;
+//				}
+//			});
+//	        dlgTopShow.show();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			dlgTopShow = null;
+		}
+	};	
+	private void hideTopDialog( )
+	{
+		if(dlgTopShow!=null)
+		{
+			try{
+ 			dlgTopShow.hide();
+ 			dlgTopShow.dismiss();
+			}
+			catch(Exception ex)
+			{
+			
+				ex.printStackTrace();
+			}
+ 			dlgTopShow = null;
+		}
+	};	
+	
+	private void showSwipeTopDialog( )
+	{
+		hideSwipeTopDialog();
+		try{
+			
+			if(dlgSwipeTopShow==null)
+				dlgSwipeTopShow = new UniMagTopDialog(this);
+			
+			Window win = dlgSwipeTopShow.getWindow();
+			win.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+			dlgSwipeTopShow.setTitle("UniMag");
+			dlgSwipeTopShow.setContentView(R.layout.dlgswipetopview );
+			TextView myTV = (TextView)dlgSwipeTopShow.findViewById(R.id.TView_Info);
+			Button myBtn = (Button)dlgSwipeTopShow.findViewById(R.id.btnCancel);
+			
+			myTV.setText(popupDialogMsg);
+			myBtn.setOnClickListener(new Button.OnClickListener()
+			{
+				public void onClick(View v) {
+					if(itemStartSC!=null)
+						itemStartSC.setEnabled(true); 
+					//stop swipe
+					myUniMagReader.stopSwipeCard();
+					if (dlgSwipeTopShow != null) {
+						statusText = "Swipe card cancelled.";
+						msrData = null;
+						handler.post(doUpdateStatus);
+						dlgSwipeTopShow.dismiss();
+					}
+				}
+			});
+//			dlgSwipeTopShow.setOnKeyListener(new OnKeyListener(){
+//				public boolean onKey(DialogInterface dialog, int keyCode,
+//						KeyEvent event) {
+//					if ((keyCode == KeyEvent.KEYCODE_BACK)){
+//						return false;
+//					}
+//					return true;
+//				}
+//			});
+//			dlgSwipeTopShow.show();	 
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	};	
+	private void showYesNoDialog( )
+	{
+		hideSwipeTopDialog();
+		try{
+			
+			if(dlgYESNOTopShow==null)
+				dlgYESNOTopShow = new UniMagTopDialogYESNO(PosMainActivity.this);
+			
+			Window win = dlgYESNOTopShow.getWindow();
+			win.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+			dlgYESNOTopShow.setTitle("Warning");
+			 
+			dlgYESNOTopShow.setContentView(R.layout.dlgtopview2bnt );
+			TextView myTV = (TextView)dlgYESNOTopShow.findViewById(R.id.TView_Info);
+			myTV.setTextColor(0xFF0FF000);
+			Button myBtnYES = (Button)dlgYESNOTopShow.findViewById(R.id.btnYes);
+			Button myBtnNO = (Button)dlgYESNOTopShow.findViewById(R.id.btnNo);
+			
+		//	myTV.setText("Warrning, Now will Update Firmware if you press 'YES' to update, or 'No' to cancel");
+			myTV.setText("Upgrading the firmware might cause the device to not work properly. \nAre you sure you want to continue? ");
+			myBtnYES.setOnClickListener(new Button.OnClickListener()
+			{
+				public void onClick(View v) {
+					updateFirmware_exTools();
+					dlgYESNOTopShow.dismiss();
+				}
+			});
+			myBtnNO.setOnClickListener(new Button.OnClickListener()
+			{
+				public void onClick(View v) {
+					dlgYESNOTopShow.dismiss();
+				}
+			});
+//			dlgYESNOTopShow.setOnKeyListener(new OnKeyListener(){
+//				public boolean onKey(DialogInterface dialog, int keyCode,
+//						KeyEvent event) {
+//					if ((keyCode == KeyEvent.KEYCODE_BACK)){
+//						return false;
+//					}
+//					return true;
+//				}
+//			});
+//			dlgYESNOTopShow.show();	 
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	};	
+	private void hideSwipeTopDialog( )
+	{
+		try
+		{
+			if(dlgSwipeTopShow!=null)
+			{
+				dlgSwipeTopShow.hide();
+				dlgSwipeTopShow.dismiss();
+				dlgSwipeTopShow = null;	
+			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	};
+
+	// implementing a method onReceiveMsgCardData, defined in uniMagReaderMsg interface
+	// receiving card data here
+	public void onReceiveMsgCardData(byte flagOfCardData,byte[] cardData) {
+		byte flag = (byte) (flagOfCardData&0x04);
+//		Log.d("Demo Info >>>>> onReceive flagOfCardData="+flagOfCardData,"CardData="+ getHexStringFromBytes(cardData));
+
+		if(flag==0x00)
+			strMsrData = new String (cardData);
+		if(flag==0x04)
+		{
+			//You need to decrypt the data here first.
+			strMsrData = new String (cardData);
+		}
+		msrData = new byte[cardData.length];
+		System.arraycopy(cardData, 0, msrData, 0, cardData.length);
+		enableSwipeCard = true;
+		handler.post(doHideTopDlg);
+		handler.post(doHideSwipeTopDlg);
+		handler.post(doUpdateTVS);
+	}
+	
+	// implementing a method onReceiveMsgConnected, defined in uniMagReaderMsg interface
+	// receiving a message that the uniMag device has been connected	
+	public void onReceiveMsgConnected() {
+		
+		isReaderConnected = true;
+		if(percent==0)
+		{
+			if(profile!=null)
+			{
+				if(profile.getModelNumber().length()>0)
+					statusText = "Now the UniMag Unit is connected.("+getTimeInfoMs(beginTime)+"s, with profile "+profile.getModelNumber()+")";
+				else statusText = "Now the UniMag Unit is connected.("+getTimeInfoMs(beginTime)+"s)";
+			}
+			else
+				statusText = "Now the UniMag Unit is connected."+" ("+getTimeInfoMs(beginTime)+"s)";
+		}
+		else
+		{
+			if(profile!=null)
+				statusText = "Now the UniMag Unit is connected.("+getTimeInfoMs(beginTime)+"s, "+"Profile found at "+percent +"% named "+profile.getModelNumber()+",auto config last " +getTimeInfoMs(beginTimeOfAutoConfig)+"s)";
+			else
+				statusText = "Now the UniMag Unit is connected."+" ("+getTimeInfoMs(beginTime)+"s, "+"Profile found at "+percent +"%,auto config last " +getTimeInfoMs(beginTimeOfAutoConfig)+"s)";
+			percent = 0;
+		}		
+		handler.post(doHideTopDlg);
+		handler.post(doHideSwipeTopDlg);
+		handler.post(doUpdateTV);
+		handler.post(doUpdateToast);
+		msrData = null;
+		handler.post(doUpdateStatus);	
+		handler.post(doUpdateAutoConfigProgressInfo);
+
+	}
+
+	// implementing a method onReceiveMsgDisconnected, defined in uniMagReaderMsg interface
+	// receiving a message that the uniMag device has been disconnected		
+	public void onReceiveMsgDisconnected() {
+		percent=0;
+		strProgressInfo=null;
+		isReaderConnected = false;
+		isWaitingForCommandResult=false;
+		autoconfig_running=false;
+		handler.post(doHideTopDlg);
+		handler.post(doHideSwipeTopDlg);
+		handler.post(doUpdateTV);
+		showAboutInfo();
+	}
+	// implementing a method onReceiveMsgTimeout, defined in uniMagReaderMsg inteface
+	// receiving a timeout message for powering up or card swipe		
+	public void onReceiveMsgTimeout(String strTimeoutMsg) {
+		isWaitingForCommandResult=false;
+		enableSwipeCard = true;
+		handler.post(doHideTopDlg);
+		handler.post(doHideSwipeTopDlg);
+		statusText = strTimeoutMsg+"("+getTimeInfo(beginTime)+")";
+		msrData = null;
+		handler.post(doUpdateStatus);
+	}
+	// implementing a method onReceiveMsgToConnect, defined in uniMagReaderMsg interface
+	// receiving a message when SDK starts powering up the UniMag device		
+	public void onReceiveMsgToConnect(){ 
+		beginTime = System.currentTimeMillis();
+		handler.post(doHideTopDlg);
+		handler.post(doHideSwipeTopDlg);
+		popupDialogMsg = "Powering up uniMag...";
+		handler.post(doShowTopDlg);
+	}
+	// implementing a method onReceiveMsgToSwipeCard, defined in uniMagReaderMsg interface
+	// receiving a message when SDK starts recording, then application should ask user to swipe a card		
+	public void onReceiveMsgToSwipeCard() {
+		handler.post(doHideTopDlg);
+		handler.post(doHideSwipeTopDlg);
+		popupDialogMsg = "Please swipe card.";
+		handler.post(doShowSwipeTopDlg);
+	}
+	// implementing a method onReceiveMsgProcessingCardData, defined in uniMagReaderMsg interface
+	// receiving a message when SDK detects data coming from the UniMag reader
+	// The main purpose is to give early notification to user to wait until SDK finishes processing card data.
+	public void onReceiveMsgProcessingCardData() {
+		statusText = "Card data is being processed. Please wait.";
+		msrData = null;
+		handler.post(doUpdateStatus);
+	}
+	// this method has been depricated, and will not be called in this version of SDK. 
+	public void onReceiveMsgSDCardDFailed(String strSDCardFailed)
+	{
+		popupDialogMsg = strSDCardFailed;
+		handler.post(doHideTopDlg);
+		handler.post(doHideSwipeTopDlg);		
+		handler.post(doShowTimeoutMsg);
+	}
+	// Setting a permission for user	
+	public boolean getUserGrant(int type, String strMessage) {
+		Log.d("Demo Info >>>>> getUserGrant:",strMessage);
+		boolean getUserGranted = false;
+		switch(type)
+		{
+		case uniMagReaderMsg.typeToPowerupUniMag:
+			//pop up dialog to get the user grant
+			getUserGranted = true;
+			break;
+		case uniMagReaderMsg.typeToUpdateXML:
+			//pop up dialog to get the user grant
+			getUserGranted = true;
+			break;
+		case uniMagReaderMsg.typeToOverwriteXML:
+			//pop up dialog to get the user grant
+			getUserGranted = true;
+			break;
+		case uniMagReaderMsg.typeToReportToIdtech:
+			//pop up dialog to get the user grant
+			getUserGranted = true;
+			break;
+		default:
+			getUserGranted = false;
+			break;
+		}
+		return getUserGranted;
+	}
+	// implementing a method onReceiveMsgFailureInfo, defined in uniMagReaderMsg interface
+	// receiving a message when SDK could not find a profile of the phone	
+	public void onReceiveMsgFailureInfo(int index, String strMessage) {
+		isWaitingForCommandResult = false;
+		
+		// If AutoConfig found a profile before and saved into db, then retreive it and connect.
+		if (profileDatabase.updateProfileFromDB()) {
+			this.profile = profileDatabase.getProfile();
+    		showAboutInfo();
+			handler.post(doConnectUsingProfile);
+		} else {
+			statusText = "Failure index: "+index+", message: "+strMessage;
+			msrData = null;
+			handler.post(doUpdateStatus);
+		}
+		//Cannot support current phone in the XML file.
+		//start to Auto Config the parameters
+		if(myUniMagReader.startAutoConfig(false)==true)
+		{
+			beginTime = getCurrentTime();
+		}
+	}
+	// implementing a method onReceiveMsgCommandResult, defined in uniMagReaderMsg interface
+	// receiving a message when SDK is able to parse a response for commands from the reader
+	public void onReceiveMsgCommandResult(int commandID, byte[] cmdReturn) {
+		Log.d("Demo Info >>>>> onReceive commandID="+commandID,",cmdReturn="+ getHexStringFromBytes(cmdReturn));
+		isWaitingForCommandResult = false;
+		
+		if (cmdReturn.length > 1){
+			if (6==cmdReturn[0]&&(byte)0x56==cmdReturn[1])
+			{
+				statusText = "Failed to send command. Attached reader is in boot loader mode. Format:<"+getHexStringFromBytes(cmdReturn)+">";
+				handler.post(doUpdateStatus);
+				return;
+			}
+		}
+		
+		switch(commandID)
+		{
+		case uniMagReaderMsg.cmdGetNextKSN:
+			if(0==cmdReturn[0])
+				statusText = "Get Next KSN timeout.";
+			else if(6==cmdReturn[0])
+				statusText = "Get Next KSN Succeed.";
+			else
+				statusText = "Get Next KSN failed.";
+			break;
+		case uniMagReaderMsg.cmdEnableAES:
+			if(0==cmdReturn[0])
+				statusText = "Turn on AES timeout.";
+			else if(6==cmdReturn[0])
+				statusText = "Turn on AES Succeed.";
+			else
+				statusText = "Turn on AES failed.";
+			break;
+		case uniMagReaderMsg.cmdEnableTDES:
+			if(0==cmdReturn[0])
+				statusText = "Turn on TDES timeout.";
+			else if(6==cmdReturn[0])
+				statusText = "Turn on TDES Succeed.";
+			else
+				statusText = "Turn on TDES failed.";
+			break;
+		case uniMagReaderMsg.cmdGetVersion:
+			if(0==cmdReturn[0])
+				statusText = "Get Version timeout.";
+			else if(6==cmdReturn[0]&&2==cmdReturn[1]&&3==cmdReturn[cmdReturn.length-2])
+			{
+				statusText = null;
+				byte cmdDataX[]  = new byte[cmdReturn.length-4];
+				System.arraycopy(cmdReturn, 2, cmdDataX, 0, cmdReturn.length-4);
+				statusText = "Get Version:"+new String(cmdDataX);
+			}
+			else
+			{
+				statusText = "Get Version failed, Error Format:<"+ getHexStringFromBytes(cmdReturn)+">";
+			}
+			break;
+		case uniMagReaderMsg.cmdGetSerialNumber:
+			if(0==cmdReturn[0])
+				statusText = "Get Serial Number timeout.";
+			else if(6==cmdReturn[0]&&2==cmdReturn[1]&&3==cmdReturn[cmdReturn.length-2])
+			{
+				statusText = null;
+				byte cmdDataX[]  = new byte[cmdReturn.length-4];
+				System.arraycopy(cmdReturn, 2, cmdDataX, 0, cmdReturn.length-4);
+				statusText = "Get Serial Number:"+new String(cmdDataX);
+			}
+			else
+			{
+				statusText = "Get Serial Number failed, Error Format:<"+ getHexStringFromBytes(cmdReturn)+">";
+			}
+			break;
+		case uniMagReaderMsg.cmdGetAttachedReaderType:
+			int readerType = cmdReturn[0];
+			ReaderType art = getAttachedReaderType(readerType);
+			statusText = "Attached Reader:\n   "+getReaderName(art) ;
+			msrData = null;
+			handler.post(doUpdateStatus);
+			return;
+		
+		case uniMagReaderMsg.cmdGetSettings:
+			if(0==cmdReturn[0])
+				statusText = "Get Setting timeout.";
+			else if(6==cmdReturn[0]&&2==cmdReturn[1]&&3==cmdReturn[cmdReturn.length-2])
+			{
+				byte cmdDataX[]  = new byte[cmdReturn.length-4];
+				System.arraycopy(cmdReturn, 2, cmdDataX, 0, cmdReturn.length-4);
+				statusText = "Get Setting:"+ getHexStringFromBytes(cmdDataX);
+				cmdDataX=null;
+			}
+			else
+			{
+				statusText = "Get Setting failed, Error Format:<"+ getHexStringFromBytes(cmdReturn)+">";
+			}
+			break;
+		case uniMagReaderMsg.cmdClearBuffer :
+			if(0==cmdReturn[0])
+				statusText = "Clear Buffer timeout.";
+			else if(6==cmdReturn[0] )
+				statusText = "Clear Buffer Succeed.";
+			else if(21==cmdReturn[0])
+				statusText = "Clear Buffer failed.";
+			else
+			{
+				statusText = "Clear Buffer, Error Format:<"+ getHexStringFromBytes(cmdReturn)+">";
+			}
+			break;
+
+		default:
+			break;
+		}
+		msrData = null;
+		msrData = new byte[cmdReturn.length];
+		System.arraycopy(cmdReturn, 0, msrData, 0, cmdReturn.length);
+		handler.post(doUpdateStatus);
+	}
+	// implementing a method onReceiveMsgChallengeResult, defined in uniMagReaderToolsMsg interface
+	// receiving a message when SDK is able to parse a response for get challenge command from the reader
+	public void onReceiveMsgChallengeResult(int returnCode,byte[] data) {
+		isWaitingForCommandResult = false;
+		switch(returnCode)
+		{
+		case uniMagReaderToolsMsg.cmdGetChallenge_Succeed_WithChallengData:
+			challengeResult = cmdGetChallenge_Succeed_WithChallengData;
+			//show the challenge data and enable edit the hex text view
+			if(6==data[0]&&2==data[1]&&3==data[data.length-2])
+			{
+				statusText = null;
+				byte cmdChallengeData[]  = new byte[8];
+				System.arraycopy(data, 2, cmdChallengeData, 0, 8);
+				byte cmdChallengeData_encyption[]  = new byte[8];
+				System.arraycopy(data, 2, cmdChallengeData_encyption, 0, 8);
+				
+				byte cmdChallengeData_KSN[]  = new byte[10];
+				System.arraycopy(data, 10, cmdChallengeData_KSN, 0, 10);
+				statusText = "Challenge Data:<"+ 
+							getHexStringFromBytes(cmdChallengeData)+"> "+"\n"+"KSN:<"+  
+							getHexStringFromBytes(cmdChallengeData_KSN)+">"+"\n"+
+							"please enter "+firmwareUpdateTool.getRequiredChallengeResponseLength()+"-byte challenge response below, as hex, then update firmware.";
+			} 
+			else {
+				statusText = "Get Challenge failed, Error Format:<"+ getHexStringFromBytes(data)+">";
+			}
+
+			break;
+		case uniMagReaderToolsMsg.cmdGetChallenge_Succeed_WithFileVersion:
+			challengeResult = cmdGetChallenge_Succeed_WithFileVersion;
+			if(6==data[0]&&((byte)0x56)==data[1] )
+			{
+				statusText = null;
+				byte cmdFileVersion[]  = new byte[2];
+				System.arraycopy(data, 2, cmdFileVersion, 0, 2);
+				char fileVersionHigh=(char) cmdFileVersion[0];
+				char fileVersionLow=(char) cmdFileVersion[1];
+				
+				statusText = "Already in boot load mode, and the file version is "+fileVersionHigh+"."+fileVersionLow+"\n" +
+								"Please update firmware directly.";
+			} else
+			{
+				statusText = "Get Challenge failed, Error Format:<"+ getHexStringFromBytes(data)+">";
+			}
+
+			break;
+		case uniMagReaderToolsMsg.cmdGetChallenge_Failed:
+			statusText = "Get Challenge failed, please try again.";
+
+			break;
+		case uniMagReaderToolsMsg.cmdGetChallenge_NeedSetBinFile:
+			statusText = "Get Challenge failed, need to set BIN file first.";
+			break;
+		case uniMagReaderToolsMsg.cmdGetChallenge_Timeout:
+			statusText = "Get Challenge timeout.";
+			break;
+		default:
+			break;
+		}
+		msrData = null;
+		handler.post(doUpdateChallengeData);
+ 		
+	}
+	// implementing a method onReceiveMsgUpdateFirmwareProgress, defined in uniMagReaderToolsMsg interface
+	// receiving a message of firmware update progress	
+	public void onReceiveMsgUpdateFirmwareProgress(int progressValue) {
+		Log.d("Demo Info >>>>> UpdateFirmwareProgress" ,"v = "+progressValue);
+		statusText = "Updating firmware, "+progressValue+"% finished.";
+		msrData = null;
+		handler.post(doUpdateStatus);
+		
+	}
+	// implementing a method onReceiveMsgUpdateFirmwareResult, defined in uniMagReaderToolsMsg interface
+	// receiving a message when firmware update has been finished	
+	public void onReceiveMsgUpdateFirmwareResult(int result) {
+		isWaitingForCommandResult = false;		
+
+		switch(result)
+		{
+		case uniMagReaderToolsMsg.cmdUpdateFirmware_Succeed:
+			statusText = "Update firmware succeed.";
+			break;
+		case uniMagReaderToolsMsg.cmdUpdateFirmware_NeedSetBinFile:
+			statusText = "Update firmware failed, need to set BIN file first";
+			break;
+		case uniMagReaderToolsMsg.cmdUpdateFirmware_NeedGetChallenge:
+			statusText = "Update firmware failed, need to get challenge first.";
+			break;
+		case uniMagReaderToolsMsg.cmdUpdateFirmware_Need8BytesData:
+			statusText = "Update firmware failed, need input 8 bytes data.";
+			break;
+		case uniMagReaderToolsMsg.cmdUpdateFirmware_Need24BytesData:
+			statusText = "Update firmware failed, need input 24 bytes data.";
+			break;
+		case uniMagReaderToolsMsg.cmdUpdateFirmware_EnterBootloadModeFailed:
+			statusText = "Update firmware failed, cannot enter boot load mode.";
+			break;
+		case uniMagReaderToolsMsg.cmdUpdateFirmware_DownloadBlockFailed:
+			statusText = "Update firmware failed, cannot download block data.";
+			break;
+		case uniMagReaderToolsMsg.cmdUpdateFirmware_EndDownloadBlockFailed:
+			statusText = "Update firmware failed, cannot end download block.";
+			break;
+		case uniMagReaderToolsMsg.cmdUpdateFirmware_Timeout:
+			statusText = "Update firmware timeout.";
+			break;
+		}
+		Log.d("Demo Info >>>>> UpdateFirmwareResult" ,"v = "+result);
+		msrData = null;
+		handler.post(doUpdateStatus);
+			
+	}
+	// implementing a method onReceiveMsgAutoConfigProgress, defined in uniMagReaderMsg interface
+	// receiving a message of Auto Config progress	
+	public void onReceiveMsgAutoConfigProgress(int progressValue) {
+		Log.d("Demo Info >>>>> AutoConfigProgress" ,"v = "+progressValue);
+		percent = progressValue;
+		statusText = "Searching the configuration automatically, "+progressValue+"% finished."+"("+getTimeInfo(beginTime)+")";
+		msrData = null;
+		beginTimeOfAutoConfig = beginTime;
+		handler.post(doUpdateAutoConfigProgress);
+	}
+	public void onReceiveMsgAutoConfigProgress(int percent, double result,
+			String profileName) {
+		if(strProgressInfo==null)
+			strProgressInfo="("+profileName+ ") <"+percent+"%>,Result="+Common.getDoubleValue(result);
+		else
+			strProgressInfo+="\n("+profileName+ ") <"+percent+"%>,Result="+Common.getDoubleValue(result);
+    	Log.d("**__@__**","demo = "+strProgressInfo);
+		handler.post(doUpdateAutoConfigProgressInfo);
+	}
+
+	public void onReceiveMsgAutoConfigCompleted(StructConfigParameters profile) {
+		Log.d("Demo Info >>>>> AutoConfigCompleted" ,"A profile has been found, trying to connect...");
+		autoconfig_running = false;
+		beginTimeOfAutoConfig = beginTime;
+		this.profile = profile;
+		profileDatabase.setProfile(profile);
+		profileDatabase.insertResultIntoDB();
+		handler.post(doConnectUsingProfile);
+	}
+
+	public void getChallenge()
+	{
+		getChallenge_exTools();
+	}
+	public void updateFirmware()
+	{
+		if (isReaderConnected)
+			handler.post(doShowYESNOTopDlg);
+		else 
+			Toast.makeText(this, "Please connect a reader first.", Toast.LENGTH_SHORT).show();
+	}
+	private void getChallenge_exTools()
+	{
+		if (firmwareUpdateTool != null)
+		{
+			if (firmwareUpdateTool.getChallenge() == true)
+			{
+				isWaitingForCommandResult = true;
+				// show to get challenge
+				statusText = " To Get Challenge, waiting for response.";
+				msrData = null;
+				handler.post(doUpdateStatus);
+			}
+		}
+	}	
+	private void updateFirmware_exTools()
+	{
+		if (firmwareUpdateTool != null)
+		{
+			String strData = textAreaBottom.getText().toString();
+			
+			if(strData.length()>0)
+			{
+				challengeResponse = getBytesFromHexString(strData);
+				if(challengeResponse==null)
+				{
+					statusText = "Invalidate challenge data, please input hex data.";
+					msrData = null;
+					handler.post(doUpdateStatus);				
+					return;
+				}
+			}
+			else
+				challengeResponse=null;
+
+			isWaitingForCommandResult = true;
+			if (firmwareUpdateTool.updateFirmware(challengeResponse) == true)
+			{
+				statusText = " To Update Firmware, waiting for response.";
+				msrData = null;
+				handler.post(doUpdateStatus);				
+			}
+		}
+	}	
+	public void prepareToSendCommand(int cmdID)
+	{
+		isWaitingForCommandResult = true;
+		switch(cmdID)
+		{
+		case uniMagReaderMsg.cmdGetNextKSN:
+			statusText = " To Get Next KSN, wait for response.";
+			break;
+		case uniMagReaderMsg.cmdEnableAES:
+			statusText = " To Turn on AES, wait for response.";
+			break;
+		case uniMagReaderMsg.cmdEnableTDES:
+			statusText = " To Turn on TDES, wait for response.";
+			break;
+		case uniMagReaderMsg.cmdGetVersion:
+			statusText = " To Get Version, wait for response.";
+			break;
+		case uniMagReaderMsg.cmdGetSettings:
+			statusText = " To Get Setting, wait for response.";
+			break;
+		case uniMagReaderMsg.cmdGetSerialNumber:
+			statusText = " To Get Serial Number, wait for response.";
+			break;
+		case uniMagReaderMsg.cmdClearBuffer:
+			statusText = " To Clear Buffer, wait for response.";
+			break;
+		default:
+			break;
+		}
+		msrData = null;
+		handler.post(doUpdateStatus);
+	}
+	private String getHexStringFromBytes(byte []data)
+    {
+		if(data.length<=0) 
+			return null;
+		StringBuffer hexString = new StringBuffer();
+		String fix = null;
+		for (int i = 0; i < data.length; i++) {
+			fix = Integer.toHexString(0xFF & data[i]);
+			if(fix.length()==1)
+				fix = "0"+fix;
+			hexString.append(fix);
+		}
+		fix = null;
+		fix = hexString.toString();
+		return fix;
+    }
+    public byte[] getBytesFromHexString(String strHexData)
+	{
+	    if (1==strHexData.length()%2) {
+	    	return null;
+	    }
+	    byte[] bytes = new byte[strHexData.length()/2];
+	    try{
+		    for (int i=0;i<strHexData.length()/2;i++) {
+		    	bytes[i] = (byte) Integer.parseInt(strHexData.substring(i*2, (i+1)*2) , 16);
+		    }
+	    }
+	    catch(Exception ex)
+	    {
+	    	ex.printStackTrace();
+	    	return null;
+	    }
+	    return bytes;
+	}
+	static private String getMyStorageFilePath( ) {
+		String path = null;
+		if(isStorageExist())
+			path = Environment.getExternalStorageDirectory().toString();
+		return path;
+	}
+	private boolean isFileExist(String path) {
+    	if(path==null)
+    		return false;
+	    File file = new File(path);
+	    if (!file.exists()) {
+	      return false ;
+	    }
+	    return true;
+    }
+	static private boolean isStorageExist() {
+		//if the SD card exists
+		boolean sdCardExist = Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
+		return sdCardExist;
+	}
+	private long getCurrentTime(){
+		return System.currentTimeMillis();
+	}
+	private String getTimeInfo(long timeBase){
+		int time = (int)(getCurrentTime()-timeBase)/1000;
+		int hour = (int) (time/3600);
+		int min = (int) (time/60);
+		int sec= (int) (time%60);
+		return  hour+":"+min+":"+sec;
+	}
+	private String getTimeInfoMs(long timeBase){
+		float time = (float)(getCurrentTime()-timeBase)/1000;
+		String strtime = String.format("%03f",time);
+		return  strtime;
+	}
+	
+	public class Dialog_swipcard {
+		private Activity activity;
+		private Context context;
+	
+		
+		private ImageView img_close;
+		private Button bt_ok;
+		
+		
+		public Dialog_swipcard(Context _context, Activity _activity) {
+			this.context = _context;
+			this.activity = _activity;
+			mainDialog = new Dialog(context);
+			mainDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+			mainDialog.setContentView(R.layout.dilaog_swip);
+			mainDialog.show();
+			mainDialog.setCancelable(false);
+			
+			editText_CreditCard1 = (EditText) mainDialog.findViewById(R.id.editText_CreditCard);
+			editText_ExpMonth1 =(EditText) mainDialog.findViewById(R.id.editText_ExpMonth);
+			editText_ExpYear1 = (EditText) mainDialog.findViewById(R.id.editText_ExpYear);
+			editText_Cvv =  (EditText) mainDialog.findViewById(R.id.editText_Cvv);
+			
+			System.out.println("mGrandTotal dialog"+mGrandTotal);
+			
+			bt_ok = (Button) mainDialog.findViewById(R.id.bt_ok);
+			
+
+			if (PosMainActivity.this.myUniMagReader!=null)
+			{	
+				if (!PosMainActivity.this.isWaitingForCommandResult) 
+				{
+					if(PosMainActivity.this.myUniMagReader.startSwipeCard())
+					{
+						PosMainActivity.this.headerTextView.setText("MSR Data");
+						PosMainActivity.this.textAreaTop.setText("");
+						PosMainActivity.this.textAreaBottom.setText("");
+						Log.d("Demo Info >>>>>","to startSwipeCard");
+					}
+					else
+						Log.d("Demo Info >>>>>","cannot startSwipeCard");
+				}
+			}
+		
+			
+			
+			img_close = (ImageView) mainDialog.findViewById(R.id.img_close);
+			img_close.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					mainDialog.dismiss();
+				}
+			});
+			
+			bt_ok.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					
+					String cardno = editText_CreditCard1.getText().toString().trim();
+					String month = editText_ExpMonth1.getText().toString().trim();
+					String Year = editText_ExpYear1.getText().toString().trim();
+					Text_Cvv = editText_Cvv.getText().toString().trim();
+					
+					if(cardno.equals("")){
+						Toast.makeText(context, "Please Enter card no", Toast.LENGTH_LONG).show();
+					}else {
+						if(month.equals("")){
+							Toast.makeText(context, "Please Enter month", Toast.LENGTH_LONG).show();
+						}else {
+							if(Year.equals("")){
+								Toast.makeText(context, "Please Enter Year", Toast.LENGTH_LONG).show();
+							}else {
+								if(Text_Cvv.equals("")){
+									Toast.makeText(context, "Please Enter Cvv no", Toast.LENGTH_LONG).show();
+								}else {
+									
+									String Athorize = session.getData("Athorize");
+									
+//									if(Athorize.equalsIgnoreCase("login") ){
+									
+									HashMap<String, String> map=new HashMap<String, String>();
+									map.put("CardNumber",""+editText_CreditCard1.getText().toString().trim());
+									map.put("EXPMonth",""+editText_ExpMonth1.getText().toString().trim());
+									map.put("EXPYear",""+editText_ExpYear1.getText().toString().trim());
+									map.put("Total",""+mGrandTotal);
+									map.put("Cvv",Text_Cvv);
+									
+									AppConstant.arrayList_Details.add(map);
+//									initAuthNet();
+									
+									Intent i = new Intent(PosMainActivity.this,TransationActivity.class);
+									startActivityForResult(i, 1000);
+									
+//									}else {
+//										Toast.makeText(PosMainActivity.this, "Please Select one payment gateway to do  the transation From setting page", Toast.LENGTH_LONG).show();
+//									}
+								}
+							}
+						}
+					}
+				}
+			});
+		}
+	}
+	
+	private void setSwipcard(String strMsrData2) {
+		System.out.println("hexString data text1 "+strMsrData2.substring(2,strMsrData.indexOf("^")));
+    	
+    	System.out.println("hexString data year "+strMsrData2.split("\\/\\^")[1].substring(0, 2));
+    	
+    	System.out.println("hexString data month "+strMsrData2.split("\\/\\^")[1].substring(2, 4));
+		
+		editText_CreditCard1.setText(""+strMsrData2.substring(2,strMsrData.indexOf("^")));
+		editText_ExpMonth1.setText(""+strMsrData2.split("\\/\\^")[1].substring(2, 4));
+		editText_ExpYear1.setText(""+strMsrData2.split("\\/\\^")[1].substring(0, 2));
+	}
+	
+	public void Clear_all_display(){
+System.out.println("Clear_all_display");
+		// TODO Auto-generated method stub
+		mainDialog.dismiss();
+		alertDialogtop.dismiss();
+		mItemList.clear();
+		mAdapter.notifyDataSetChanged();
+		mSelectedItem = null;
+		mSelectedPosition = -1;
+		if (mItemList.isEmpty()) {
+			mSubTotal = 0;
+			mTaxTotal = 0;
+			fetchOnHoldButton.setTag("1");
+			fetchOnHoldButton.setText("Fetch On Hold");
+			subTotalView.setText(String.valueOf("$" + mSubTotal));
+			taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+			grandTotalview.setText(String.valueOf("$" + mSubTotal));
+		}
+	}
 }
