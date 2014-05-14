@@ -23,7 +23,7 @@ public class MenuActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.menu_activity);
-			Parameters.ServerSyncTimer();
+		Parameters.ServerSyncTimer();
 		Parameters.printerContext=MenuActivity.this;
 		mGridView = (GridView) findViewById(R.id.menuGrid);
 		logout = (ImageView) findViewById(R.id.logoutbutton);
