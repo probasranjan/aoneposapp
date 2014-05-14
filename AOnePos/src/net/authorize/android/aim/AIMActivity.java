@@ -3,9 +3,11 @@ package net.authorize.android.aim;
 import java.math.BigDecimal;
 import java.util.HashMap;
 
+import net.authorize.Environment;
 import net.authorize.ResponseCode;
 import net.authorize.ResponseReasonCode;
 import net.authorize.TransactionType;
+import net.authorize.android.AuthNet;
 import net.authorize.android.AuthNetActivityBase;
 import net.authorize.android.SDKActivity;
 import net.authorize.android.SimpleActivity;
@@ -59,9 +61,9 @@ public class AIMActivity extends SimpleActivity implements OnClickListener {
     LinearLayout layout = (LinearLayout) findViewById(R.id.AuthOnlyLayout);
     layout.addView(authOnlyButton);
     // footer
-    SDKActivity.addFooter(this,
-        (LinearLayout) findViewById(R.id.AIMFooterLayout),
-        R.string.aim_footer_text);
+//    SDKActivity.addFooter(this,
+//        (LinearLayout) findViewById(R.id.AIMFooterLayout),
+//        R.string.aim_footer_text);
     
     launchAuthOnlyIntent();
   }
@@ -132,7 +134,10 @@ public class AIMActivity extends SimpleActivity implements OnClickListener {
    * Initialize the BuyNow button.
    */
   private void initAuthNet() {
-    authNetObj = SDKActivity.authNet;
+    authNetObj = AuthNet.getInstance(Environment.SANDBOX,
+            R.layout.authnet_mobile_merchant_auth_dialog, R.id.authnet_loginid_edit,
+            R.id.authnet_password_edit, R.id.authnet_auth_cancel_button,
+            R.id.authnet_auth_login_button);;
 
     // create order
     order = Order.createOrder();
