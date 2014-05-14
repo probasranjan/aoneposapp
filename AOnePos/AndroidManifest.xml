@@ -4,9 +4,13 @@
     android:versionCode="23"
     android:versionName="3.0" >
 
+    <!-- <uses-sdk -->
+    <!-- android:minSdkVersion="12" -->
+    <!-- android:targetSdkVersion="19" /> -->
+
     <uses-sdk
-        android:minSdkVersion="12"
-        android:targetSdkVersion="19" />
+        android:minSdkVersion="5"
+        android:targetSdkVersion="8" />
 
     <uses-permission android:name="android.permission.READ_CONTACTS" >
     </uses-permission>
@@ -243,7 +247,7 @@
             android:screenOrientation="landscape"
             android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
-         <activity
+        <activity
             android:name="com.aoneposapp.mercury.MercuryActivity"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="stateAlwaysHidden" >
@@ -394,6 +398,10 @@
             android:name="net.authorize.android.SDKActivity"
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="landscape" />
+        <activity
+            android:name="net.authorize.android.TransationActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="landscape" />
         <!-- Core Test Harness Activities -->
         <activity
             android:name="net.authorize.android.aim.AIMActivity"
@@ -403,9 +411,14 @@
         <!-- AIM Activities -->
 
         <activity
+            android:name="net.authorize.android.aim.AuthCaptureActivity"
+            android:configChanges="keyboardHidden|orientation" />
+        <activity
             android:name="net.authorize.android.aim.AuthOnlyActivity"
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="landscape" />
+        <activity android:name="com.aoneposapp.firstdata.FileDialog" >
+        </activity>
     </application>
 
 </manifest>
