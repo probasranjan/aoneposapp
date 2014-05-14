@@ -3,16 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     android:background="@drawable/background" >
-<LinearLayout 
+
+    <LinearLayout
         android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
         <WebView
-                        android:id="@+id/webfor_print_pos"
-                        android:layout_width="460dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_height="1200dp" />
-        </LinearLayout>
+            android:id="@+id/webfor_print_pos"
+            android:layout_width="460dp"
+            android:layout_height="1200dp"
+            android:layout_gravity="center_horizontal" />
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/top"
         android:layout_width="match_parent"
@@ -39,8 +42,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
                     android:layout_marginRight="15dp"
                     android:text="POS"
                     android:textColor="@android:color/black"
@@ -49,8 +52,8 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                     android:layout_centerVertical="true"
-                     android:layout_marginLeft="15dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
                     android:src="@drawable/headeraonelogo" />
 
                 <DigitalClock
@@ -64,7 +67,7 @@
                     android:text="DigitalClock"
                     android:textColor="@android:color/black"
                     android:textSize="10sp" />
-                
+
                 <TextView
                     android:id="@+id/loginname"
                     android:layout_width="wrap_content"
@@ -75,8 +78,8 @@
                     android:text="Employee Id:"
                     android:textColor="@android:color/black"
                     android:textSize="10sp" />
-                
-                 <TextView
+
+                <TextView
                     android:id="@+id/loginnameval"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -199,10 +202,10 @@
                                 android:id="@+id/serialNo"
                                 android:layout_width="0dip"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:layout_weight="0.1"
                                 android:background="#d8d5d5"
                                 android:text="S.No"
-                                android:layout_gravity="center_vertical"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="#000000"
                                 android:textStyle="bold" />
@@ -211,9 +214,10 @@
                                 android:id="@+id/itemNo"
                                 android:layout_width="0dip"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:layout_weight="0.3"
                                 android:background="#d8d5d5"
-                                android:text="Item #" android:layout_gravity="center_vertical"
+                                android:text="Item #"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="#000000"
                                 android:textStyle="bold" />
@@ -222,9 +226,10 @@
                                 android:id="@+id/itemInfo"
                                 android:layout_width="0dip"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:layout_weight="0.3"
                                 android:background="#d8d5d5"
-                                android:text="Item info" android:layout_gravity="center_vertical"
+                                android:text="Item info"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="#000000"
                                 android:textStyle="bold" />
@@ -233,9 +238,10 @@
                                 android:id="@+id/quantity"
                                 android:layout_width="0dip"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:layout_weight="0.1"
                                 android:background="#d8d5d5"
-                                android:text="Qty" android:layout_gravity="center_vertical"
+                                android:text="Qty"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="#000000"
                                 android:textStyle="bold" />
@@ -244,15 +250,16 @@
                                 android:id="@+id/price"
                                 android:layout_width="0dip"
                                 android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
                                 android:layout_weight="0.2"
                                 android:background="#d8d5d5"
-                                android:text="Price" android:layout_gravity="center_vertical"
+                                android:text="Price"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="#000000"
                                 android:textStyle="bold" />
 
                             <TextView
-                                android:layout_width="23dp" 
+                                android:layout_width="23dp"
                                 android:layout_height="wrap_content"
                                 android:background="#d8d5d5" />
                         </LinearLayout>
@@ -261,8 +268,8 @@
                             android:id="@+id/itemListView"
                             android:layout_width="match_parent"
                             android:layout_height="340dp"
-                            android:layout_weight="9" 
                             android:layout_marginBottom="3dp"
+                            android:layout_weight="9"
                             android:listSelector="@android:color/darker_gray" >
                         </ListView>
                     </LinearLayout>
@@ -542,9 +549,9 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
                                 android:layout_marginTop="5dp"
                                 android:layout_weight="1"
-                                android:layout_marginRight="5dp"
                                 android:background="@drawable/paybuttonpos"
                                 android:text="Fetch on Hold"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
@@ -578,28 +585,28 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="8dp"
+                                android:layout_marginRight="5dp"
                                 android:layout_marginTop="5dp"
                                 android:layout_weight="1"
-                                     android:layout_marginRight="5dp"
                                 android:background="@drawable/paybuttonpos"
                                 android:text="Recall Invoices"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="@android:color/white"
                                 android:textStyle="bold" />
-                             <Button
+
+                            <Button
                                 android:id="@+id/spilt_invoice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                           
+                                android:layout_marginLeft="8dp"
                                 android:layout_marginTop="5dp"
                                 android:layout_weight="1"
-                                 android:layout_marginLeft="8dp"
                                 android:background="@drawable/paybuttonpos"
                                 android:text="Spilt Invoice"
-                                android:visibility="gone"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:textColor="@android:color/white"
-                                android:textStyle="bold" />
+                                android:textStyle="bold"
+                                android:visibility="gone" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -697,27 +704,29 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_below="@+id/layout_rightMiddleButtonLayout"
-                        android:orientation="horizontal" >
+                        android:orientation="vertical" >
 
-                        <ScrollView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" >
+                        <HorizontalScrollView
+                            android:layout_width="fill_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="2" >
 
                             <LinearLayout
                                 android:id="@+id/deparmentlist"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical" >
+                                android:orientation="horizontal" >
                             </LinearLayout>
-                        </ScrollView>
+                        </HorizontalScrollView>
 
                         <ScrollView
                             android:layout_width="fill_parent"
-                            android:layout_height="wrap_content" >
+                            android:layout_height="0dp"
+                            android:layout_weight="8" >
 
                             <LinearLayout
                                 android:id="@+id/showitemsll"
-                                android:layout_width="wrap_content"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical" >
                             </LinearLayout>
@@ -834,4 +843,156 @@
         </LinearLayout>
     </SlidingDrawer>
 
+    
+<RelativeLayout 
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#2c3e50"
+    android:orientation="vertical" 
+    android:visibility="gone">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal" 
+        android:background="#e74c3c">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Swip Card"
+            android:padding="5dp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/li_bottom"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:orientation="vertical"
+        android:visibility="visible" >
+
+        <EditText
+            android:id="@+id/editText_CreditCard1"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:hint="CREDIT CARD NUMBER"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/editText_ExpMonth1"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:hint="EXP Month"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/editText_ExpYear1"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:hint="EXP Year"
+            android:inputType="number" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/logo"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="#dddddd"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/header_text"
+            android:layout_width="fill_parent"
+            android:layout_height="24sp"
+            android:layout_marginLeft="10dp"
+            android:gravity="bottom"
+            android:text="SDK Info"
+            android:textStyle="bold" >
+        </TextView>
+
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="120dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:background="#ffffff"
+            android:visibility="visible" >
+
+            <TextView
+                android:id="@+id/text_area_top"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text=""
+                android:textSize="14sp" >
+            </TextView>
+        </ScrollView>
+
+        <EditText
+            android:id="@+id/text_area_bottom"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:background="#ffffff"
+            android:text=""
+            android:textSize="14sp"
+            android:visibility="visible" >
+        </EditText>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutBottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="10dp" >
+
+        <Button
+            android:id="@+id/btn_swipeCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Swipe Card" />
+
+        <TextView
+            android:id="@+id/status_text"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:textColor="@android:color/white"
+            android:gravity="center_vertical|center_horizontal" />
+
+        <Button
+            android:id="@+id/btn_command"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Command"
+            android:visibility="invisible" />
+    </LinearLayout>
+
+</RelativeLayout>
 </RelativeLayout>
