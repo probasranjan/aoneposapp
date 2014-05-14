@@ -50,7 +50,7 @@ public class ProfileDatabase {
         
         isUseAutoConfigProfileChecked = useAutoConfigProfileAsDefault();
     }
-	boolean updateProfileFromDB () {
+	public boolean updateProfileFromDB () {
 		try {
 	        cursor = myDb.query(DB_TABLE_PROFILE, new String[]{
 	        		"search_date", 
