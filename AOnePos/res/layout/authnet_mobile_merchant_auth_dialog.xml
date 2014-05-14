@@ -34,7 +34,8 @@
         android:layout_centerHorizontal="true"
         android:singleLine="true"
         android:textColor="#3a2014"
-        android:textSize="16dp" />
+        android:textSize="16dp" 
+        android:text="suyashahire123"/>
 
     <TextView
         android:id="@+id/authnet_password_text"
@@ -57,7 +58,8 @@
         android:password="true"
         android:singleLine="true"
         android:textColor="#3a2014"
-        android:textSize="16dp" />
+        android:textSize="16dp" 
+        android:text="VijayweB123"/>
 
     <TextView
         android:id="@+id/authnet_error_text"
