@@ -43,20 +43,20 @@ public class Parameters {
 	static DatabaseForDemo demodbParam = new DatabaseForDemo(MyApplication.getAppContext());
 	static SQLiteDatabase dbforloginlogoutWrite12 = demodbParam.getWritableDatabase();
 	static SQLiteDatabase dbforloginlogoutRead12 = demodbParam.getReadableDatabase();
-	 public static String usertype = "admin";
-	 public static String userid;
-	 static Print printer1;
-	 public static Timer timer=null;
-	 public static String store_id = "";
-	 public static Context printerContext;
-	 public static boolean PrinterBool=true;
-	 //public static String sessionid;
-	 public static String paymentprocesstype = "Mercury Pay";//Express Manual
-		public static String usertypeloginvalue="";
-		public static String invoiceid_mercury="";
-		 public static String logintime="";
-		 public static String sessionidforloginlogout="";
-		 static DecimalFormat df = new DecimalFormat("#.##");
+	public static String usertype = "admin";
+	public static String userid;
+	static Print printer1;
+	public static Timer timer=null;
+	public static String store_id = "";
+	public static Context printerContext;
+	public static boolean PrinterBool=true;
+	//public static String sessionid;
+	public static String paymentprocesstype = "Mercury Pay";//Express Manual
+	public static String usertypeloginvalue="";
+	public static String invoiceid_mercury="";
+	public static String logintime="";
+	public static String sessionidforloginlogout="";
+	static DecimalFormat df = new DecimalFormat("#.##");
 	static char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 	static char[] numberr = "1234567890".toCharArray();
 	/*public static String DemoUrl="http://www.mydata.ws/aoneposws/webservicedemo/";
@@ -64,6 +64,44 @@ public class Parameters {
 	public static String DemoUrl="";
 	//public static String OriginalUrl="http://192.168.1.6/xampp/sites/aone/crm/ws/sridevitech/";
 	public static String OriginalUrl="";
+//	public static String MyTempLocalServerURL = "http://development.dev01.vijaywebsolutions.com/ABCBurger/";
+	public static String MyTempLocalServerURL = "http://www.mydata.ws/aoneposws/kababmenu/";
+	public static String URL_UploadCSVForSynchronize = MyTempLocalServerURL+"synchronization.php";
+//	public static String OriginalUrl="http://192.168.2.122/ABCBurger/";
+//	public static String OriginalUrl="http://www.mydata.ws/aoneposws/webserviceoriginal/";
+	
+	//tables that to be Synchronize
+	public static final String[] table_names = {
+			"admin_details",
+			"alternate_sku",
+			"category_details",
+			"customer_extended_info_table",
+			"customer_general_info_table",
+			"customer_shipping_table",
+			"customer_stores_table",
+			"customer_table",
+//			"delete_queries",
+			"department_details",
+			"employee_payroll",
+			"employee_permissions",
+			"employee_personal",
+			"employee_store",
+			"employee_table",
+//			"employees",
+			"inventorytable",
+			"invoice_items_table",
+			"invoice_total_table",
+			"login_logout_table",
+			"mercury_pay_table",
+//			"mobile_loggedin_users",
+			"modifier_table",
+			"optional_info_table",
+			"ordering_info_table",
+			"split_invoice_table",
+			"stock_modification_history",
+			"store_details",
+			"vendor"};
+	
 	public static boolean dbbooleanvalue=false;
 	public static String default_userName = "admin";
 	public static String default_passWord="admin";
@@ -162,6 +200,7 @@ public class Parameters {
 	                Log.i("Class", info[i].getState().toString());
 	                if (info[i].getState() == NetworkInfo.State.CONNECTED) 
 	                {
+	                	 Log.i("NetworkInfo.State", "CONNECTED");
 	                    return true;
 	                }
 	            }
@@ -262,7 +301,7 @@ public class Parameters {
 			Parameters.logintime = "";
 			Parameters.sessionidforloginlogout = "";
 			Intent i = new Intent(MyApplication.getAppContext(),LoginHomeActivity.class);
-		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     		i.putExtra("EXIT", true);
     		MyApplication.getAppContext().startActivity(i);
 		}else{
@@ -352,7 +391,6 @@ public class Parameters {
 	}
 	public static boolean URLIsReachable(String urlString)
 	{
-		
 	    try
 	    {
 	        URL url = new URL(urlString);
@@ -381,11 +419,8 @@ public class Parameters {
 				if (mCursor1.getCount() > 0) {
 					if (mCursor1.moveToFirst()) {
 						do {
-							if (printerid
-									.equals(mCursor1.getString(mCursor1
-											.getColumnIndex(DatabaseForDemo.PRINTER_ID)))) {
-							 printreturnString=""+mCursor1.getString(mCursor1
-										.getColumnIndex(DatabaseForDemo.PRINTER_TEXT));
+							if (printerid .equals(mCursor1.getString(mCursor1 .getColumnIndex(DatabaseForDemo.PRINTER_ID)))) {
+							 printreturnString=""+mCursor1.getString(mCursor1 .getColumnIndex(DatabaseForDemo.PRINTER_TEXT));
 								forprintid = true;
 							}
 
