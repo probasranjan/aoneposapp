@@ -322,6 +322,7 @@ public class ServerSyncClass {
 	
 	public void backupcall(String response){
 		System.out.println("backupcall is called");
+		System.out.println("response in backupcall: "+response);
 		try {
 			JSONObject obj = new JSONObject(response);
 			boolean urlval = obj.has("next-url");
