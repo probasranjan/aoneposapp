@@ -65,7 +65,8 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:hint="CVV Code"
-            android:inputType="number" />
+            android:inputType="number" 
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/bt_ok"
