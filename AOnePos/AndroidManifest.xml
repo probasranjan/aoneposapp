@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aoneposapp"
-    android:versionCode="23"
+    android:versionCode="27"
     android:versionName="3.0" >
 
     <!-- <uses-sdk -->
@@ -403,6 +403,7 @@
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="landscape" />
         <!-- Core Test Harness Activities -->
+        
         <activity
             android:name="net.authorize.android.aim.AIMActivity"
             android:configChanges="keyboardHidden|orientation"
