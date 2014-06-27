@@ -192,7 +192,6 @@ public class Parameters {
 	    if (connectivity != null) 
 	    {
 	        NetworkInfo[] info = connectivity.getAllNetworkInfo();
-
 	        if (info != null) 
 	        {
 	            for (int i = 0; i < info.length; i++) 
@@ -265,8 +264,8 @@ public class Parameters {
 		}
 		mCursor.close();
 		return "";
-
 	}
+	
 	public static void methodForLogout(Context cccc){
 		try{
 			menufinish=true;

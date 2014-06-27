@@ -223,7 +223,8 @@ public class PrinterFunctions
 			Log.e("seetha","rama");
 			Log.e("seetha",context+" "+portName+" "+portSettings+" ssssssss "+sensorActiveHigh );
 			try {
-				port = StarIOPort.getPort(portName, portSettings, 10000, context);
+			//	port = StarIOPort.getPort(portName, portSettings, 10000, context);
+				port = StarIOPort.getPort(portName, portSettings, 10000);
 			} catch (StarIOPortException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -237,7 +238,7 @@ public class PrinterFunctions
 			*/
 			
 			try
-			{
+			{ 
 				Thread.sleep(500);
 			}
 			catch(InterruptedException e) {

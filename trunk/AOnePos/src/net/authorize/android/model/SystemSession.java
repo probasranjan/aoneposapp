@@ -10,7 +10,7 @@ public class SystemSession {
 	private Editor editor;
 	public static final String DELETEALEARTBOX = "DELETE_ALERT_BOX";
 	
-	public static final String Swip = "SWIP";
+	public static final String Swip = "SWIP", isFirstSynchronization = "isFirstSynchronization";
 	
 	public SystemSession(Context context) 
 	{
@@ -59,6 +59,11 @@ public class SystemSession {
 	 editor.putBoolean(DELETEALEARTBOX, value);
 	 editor.commit();
 	 }
+	 public void addBooleanData(String key,boolean value)
+	 {
+		 editor.putBoolean(key, value);
+		 editor.commit();
+	 }
 
 	 /**
 	 * This is used to get Drop pin value
@@ -82,6 +87,10 @@ public class SystemSession {
 	 public boolean getSwip()
 	 {
 	 return preference.getBoolean(Swip, false);
+	 }
+	 public boolean isFirstSynchronization()
+	 {
+		 return preference.getBoolean(isFirstSynchronization, true);
 	 }
 
 	

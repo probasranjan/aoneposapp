@@ -1,37 +1,26 @@
 package com.aoneposapp;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
+import java.util.Vector;
 
-import net.authorize.ResponseCode;
-import net.authorize.ResponseReasonCode;
-import net.authorize.TransactionType;
-import net.authorize.android.AuthNetActivityBase;
-import net.authorize.android.SDKActivity;
 import net.authorize.android.SimpleActivity;
 import net.authorize.android.TransationActivity;
-import net.authorize.android.button.AuthNetButton;
 import net.authorize.android.model.AppConstant;
 import net.authorize.android.model.SystemSession;
-import net.authorize.data.Customer;
-import net.authorize.data.EmailReceipt;
-import net.authorize.data.Order;
-import net.authorize.data.ShippingAddress;
-import net.authorize.data.ShippingCharges;
-import net.authorize.data.creditcard.CreditCard;
-import net.authorize.xml.Result;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +37,7 @@ import IDTech.MSR.uniMag.UniMagTools.uniMagSDKTools;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -66,9 +56,11 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -114,6 +106,8 @@ import android.widget.TextView;
 import android.widget.TextView.BufferType;
 import android.widget.Toast;
 
+import com.andprn.port.android.WiFiPort;
+import com.andprn.request.android.RequestHandler;
 import com.aoneposapp.adapters.Custom_Adapter;
 import com.aoneposapp.adapters.ImageAdapterForHold;
 import com.aoneposapp.adapters.InventoryListAdapter;
@@ -125,6 +119,7 @@ import com.aoneposapp.firstdata.CardData;
 import com.aoneposapp.firstdata.FileDialog;
 import com.aoneposapp.firstdata.ProfileDatabase;
 import com.aoneposapp.mercury.MagTekDemo;
+import com.aoneposapp.posxprinter.ESCPOSSample;
 import com.aoneposapp.starprinter.PrinterFunctions;
 import com.aoneposapp.utils.Constants;
 import com.aoneposapp.utils.DatabaseForDemo;
@@ -317,33 +312,20 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 		
 		public EditText editText_CreditCard1,editText_ExpMonth1,editText_ExpYear1,editText_Cvv;
 		String Text_Cvv;
+		  
+		private SystemSession session;
+		  
+		private Dialog mainDialog;
 		
+		//Printing PosX Printer
 		
-		// Athorize .net code
+		private WiFiPort wifiPort;
+		ESCPOSSample sample ;
+		private Thread hThread;
 		
-		 // buttons
-		  private static final int AUTH_ONLY_BUTTON_ID = 0x998;
-		  private AuthNetButton authOnlyButton;
+		ArrayList<String> printVal ;
+		Bitmap map1;
 
-		  private ArrayList<HashMap<String, String>> arrayList_Details = new ArrayList<HashMap<String,String>>();;
-		  
-		  // AIM request containers
-		  private static String refId = "ref" + System.currentTimeMillis();
-		  private static BigDecimal totalAmount;
-		  private static CreditCard creditCard;
-		  private static String refTransId;
-		  private static String authCode;
-		  private static Order order;
-		  private static ShippingCharges shippingCharges;
-		  private static Customer customer;
-		  private static ShippingAddress shippingAddress;
-		  private static EmailReceipt emailReceipt;
-		  private static HashMap<String, String> merchantDefinedFields = new HashMap<String, String>();
-		  
-		  private SystemSession session;
-		  
-		  private Dialog mainDialog;
-		
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -351,6 +333,14 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 		setContentView(R.layout.pos_activity);
 		
 		session = new SystemSession(PosMainActivity.this);
+		
+		// Printer POSX
+		sample = new ESCPOSSample();	
+		wifiPort = WiFiPort.getInstance();
+		if (android.os.Build.VERSION.SDK_INT > 9) {
+	        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+	        StrictMode.setThreadPolicy(policy);
+		}
 		
     	editText_CreditCard = (EditText) findViewById(R.id.editText_CreditCard1);
 		editText_ExpMonth =(EditText) findViewById(R.id.editText_ExpMonth1);
@@ -403,7 +393,7 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 		
 		
 //		System.out.println("On creart id"+18);
-//    	initializeReader();
+    	initializeReader();
 //    	System.out.println("On creart id"+19);
 //    	String strManufacture = myUniMagReader.getInfoManufacture();
 //    	System.out.println("On creart id"+20);
@@ -471,7 +461,6 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 				}
 			}
 			mCuaonersor.close();
-
 			DPadapter = new StoreItemAdapter(PosMainActivity.this, android.R.layout.simple_spinner_item, storearray);
 			selectStore.setAdapter(DPadapter);
 
@@ -489,16 +478,15 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 					} while (mCurchisor.moveToNext());
 				}
 			}
+			
 			mCurchisor.close();
 			DPadapter = new StoreItemAdapter(PosMainActivity.this, android.R.layout.simple_spinner_item, storearray);
 			selectStore.setAdapter(DPadapter);
-
 		}
+		
 		ok.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View arg0) {
-
 				alertStore.dismiss();
 				if (storearrayid.size() > 0) {
 
@@ -585,7 +573,6 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 								demobutton.setText("Mode OFF");
 								mode = false;
 								alertDialog1.dismiss();
-
 							}
 						});
 						cancel.setOnClickListener(new OnClickListener() {
@@ -661,6 +648,7 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 				}
 			}
 		});
+		
 		image4.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -676,7 +664,6 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 			}
 		});
 		image5.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
@@ -818,7 +805,6 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 		    						if (checkitemExists(mBarcode, "1")) {
 		    							getItemDetails(false, mBarcode, null);
 		    						}
-
 		    					}
 		    					if (mQuantity != null && mQuantity.length() > 0) {
 		    						if (mSelectedItem != null) {
@@ -1370,6 +1356,7 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 				tv.setText(deptspinnerdata.get(dsize));
 				tv.setTextAppearance(getApplicationContext(),android.R.style.TextAppearance_Medium);
 				tv.setPadding(5, 5, 5, 5);
+				tv.setBackgroundResource(R.drawable.border);
 				if (dsize == 0) {
 					tv.setBackgroundResource(R.drawable.highlightedtopmenuitem);
 					tv.setTextColor(Color.BLACK);
@@ -1386,7 +1373,7 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 						setitemList(deptspinnerdata.get(xyz));
 						if (saveforlistcolourchange != -1 && saveforlistcolourchange != xyz) {
 							TextView tvin = (TextView) findViewById(saveforlistcolourchange);
-							tvin.setBackgroundResource(0);
+							tvin.setBackgroundResource(R.drawable.border);
 							tvin.setTextColor(Color.WHITE);
 						}
 						saveforlistcolourchange = xyz;
@@ -2652,9 +2639,22 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 			}
 		});
 	//	new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
+		
+		sample = new ESCPOSSample();	
+		
+		wifiPort = WiFiPort.getInstance();
+		
+		if (android.os.Build.VERSION.SDK_INT > 9) {
+	        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+	        StrictMode.setThreadPolicy(policy);
+		}
+		
+		loadSettingFile();
+		
 	}
-	
-	
+
+
+
 	//Swip card
 	@Override
 	protected void onPause() {
@@ -3612,7 +3612,6 @@ try{
 						fifty.setEnabled(false);
 						bigbutton.setEnabled(false);
 						new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
-						
 					}else{
 						one.setEnabled(false);
 						five.setEnabled(false);
@@ -4003,7 +4002,6 @@ try{
 						}
 						}
 					}
-
 				}
 			});
 
@@ -5737,28 +5735,30 @@ try{
 		totalaccount = totalaccount+account;*/
 		String payclip = "" 
 		        + " \n \n"
-		        + " INVOICE#" + invoice_id + "       \n"
-				+ "   Closed to Cash Purchase   \n  \n" + " DATE/TIME: "
-				+ Parameters.currentTime() + " \n" + " CASHIER:   " + 1234
-				+ "\n" + " STATION:   " + 01 + " \n  \n" + "Item Count: "
-				+ mItemList.size() + "\n"
+		        + "     INVOICE#" + invoice_id + "       \n"
+				+ "     Closed to Cash Purchase   \n  \n" 
+		        + "     DATE/TIME: "+ Parameters.currentTime() + " \n" 
+		        + "     CASHIER:   " + 1234
+				+ "\n" 
+		        + "     STATION:   " + 01 + " \n  \n" 
+				+ "     Item Count:"+ mItemList.size() + "\n"
 				+ "=========================================" + ""
 				+ listofitems + "\n"
 				+ "=========================================\n"
-				+ "Subtotal            " + mSubTotal + "\n"
-				+ "Tax                 " + mTaxTotal + "\n"
-				+ "GRAND TOTAL         " + mGrandTotal + "\n \n"
-				+ "Cash                " + Double.valueOf(df.format(totalcash)) + "\n"
-				+ "Check               " + Double.valueOf(df.format(totalcheck)) + "\n"
-				+ "Credit/Debit        " + Double.valueOf(df.format(totalcredit)) + "\n"
-				+ "Account             " + Double.valueOf(df.format(totalaccount)) + "\n"
-				+ "Amt Tendered        " + mGrandTotal + "\n"
-				+ "Change              " + Double.valueOf(df.format(change)) + "\n \n \n"
-				+ "Thank you for visiting \n \n \n" + "    Invoice: "
+				+ "       Subtotal     " + mSubTotal + "\n"
+				+ "       Tax          " + mTaxTotal + "\n"
+				+ "       GRAND TOTAL  " + mGrandTotal + "\n \n"
+				+ "       Cash         " + Double.valueOf(df.format(totalcash)) + "\n"
+				+ "       Check        " + Double.valueOf(df.format(totalcheck)) + "\n"
+				+ "       Credit/Debit " + Double.valueOf(df.format(totalcredit)) + "\n"
+				+ "       Account      " + Double.valueOf(df.format(totalaccount)) + "\n"
+				+ "       Amt Tendered " + mGrandTotal + "\n"
+				+ "       Change       " + Double.valueOf(df.format(change)) + "\n \n \n"
+				+ "       Thank you for visiting \n \n \n" + "      Invoice: "
 				+ invoice_id;
 		Log.e("asdf",payclip);
 		String headlines=Parameters.printTextgetFromDatabase(PosMainActivity.this,"printer1");
-	String	printstring="<html> <head><style type='text/css'>body { background-color:none;font-family : Verdana;color:#000000;font-size:20px;} .tablehead{font-family : Verdana;color:#000000;font-size:32px;} table td{font-family : Verdana;color:#000000;font-size:32px; line-height:40px; padding:0px 4px;}</style></head><body on style='background-color:none;'><center><table id='page' cellspasing='3' width='100%' align='center' border='0'>"
+		String printstring="<html> <head><style type='text/css'>body { background-color:none;font-family : Verdana;color:#000000;font-size:20px;} .tablehead{font-family : Verdana;color:#000000;font-size:32px;} table td{font-family : Verdana;color:#000000;font-size:32px; line-height:40px; padding:0px 4px;}</style></head><body on style='background-color:none;'><center><table id='page' cellspasing='3' width='100%' align='center' border='0'>"
 				+"<tr> <th align='center' colspan='2'><span class='tablehead'>"+headlines+"</span></th></tr>"
 			    +"<tr><th align='center' colspan='2'><span class='tablehead'></span></th></tr>"
 				+"<tr><td align='center' colspan='2' style='font-size:22px'>INVOICE# "+invoice_id+" </td></tr>"
@@ -5807,7 +5807,7 @@ try{
 	private void printText(String printerid, String print_text,Bitmap map) {
 		try{
 		boolean forprintid = false;
-		ArrayList<String> printVal = new ArrayList<String>();
+		 printVal = new ArrayList<String>();
 			String selectQuery = "SELECT  * FROM " + DatabaseForDemo.PRINTER_TABLE; // + " where "+
 														// DatabaseForDemo.PRINTER_ID
 														// + "='" + printerid +
@@ -5834,11 +5834,12 @@ try{
 						} while (mCursordwe2kop1.moveToNext());
 					}
 					if (forprintid) {
-
+						
 					} else {
 						if (mCursordwe2kop1.moveToFirst()) {
 							for (int i = 0; i < count; i++) {
 								String value = mCursordwe2kop1.getString(i);
+								System.out.println("value   :"+value);
 								printVal.add(value);
 							}
 						}
@@ -5856,7 +5857,7 @@ try{
 
 			billPrint.buildDrawingCache();
 
-	        Bitmap map1=billPrint.getDrawingCache();
+	        map1=billPrint.getDrawingCache();
 	        billPrint.loadUrl("file://"+Environment.getExternalStorageDirectory()+"/printData/billFile.html");
 	         if(billPrint.getHeight()>0&&billPrint.getWidth()>0)
 	         map1=drawableToBitmap(getBitmapFromView(billPrint));
@@ -5869,8 +5870,15 @@ try{
 		         map1=drawableToBitmap(getBitmapFromView(billPrint));
 		         Log.v("srii","sriiiimmmmm");
 		         }
+	         if(printVal.get(15).equals("POSX")){
+	        	 if(wifiPort.isConnected())
+					{
+						wifiDisConn();
+					}
+	         }
+	       
 	         
-			PrintingNow(printVal, map1);
+	        	 PrintingNow(printVal, map1);
 			}else{
 				PrintingNow(printVal, map);
 			}
@@ -5884,9 +5892,20 @@ try{
 				}
 	}
 	
+	// WiFi Disconnection method.
+		private void wifiDisConn() throws IOException, InterruptedException
+		{
+			wifiPort.disconnect();
+			hThread.interrupt();
+			Toast toast = Toast.makeText(PosMainActivity.this,"Disconnect", Toast.LENGTH_SHORT);
+			toast.show();	
+		}
+	
 	void PrintingNow(ArrayList<String> printVal, Bitmap printingImage) {
 		try{
 		billPrintPreferences("image_data", printingImage);
+		
+		System.out.println("Values aksjfhkajs"+printVal.get(15)+" printer id"+printVal.get(13));
 		if (printVal.get(15).equals("EPSON")) {
 			Builder builder = null;
 			String method = "";
@@ -5905,8 +5924,7 @@ try{
 			            return ;
 			        }
 				 Log.v(Math.min(542, printingImage.getWidth())+"", printingImage.getHeight()+"H  W"+ printingImage.getWidth());
-				  builder.addImage(printingImage, 0, 0, Math.min(542, printingImage.getWidth()), printingImage.getHeight(), Builder.COLOR_1, 
-						  Builder.MODE_MONO, Builder.HALFTONE_THRESHOLD, 1.0);
+				  builder.addImage(printingImage, 0, 0, Math.min(542, printingImage.getWidth()), printingImage.getHeight(), Builder.COLOR_1, Builder.MODE_MONO, Builder.HALFTONE_THRESHOLD, 1.0);
 				  builder.addCut(Builder.CUT_FEED);
 				Log.e("Rama", "parddhu6");
 				/*harinath     
@@ -5992,7 +6010,7 @@ try{
 			 * e.printStackTrace(); }
 			 */
 			printer = null;
-		} else {
+		} else if (printVal.get(15).equals("STAR")){
 			try {
 				boolean compressionEnable = false;
 				String commandType  = "Raster";
@@ -6005,12 +6023,19 @@ try{
 			            ShowMsg.showError(R.string.errmsg_noimage, PosMainActivity.this);
 			            return ;
 			        }
-				PrinterFunctions.PrintBitmapImage(PosMainActivity.this, typp+""+printVal.get(13), "", getResources(), printingImage, 546, compressionEnable);
-	        //	PrinterFunctions.PrintSampleReceipt(ReportsActivity.this,  "TCP:"+printVal.get(13),   "",  commandType, getResources(), "3inch (78mm)", printingText);
+				 PrinterFunctions.PrintBitmapImage(PosMainActivity.this, typp+""+printVal.get(13), "", getResources(), printingImage, 546, compressionEnable);
+	        //	PrinterFunctions.PrintSampleReceipt(PosMainActivity.this,  "TCP:"+printVal.get(13),   "",  commandType, getResources(), "3inch (78mm)",payclip);
 			} catch (Exception e) {
 				System.out.println(e);
 			}
+		}else {
+			
+			/// Printer POsx
+		//	Connection_of_printer(printVal.get(13),printingImage);
+			
+			wifiConn(printVal.get(13));
 		}
+		
 		Log.e("Rama", "parddhu20");
 		} catch (NumberFormatException e) {
 			  e.printStackTrace();
@@ -6019,13 +6044,15 @@ try{
 				} catch (Exception e1) {
 				  e1.printStackTrace();
 				}
+		
+		System.out.println("printVal :" +printVal.get(13));
 	}
 //harinath
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		Parameters.printerContext=PosMainActivity.this;
-		super.onResume();
+		
 		if (Parameters.mSearchItemStatus) {
 			if (Parameters.mSearchItemId != null){
 				mSubTotal = 0;
@@ -6050,6 +6077,8 @@ try{
 		if(itemStartSC!=null)
 			itemStartSC.setEnabled(true); 
 		isWaitingForCommandResult=false;
+		
+		super.onResume();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -6291,7 +6320,7 @@ try{
 				}
 				if (sentValue >= remainingamount) {
 					change =sentValue- remainingamount;
-					change = (double) Math.round(change * 100) / (double) 100;
+					change = (double) Math.round(change * 100)/(double) 100;
 					directpayment = true;
 					alertDialogtop.dismiss();
 					/* HashMap<String, String> map = new HashMap<String, String>();
@@ -6326,10 +6355,10 @@ try{
 				} else {
 					remainingamount = remainingamount - sentValue;
 					remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
-					  EditText total = (EditText) layouttop .findViewById(R.id.totalsave);
-							   total.setText(""+remainingamount);
-					  EditText remaining = (EditText) layouttop .findViewById(R.id.remaining);
-						       remaining.setText(""+remainingamount);
+					EditText total = (EditText) layouttop .findViewById(R.id.totalsave);
+					total.setText(""+remainingamount);
+					EditText remaining = (EditText) layouttop .findViewById(R.id.remaining);
+					remaining.setText(""+remainingamount);
 					total.setText("$" + remainingamount);
 					cashpaymentAmount = Math .ceil(remainingamount);
 					Button bigbutton = (Button) layouttop .findViewById(R.id.roundvalue);
@@ -6673,10 +6702,11 @@ try{
 	@Override
 	public void onDestroy() {
 		stopService(new Intent(this, PayPalService.class));
-		super.onDestroy();
-
-	//	myUniMagReader.release();
+		
+		myUniMagReader.release();
 		profileDatabase.closeDB();
+		super.onDestroy();
+	
 		if (isExitButtonPressed)
 		{
 			android.os.Process.killProcess(android.os.Process.myPid());
@@ -7141,23 +7171,44 @@ try{
 	}
 	
 	void createHtmlFile(String webtext){
-			try {
-				File myFile = new File("/sdcard/printData/billFile.html");
-				myFile.createNewFile();
-				FileOutputStream fOut = new FileOutputStream(myFile);
+//			try {
+//				File myFile = new File("/sdcard/printData/billFile.html");
+//				myFile.createNewFile();
+//				FileOutputStream fOut = new FileOutputStream(myFile);
+//				OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+//				myOutWriter.append(""+webtext);
+//				myOutWriter.close();
+//				fOut.close();
+//				System.out.println("html written successfully..");
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//				showAlertDialog(PosMainActivity.this, "Print Text", "Getting an Error" , false);
+//			} catch (IOException e) {
+//				showAlertDialog(PosMainActivity.this, "Print Text", "Getting an Error" , false);
+//				e.printStackTrace();
+//			}
+//			billPrint.loadUrl("file://"+Environment.getExternalStorageDirectory()+"/printData/billFile.html");
+		
+		try {
+		    File newFolder = new File(Environment.getExternalStorageDirectory(), "printData");
+		    if (!newFolder.exists()) {
+		        newFolder.mkdir();
+		    }
+		    try {
+		        File file = new File(newFolder, "billFile" + ".html");
+		        file.createNewFile();
+		        FileOutputStream fOut = new FileOutputStream(file);
 				OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
 				myOutWriter.append(""+webtext);
 				myOutWriter.close();
 				fOut.close();
-				System.out.println("html written successfully..");
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				showAlertDialog(PosMainActivity.this, "Print Text", "Getting an Error" , false);
-			} catch (IOException e) {
-				showAlertDialog(PosMainActivity.this, "Print Text", "Getting an Error" , false);
-				e.printStackTrace();
-			}
-			billPrint.loadUrl("file://"+Environment.getExternalStorageDirectory()+"/printData/billFile.html");
+		    } catch (Exception ex) {
+		        System.out.println("ex: " + ex);
+		    }
+		} catch (Exception e) {
+		    System.out.println("e: " + e);
+		}
+		billPrint.loadUrl("file://"+Environment.getExternalStorageDirectory()+"/printData/billFile.html");
 		}
 	
 	public Drawable getBitmapFromView(View view) {
@@ -7202,6 +7253,7 @@ try{
 		alertDialog.setButton("Yes", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				System.out.println("Values :"+"printername"+printername+"print_text"+print_text+"map"+map);
 				printText(printername, print_text, map);
 				dialog.dismiss();
 			}
@@ -8154,18 +8206,7 @@ try{
 					itemStartSC.setEnabled(true);
 				textAreaTop.setText(strMsrData);
 				
-		    	System.out.println("hexString data text1 "+strMsrData.substring(2,strMsrData.indexOf("^")));
-		    	
-		    	System.out.println("hexString data year "+strMsrData.split("\\/\\^")[1].substring(0, 2));
-		    	
-		    	System.out.println("hexString data month "+strMsrData.split("\\/\\^")[1].substring(2, 4));
-				 
-//		    	editText_CreditCard.setText(""+strMsrData.substring(2,strMsrData.indexOf("^")));
-//		    	
-//		    	editText_ExpMonth.setText(""+strMsrData.split("\\/\\^")[1].substring(2, 4));
-//				 
-//		    	editText_ExpYear.setText(""+strMsrData.split("\\/\\^")[1].substring(0, 2)); 
-		    	
+				System.out.println("Swip Card data "+strMsrData);
 		    	setSwipcard(strMsrData);
 				 
 	            StringBuffer hexString = new StringBuffer();
@@ -9107,7 +9148,7 @@ try{
 			editText_CreditCard1 = (EditText) mainDialog.findViewById(R.id.editText_CreditCard);
 			editText_ExpMonth1 =(EditText) mainDialog.findViewById(R.id.editText_ExpMonth);
 			editText_ExpYear1 = (EditText) mainDialog.findViewById(R.id.editText_ExpYear);
-			editText_Cvv =  (EditText) mainDialog.findViewById(R.id.editText_Cvv);
+		//	editText_Cvv =  (EditText) mainDialog.findViewById(R.id.editText_Cvv);
 			
 			System.out.println("mGrandTotal dialog"+mGrandTotal);
 			
@@ -9149,7 +9190,7 @@ try{
 					String cardno = editText_CreditCard1.getText().toString().trim();
 					String month = editText_ExpMonth1.getText().toString().trim();
 					String Year = editText_ExpYear1.getText().toString().trim();
-					Text_Cvv = editText_Cvv.getText().toString().trim();
+				//	Text_Cvv = editText_Cvv.getText().toString().trim();
 					
 					if(cardno.equals("")){
 						Toast.makeText(context, "Please Enter card no", Toast.LENGTH_LONG).show();
@@ -9160,31 +9201,24 @@ try{
 							if(Year.equals("")){
 								Toast.makeText(context, "Please Enter Year", Toast.LENGTH_LONG).show();
 							}else {
-								if(Text_Cvv.equals("")){
-									Toast.makeText(context, "Please Enter Cvv no", Toast.LENGTH_LONG).show();
-								}else {
-									
 									String Athorize = session.getData("Athorize");
-									
-//									if(Athorize.equalsIgnoreCase("login") ){
 									
 									HashMap<String, String> map=new HashMap<String, String>();
 									map.put("CardNumber",""+editText_CreditCard1.getText().toString().trim());
 									map.put("EXPMonth",""+editText_ExpMonth1.getText().toString().trim());
 									map.put("EXPYear",""+editText_ExpYear1.getText().toString().trim());
 									map.put("Total",""+mGrandTotal);
-									map.put("Cvv",Text_Cvv);
 									
+									System.out.println("totalAmount Total   :"+mGrandTotal);
 									AppConstant.arrayList_Details.add(map);
-//									initAuthNet();
 									
 									Intent i = new Intent(PosMainActivity.this,TransationActivity.class);
+									i.putExtra("total", ""+mGrandTotal);
+									i.putExtra("cardno", ""+editText_CreditCard1.getText().toString().trim());
+									i.putExtra("ExpMonth", ""+editText_ExpMonth1.getText().toString().trim());
+									i.putExtra("ExpYear", ""+editText_ExpYear1.getText().toString().trim());
 									startActivityForResult(i, 1000);
-									
-//									}else {
-//										Toast.makeText(PosMainActivity.this, "Please Select one payment gateway to do  the transation From setting page", Toast.LENGTH_LONG).show();
-//									}
-								}
+								
 							}
 						}
 					}
@@ -9194,15 +9228,19 @@ try{
 	}
 	
 	private void setSwipcard(String strMsrData2) {
-		System.out.println("hexString data text1 "+strMsrData2.substring(2,strMsrData.indexOf("^")));
-    	
-    	System.out.println("hexString data year "+strMsrData2.split("\\/\\^")[1].substring(0, 2));
-    	
-    	System.out.println("hexString data month "+strMsrData2.split("\\/\\^")[1].substring(2, 4));
 		
-		editText_CreditCard1.setText(""+strMsrData2.substring(2,strMsrData.indexOf("^")));
-		editText_ExpMonth1.setText(""+strMsrData2.split("\\/\\^")[1].substring(2, 4));
-		editText_ExpYear1.setText(""+strMsrData2.split("\\/\\^")[1].substring(0, 2));
+		String[] parts = strMsrData2.split("\\^");
+    	String part1 = parts[0]; // 004
+    	String part2 = parts[1]; // 034556
+    	String part3 = parts[2];
+    	
+    	System.out.println("Data of card card number "+strMsrData2.substring(2,strMsrData2.indexOf("^")));
+    	System.out.println("Data of card card year"+part3.substring(0, 2));
+    	System.out.println("Data of card card month "+part3.substring(2, 4));
+		
+		editText_CreditCard1.setText(""+strMsrData2.substring(2,strMsrData2.indexOf("^")));
+		editText_ExpMonth1.setText(""+part3.substring(2, 4));
+		editText_ExpYear1.setText(""+part3.substring(0, 2));
 	}
 	
 	public void Clear_all_display(){
@@ -9224,4 +9262,124 @@ System.out.println("Clear_all_display");
 			grandTotalview.setText(String.valueOf("$" + mSubTotal));
 		}
 	}
+	
+	private void Connection_of_printer(String string, Bitmap printingImage) {
+		try
+		{
+			if(wifiPort.isConnected())
+			{
+				sample.imageTest(PosMainActivity.this,printingImage);
+			}else {
+				wifiConn(string);
+			}
+		}
+		catch (IOException e)
+		{
+		}
+	}
+	
+	// WiFi Connection method.
+		private void wifiConn(String ipAddr) throws IOException
+		{
+			new connTask().execute(ipAddr);
+		}
+		
+		// WiFi Connection Task.
+			class connTask extends AsyncTask<String, Void, Integer>
+			{
+				private final ProgressDialog dialog = new ProgressDialog(PosMainActivity.this);
+				
+				@Override
+				protected void onPreExecute()
+				{
+					dialog.setTitle("Wi-Fi");
+					dialog.setMessage("Connecting");
+					dialog.show();
+					super.onPreExecute();
+				}
+				
+				@Override
+				protected Integer doInBackground(String... params)
+				{
+					Integer retVal = null;
+					try
+					{
+						// ip 
+						wifiPort.connect(params[0]);
+						lastConnAddr = params[0];
+						retVal = new Integer(0);
+					}
+					catch (IOException e)
+					{
+						retVal = new Integer(-1);
+					}
+					return retVal;
+				}
+				
+				@Override
+				protected void onPostExecute(Integer result)
+				{
+					if(result.intValue() == 0)
+					{
+						RequestHandler rh = new RequestHandler();				
+						hThread = new Thread(rh);
+						hThread.start();
+						addIpList(lastConnAddr);
+						if(dialog.isShowing())
+							dialog.dismiss();
+						Toast toast = Toast.makeText(PosMainActivity.this,"Wi-Fi Connected", Toast.LENGTH_SHORT);
+						toast.show();	
+						try {
+							sample.imageTest(PosMainActivity.this,map1);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					else
+					{	
+						if(dialog.isShowing())
+							dialog.dismiss();
+					//	AlertView.showAlert("Wi-Fi Connected", "Check the device status or settings.", PosMainActivity.this);
+					}
+					super.onPostExecute(result);
+				}
+			}
+			
+			// if address already exists in list, it would inserted LIFO.
+			private void addIpList(String addr)
+			{
+				ipAddrVector.insertElementAt(addr, 0);
+			}
+			
+			private Vector<String> ipAddrVector;
+			private static final String dir = Environment.getExternalStorageDirectory().getAbsolutePath() + "//temp";
+			private static final String fileName = dir + "//WFPrinter";
+			private String lastConnAddr;
+			
+			private void loadSettingFile()
+			{
+				String line;
+				ipAddrVector = new Vector<String>();
+				try
+				{	
+					// Retrieve the connection history from the file.
+					BufferedReader fReader = new BufferedReader(new FileReader(fileName));
+					while((line = fReader.readLine()) != null)
+					{
+						ipAddrVector.addElement(line);
+					}
+					fReader.close();
+					if(ipAddrVector.size() > 0)
+					{
+						lastConnAddr = ipAddrVector.firstElement();
+					}
+				}
+				catch (FileNotFoundException e)
+				{
+				}
+				catch (IOException e)
+				{
+				}	
+			}
 }
