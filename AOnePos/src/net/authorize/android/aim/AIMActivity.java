@@ -69,9 +69,10 @@ public class AIMActivity extends SimpleActivity implements OnClickListener {
   }
 
   public void onClick(View dialog) {
-	  if (dialog == (AuthNetButton) findViewById(AUTH_ONLY_BUTTON_ID)) {
+	  if (dialog == (AuthNetButton) findViewById(AUTH_ONLY_BUTTON_ID)) 
+	  {
 	      launchAuthOnlyIntent();
-	    }
+	   }
   }
 
   /**

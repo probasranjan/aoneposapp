@@ -101,8 +101,7 @@ public class CommonCode {
 	 */
 	public Typeface getBoldFont()
 	{
-		return Typeface.createFromAsset(_context.getAssets(),
-				"fonts/AppleGaramond-Light.ttf");
+		return Typeface.createFromAsset(_context.getAssets(),"fonts/AppleGaramond-Light.ttf");
 	}
 	
 	/**

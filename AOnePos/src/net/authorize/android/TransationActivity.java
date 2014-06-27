@@ -1,6 +1,7 @@
 package net.authorize.android;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.authorize.Environment;
@@ -27,6 +28,8 @@ public class TransationActivity extends SimpleActivity {
 
 	public static AuthNet authNetObj;
 	private double total_val;
+	String cardno,cardmonth,cardyear,total;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +42,19 @@ public class TransationActivity extends SimpleActivity {
 						R.id.authnet_auth_cancel_button,
 						R.id.authnet_auth_login_button);
 		
-//		Intent intent = getIntent();
-//		
-		String total = "" + AppConstant.arrayList_Details.get(0).get("Total");
+		Intent intent = getIntent();
+		total = intent.getExtras().getString("total");
+		cardno = intent.getExtras().getString("cardno");
+		cardmonth = intent.getExtras().getString("ExpMonth");
+		cardyear = intent.getExtras().getString("ExpYear");
+		
+		System.out.println("Card no :"+cardno);
+		System.out.println("Card ExpMonth :"+cardmonth);
+		System.out.println("Card ExpYear :"+cardyear);
+		System.out.println("Card total_val :"+total);
+		
 		total_val = Double.parseDouble(total);
+		
 		launchAuthCaptureIntent();
 	}
 
@@ -51,6 +63,7 @@ public class TransationActivity extends SimpleActivity {
 	 */
 	private void launchAuthCaptureIntent() {
 		String refId = Long.toString(System.currentTimeMillis());
+		
 		BigDecimal totalAmount = new BigDecimal(total_val);
 
 		/*
@@ -59,10 +72,10 @@ public class TransationActivity extends SimpleActivity {
 		 */
 		CreditCard creditCard = CreditCard.createCreditCard();
 
-		creditCard.setCreditCardNumber("" + AppConstant.arrayList_Details.get(0).get("CardNumber"));
-		creditCard.setExpirationMonth("" + AppConstant.arrayList_Details.get(0).get("EXPMonth"));
-		creditCard.setExpirationYear("" + AppConstant.arrayList_Details.get(0).get("EXPYear"));
-		creditCard.setCardCode("" + AppConstant.arrayList_Details.get(0).get("Cvv"));
+		creditCard.setCreditCardNumber("" +cardno);
+		creditCard.setExpirationMonth("" + cardmonth);
+		creditCard.setExpirationYear("" +cardyear);
+	//	creditCard.setCardCode("" + cardcvv);
 
 		Order order = Order.createOrder();
 		order.setDescription("Note" + AppConstant.arrayList_Items);
@@ -70,6 +83,7 @@ public class TransationActivity extends SimpleActivity {
 		order.setPurchaseOrderNumber("200");
 		order.setInvoiceNumber(Long.toString(System.currentTimeMillis()));
 		order.setTotalAmount(totalAmount);
+		System.out.println("totalAmount  :"+totalAmount);
 
 		Customer customer = null;
 		Address shippingAddress = null;
@@ -115,16 +129,14 @@ public class TransationActivity extends SimpleActivity {
 				errorBuilder = new StringBuilder();
 				if (aimResult.getTransactionResponseErrors().size() > 0) {
 					for (ResponseReasonCode respReasonCode : aimResult .getTransactionResponseErrors()) {
-						errorBuilder.append(respReasonCode.getResponseReasonCode())
-								.append(": ")
-								.append(respReasonCode.getReasonText())
-								.append("\n");
+						errorBuilder.append(respReasonCode.getResponseReasonCode()) .append(": ") .append(respReasonCode.getReasonText()) .append("\n");
 					}
 				} else if (aimResult.getMessages().size() > 0) {
 					for (MessageType msgType1 : aimResult.getMessages()) {
 						errorBuilder.append(msgType1.getValue()).append(": ") .append(msgType1.getText()).append("\n");
 					}
 				}
+				System.out.println("errorBuilder : "+ errorBuilder);
 				// showAlert((TransactionType) txnType + " failed", errorBuilder.toString());
 				Intent returnIntent = new Intent();
 				returnIntent.putExtra("result","fail");
