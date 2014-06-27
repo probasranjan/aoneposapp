@@ -20,18 +20,19 @@
             android:layout_marginRight="15dp"
             android:background="@drawable/hqbackground69opacity"
             android:orientation="vertical" >
-		<RelativeLayout
+
+            <RelativeLayout
                 android:layout_width="fill_parent"
                 android:layout_height="50dp"
-                android:background="@drawable/logo_login_bg"
+                android:layout_marginBottom="3dp"
                 android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp" >
-               
+                android:background="@drawable/logo_login_bg" >
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
                     android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
                     android:layout_marginRight="15dp"
                     android:text="Settings"
                     android:textColor="@android:color/black"
@@ -41,10 +42,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                     android:layout_marginLeft="15dp"
+                    android:layout_marginLeft="15dp"
                     android:src="@drawable/headeraonelogo" />
 
-                 <DigitalClock
+                <DigitalClock
                     android:id="@+id/digital_clock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -55,7 +56,7 @@
                     android:text="DigitalClock"
                     android:textColor="@android:color/black"
                     android:textSize="10sp" />
-                
+
                 <TextView
                     android:id="@+id/loginname"
                     android:layout_width="wrap_content"
@@ -66,8 +67,8 @@
                     android:text="Employee Id:"
                     android:textColor="@android:color/black"
                     android:textSize="10sp" />
-                
-                 <TextView
+
+                <TextView
                     android:id="@+id/loginnameval"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -89,211 +90,207 @@
                     android:textColor="@android:color/black"
                     android:textSize="10sp" />
             </RelativeLayout>
-       <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/toprightmenu"
-        android:weightSum="8" >
-
-        <Button
-            android:id="@+id/tslookup"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/highlightedtopmenuitem"
-            android:text="TS Lookup"
-            android:textColor="@android:color/black"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/printer"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/toprightmenu"
-            android:text="Printer"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/tax"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/toprightmenu"
-            android:text="Tax"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/payment"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/toprightmenu"
-            android:text="Payment Type"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-        
-         <Button
-            android:id="@+id/database"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/toprightmenu"
-            android:text="Database"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/company"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/toprightmenu"
-            android:text="Company"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/serverurl_button"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/toprightmenu"
-            android:text="Server Url"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/card"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/toprightmenu"
-            android:text="Card"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-        
-       
-    </LinearLayout>
-         
-           
-     <LinearLayout 
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@android:color/transparent"
-    android:orientation="vertical" >
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:background="@android:color/white"
-        android:orientation="vertical" >
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_margin="10dp"
-            android:background="#3c6586"
-            android:orientation="horizontal" >
-            
-             <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/inflatingLayout"
-        android:orientation="vertical" >
-        
-                  <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:orientation="horizontal" >
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_margin="6dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/toprightmenu"
+                android:orientation="horizontal"
+                android:weightSum="8" >
+
+                <Button
+                    android:id="@+id/tslookup"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/highlightedtopmenuitem"
+                    android:text="TS Lookup"
+                    android:textColor="@android:color/black"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/printer"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/toprightmenu"
+                    android:text="Printer"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/tax"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/toprightmenu"
+                    android:text="Tax"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/payment"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/toprightmenu"
+                    android:text="Payment Type"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/database"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/toprightmenu"
+                    android:text="Database"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/company"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/toprightmenu"
+                    android:text="Company"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/serverurl_button"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/toprightmenu"
+                    android:text="Server Url"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/card"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/toprightmenu"
+                    android:text="Card"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@android:color/transparent"
                 android:orientation="vertical" >
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                     android:layout_gravity="center_horizontal"
-                    android:background="@drawable/additionaloptions"
-                    android:text="Departments" />
-
-                <ScrollView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@android:color/white"
+                    android:orientation="vertical" >
 
                     <LinearLayout
-                        android:id="@+id/linear"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
-                        android:orientation="vertical" >
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:layout_margin="10dp"
+                        android:background="#3c6586"
+                        android:orientation="horizontal" >
+
+                        <LinearLayout
+                            android:id="@+id/inflatingLayout"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:orientation="vertical" >
+
+                            <LinearLayout
+                                android:layout_width="fill_parent"
+                                android:layout_height="fill_parent"
+                                android:orientation="horizontal" >
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_margin="6dp"
+                                    android:orientation="vertical" >
+
+                                    <Button
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center_horizontal"
+                                        android:background="@drawable/additionaloptions"
+                                        android:text="Departments" />
+
+                                    <ScrollView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <LinearLayout
+                                            android:id="@+id/linear"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:background="@android:color/transparent"
+                                            android:orientation="vertical" >
+                                        </LinearLayout>
+                                    </ScrollView>
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="fill_parent"
+                                    android:layout_marginLeft="15dp"
+                                    android:layout_marginRight="15dp"
+                                    android:orientation="horizontal" >
+
+                                    <Button
+                                        android:id="@+id/ok1"
+                                        android:layout_width="100dp"
+                                        android:layout_height="50dp"
+                                        android:layout_gravity="bottom"
+                                        android:layout_marginBottom="5dp"
+                                        android:background="@drawable/greenbutton"
+                                        android:text="Save"
+                                        android:textColor="#ffffff"
+                                        android:textSize="20sp" />
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="fill_parent"
+                                    android:layout_margin="6dp"
+                                    android:orientation="vertical" >
+
+                                    <Button
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="center_horizontal"
+                                        android:background="@drawable/additionaloptions"
+                                        android:text="Items" />
+
+                                    <ScrollView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content" >
+
+                                        <LinearLayout
+                                            android:id="@+id/itemlinear"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:background="@android:color/transparent"
+                                            android:orientation="vertical" >
+                                        </LinearLayout>
+                                    </ScrollView>
+                                </LinearLayout>
+                            </LinearLayout>
+                        </LinearLayout>
                     </LinearLayout>
-                </ScrollView>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:orientation="horizontal" >
-
-                <Button
-                    android:id="@+id/ok1"
-                    android:layout_width="100dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/greenbutton"
-                    android:textColor="#ffffff"
-                    android:textSize="20sp"
-                    android:layout_gravity="bottom"
-                    android:layout_marginBottom="5dp"
-                    android:text="Save" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:layout_margin="6dp"
-                android:orientation="vertical" >
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                     android:layout_gravity="center_horizontal"
-                    android:background="@drawable/additionaloptions"
-                    android:text="Items" />
-
-                <ScrollView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
-
-                    <LinearLayout
-                        android:id="@+id/itemlinear"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/transparent"
-                        android:orientation="vertical" >
-                    </LinearLayout>
-                </ScrollView>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
-</LinearLayout>
-        </LinearLayout>
-        </LinearLayout>
-        </LinearLayout>
-       
 
     <SlidingDrawer
         android:id="@+id/SlidingDrawer"
@@ -309,8 +306,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:rotation="180"
-          android:src="@drawable/arrow"
-             >
+            android:src="@drawable/arrow" >
         </ImageView>
 
         <LinearLayout
@@ -383,7 +379,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/pro0" />
-                      <ImageView
+
+                    <ImageView
                         android:id="@+id/logout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -408,10 +405,10 @@
             android:src="@drawable/helpicon" />
 
         <ImageView
+            android:id="@+id/logout2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/logoutbutton"
-            android:id="@+id/logout2" />
+            android:src="@drawable/logoutbutton" />
     </LinearLayout>
 
 </RelativeLayout>
