@@ -391,7 +391,6 @@ String enc_key="";
 				
 				}
 		});
-		
 
 		Timer tTimer = new Timer();
 
@@ -427,9 +426,8 @@ String enc_key="";
 		};
 		tTimer.scheduleAtFixedRate(tTimerTask, 0, 1000);
 		displayInfo();
-		
-
 	}
+	
 	String getConfigurationLocal()
 	{
 		String strXMLConfig="";
