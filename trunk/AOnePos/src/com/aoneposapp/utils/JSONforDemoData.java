@@ -22,9 +22,11 @@ public class JSONforDemoData extends AsyncTask<String, Void, String> {
 	ProgressDialog progressDialog;
 	GetJSONListener getJSONListener;
 	static Context curContext;
+	static String demo_database_name;
 
-	public JSONforDemoData(Context context) {
+	public JSONforDemoData(Context context,String demo_name) {
 		curContext = context;
+		demo_database_name = demo_name;
 	}
 
 	public static String connect(String url) {
@@ -81,10 +83,17 @@ public class JSONforDemoData extends AsyncTask<String, Void, String> {
 		orDatabaseCat();
 		micellaneousTable();
 		int p = 0;
+		POIFSFileSystem myFileSystem ;
 		try {
-
-			POIFSFileSystem myFileSystem = new POIFSFileSystem(curContext.getAssets()
-					.open("sampledata.xls"));
+			if(!demo_database_name.equalsIgnoreCase("mobile"))
+			{
+//				 myFileSystem = new POIFSFileSystem(curContext.getAssets() .open("sampledata.xls"));
+				 myFileSystem = new POIFSFileSystem(curContext.getAssets() .open("Restuarant.xls"));
+			}
+			else 
+			{
+				myFileSystem = new POIFSFileSystem(curContext.getAssets() .open("phone_data.xls"));
+			}
 			Log.e(" before myFileSystem", "" + myFileSystem);
 			HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
 			Log.e(" before myWorkBook", "" + myWorkBook);
@@ -299,10 +308,17 @@ public class JSONforDemoData extends AsyncTask<String, Void, String> {
 			if (mCursor.getCount() < 10) {
 				Log.v("gfdkg", "super2");
 				int p = 0;
+				POIFSFileSystem myFileSystem;
 				try {
-
-					POIFSFileSystem myFileSystem = new POIFSFileSystem(
-							curContext.getAssets().open("department.xls"));
+					if(!demo_database_name.equalsIgnoreCase("mobile"))
+					{
+//						myFileSystem = new POIFSFileSystem( curContext.getAssets().open("department.xls"));
+						myFileSystem = new POIFSFileSystem( curContext.getAssets().open("department_restaurant.xls"));
+					}
+					else
+					{
+						myFileSystem = new POIFSFileSystem( curContext.getAssets().open("department_mobile.xls"));
+					}
 					HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
 					HSSFSheet mySheet = myWorkBook.getSheetAt(0);
 					Iterator<Row> rowIter = mySheet.rowIterator();
@@ -388,10 +404,17 @@ public class JSONforDemoData extends AsyncTask<String, Void, String> {
 			if (mCursor.getCount() < 10) {
 				Log.v("gfdkg", "super2");
 				int p = 0;
+				POIFSFileSystem myFileSystem ;
 				try {
-
-					POIFSFileSystem myFileSystem = new POIFSFileSystem(
-							curContext.getAssets().open("categoryaaa.xls"));
+					if(!demo_database_name.equalsIgnoreCase("mobile"))
+					{
+//						 myFileSystem = new POIFSFileSystem( curContext.getAssets().open("categoryaaa.xls"));
+						 myFileSystem = new POIFSFileSystem( curContext.getAssets().open("category_restaurant.xls"));
+					}
+					else
+					{
+					 myFileSystem = new POIFSFileSystem( curContext.getAssets().open("categoryaaa_mobile.xls"));
+					}
 					Log.e(" before myFileSystem", "" + myFileSystem);
 					// Create a workbookusing the File System
 					HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);

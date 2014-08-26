@@ -377,19 +377,19 @@ public class DatabaseForDemo extends SQLiteOpenHelper {
 
 	public DatabaseForDemo(final Context context) 
 	{
-		super(context, Environment.getExternalStorageDirectory()
-                + File.separator + "/DataBase/" + File.separator
-                + DB_NAME, null, DB_VERSION);
-//		super(context, DB_NAME, null, DB_VERSION);
-//		if (android.os.Build.VERSION.SDK_INT >= 4.2) 
-//		{
-//			DB_PATH = context.getApplicationInfo().dataDir + "/databases/";
-//		} 
-//		else 
-//		{
-//			DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
-//			DB_PATH = Environment.getExternalStorageDirectory() + File.separator + "/DataBase/";
-//		}
+//		super(context, Environment.getExternalStorageDirectory()
+//                + File.separator + "/DataBase/" + File.separator
+//                + DB_NAME, null, DB_VERSION);
+		super(context, DB_NAME, null, DB_VERSION);
+		if (android.os.Build.VERSION.SDK_INT >= 4.2) 
+		{
+			DB_PATH = context.getApplicationInfo().dataDir + "/databases/";
+		} 
+		else 
+		{
+			DB_PATH = "/data/data/" + context.getPackageName() + "/databases/";
+			DB_PATH = Environment.getExternalStorageDirectory() + File.separator + "/DataBase/";
+		}
 		this.mContext = context;
 	}
 

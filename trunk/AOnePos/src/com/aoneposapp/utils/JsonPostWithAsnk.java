@@ -64,7 +64,6 @@ public class JsonPostWithAsnk extends AsyncTask<String, Void, JSONObject>{
                 e.printStackTrace();
             }
         }
-
         return sb.toString();
     }
 
@@ -91,7 +90,6 @@ public class JsonPostWithAsnk extends AsyncTask<String, Void, JSONObject>{
   	        HttpEntity entity = response.getEntity();
 
   			if (entity != null) {
-
   			    // A Simple JSON Response Read
   			    InputStream instream = entity.getContent();
   			    String result= convertStreamToString(instream);
