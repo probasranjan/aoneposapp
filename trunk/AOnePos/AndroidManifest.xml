@@ -12,6 +12,7 @@
         android:minSdkVersion="5"
         android:targetSdkVersion="8" />
 
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" >
     </uses-permission>
     <uses-permission android:name="android.permission.CAMERA" >
@@ -58,7 +59,7 @@
 
         <!-- android:theme="@style/MainActivityStyle" -->
         <activity
-            android:name="com.aoneposapp.LoginHomeActivity"
+            android:name="com.aoneposapp.Splash_Activity"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden" >
@@ -67,6 +68,18 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.aoneposapp.Select_Demo_database_Activity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.aoneposapp.LoginHomeActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
         <activity
             android:name="com.aoneposapp.starprinter.StarIOSDKPOSPrinterRasterModeActivity"
@@ -403,7 +416,7 @@
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="landscape" />
         <!-- Core Test Harness Activities -->
-        
+
         <activity
             android:name="net.authorize.android.aim.AIMActivity"
             android:configChanges="keyboardHidden|orientation"
