@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
+import net.authorize.android.model.SystemSession;
+
 import org.apache.http.NameValuePair;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -21,6 +23,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +38,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -43,6 +47,8 @@ import android.widget.Button;
 import android.widget.DigitalClock;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -61,11 +67,10 @@ import com.aoneposapp.utils.Parameters;
 public class LoginHomeActivity extends Activity {
 	private EditText userName, passWord;
 	private ImageView loginButton;
-	private String uName = " ", pWord = " ", status = "a",status_first="w";
+	private String uName = " ", pWord = " ", status = "a", status_first = "w";
 	Button filebutton;
-	//	String urlval = "";
-	String name, cost, no, dp, vlu, pri, st, tax, vndrNo, vndrName, qty, price,
-	catid;
+	// String urlval = "";
+	String name, cost, no, dp, vlu, pri, st, tax, vndrNo, vndrName, qty, price, catid;
 	TextView tv1, tv2, tv3;
 	ImageView imageView;
 	public final Pattern EMAIL_ADDRESS_PATTERN = Pattern
@@ -89,31 +94,45 @@ public class LoginHomeActivity extends Activity {
 	boolean isOpened = false;
 
 	DatabaseForDemo sqlA1;
-	SQLiteDatabase dbforloginlogoutWrite,dbforloginlogoutRead;
+	SQLiteDatabase dbforloginlogoutWrite, dbforloginlogoutRead;
+	private SystemSession session ;
+	private String Data_type_demo;
 	
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login_home);
-		Parameters.printerContext=LoginHomeActivity.this;
+		session = new SystemSession(LoginHomeActivity.this);
+		String demo_database = session.getData("Data_value");
+		if(demo_database.equalsIgnoreCase(""))
+			show_select_Demo_DB_dialog();
+		else
+			init_var();
+	}
+
+	private void init_var() 
+	{
+		Data_type_demo = session.getData("Data_value");
+		
+		Parameters.printerContext = LoginHomeActivity.this;
 		System.gc();
-		Parameters.menufinish=false;
-		try{
+		Parameters.menufinish = false;
+		try {
 			DigitalClock dc = (DigitalClock) findViewById(R.id.digitalClock1);
 			imageLayout = (RelativeLayout) findViewById(R.id.imageLayout);
 			loginLayout = (RelativeLayout) findViewById(R.id.loginlayout);
 			topView = (RelativeLayout) findViewById(R.id.topview);
 			Parameters.ServerSyncTimer();
 			sqlA1 = new DatabaseForDemo(LoginHomeActivity.this);
-//			sqlA1.open();
+			// sqlA1.open();
 			dbforloginlogoutWrite = sqlA1.getWritableDatabase();
 			dbforloginlogoutRead = sqlA1.getReadableDatabase();
 			sqlA1.onUpgrade(dbforloginlogoutWrite, 1, 4);
 
-			final View activityRootView = getWindow().getDecorView().findViewById( android.R.id.content);
-			activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(
-					new OnGlobalLayoutListener() {
+			final View activityRootView = getWindow().getDecorView() .findViewById(android.R.id.content);
+			activityRootView.getViewTreeObserver().addOnGlobalLayoutListener( new OnGlobalLayoutListener() 
+			{
 						@Override
 						public void onGlobalLayout() {
 
@@ -130,19 +149,23 @@ public class LoginHomeActivity extends Activity {
 						}
 					});
 
-			String paymenttypevalis = "select "+DatabaseForDemo.PaymentProcessorName+" from "+DatabaseForDemo.PaymentProcessorPreferences;
+			String paymenttypevalis = "select "
+					+ DatabaseForDemo.PaymentProcessorName + " from "
+					+ DatabaseForDemo.PaymentProcessorPreferences;
 			Cursor cursordedf = dbforloginlogoutRead.rawQuery(paymenttypevalis, null);
 			// startManagingCursor(cursordedf);
-			if(cursordedf!=null){
-				if(cursordedf.getCount()>0){
-					if(cursordedf.moveToFirst()){
-						do{
-							if(cursordedf.isNull(cursordedf.getColumnIndex(DatabaseForDemo.PaymentProcessorName))){
+			if (cursordedf != null) {
+				if (cursordedf.getCount() > 0) {
+					if (cursordedf.moveToFirst()) {
+						do {
+							if (cursordedf .isNull(cursordedf .getColumnIndex(DatabaseForDemo.PaymentProcessorName)))
+							{
 								Parameters.paymentprocesstype = "Express Manual";
-							}else{
-								Parameters.paymentprocesstype = cursordedf.getString(cursordedf.getColumnIndex(DatabaseForDemo.PaymentProcessorName));
+							} else 
+							{
+								Parameters.paymentprocesstype = cursordedf .getString(cursordedf .getColumnIndex(DatabaseForDemo.PaymentProcessorName));
 							}
-						}while(cursordedf.moveToNext());
+						} while (cursordedf.moveToNext());
 					}
 				}
 			}
@@ -150,21 +173,17 @@ public class LoginHomeActivity extends Activity {
 			boolean isurlval = false;
 			String query = "select " + DatabaseForDemo.MISCEL_PAGEURL + " from " + DatabaseForDemo.MISCELLANEOUS_TABLE;
 			Cursor miscur879 = dbforloginlogoutRead.rawQuery(query, null);
-			if (miscur879 != null) 
-			{
+			if (miscur879 != null) {
 				if (miscur879.getCount() > 0) 
 				{
 					if (miscur879.moveToFirst()) 
 					{
-						do 
-						{
+						do {
 							if (miscur879 .isNull(miscur879 .getColumnIndex(DatabaseForDemo.MISCEL_PAGEURL))) 
 							{
 								isurlval = false;
-							} 
-							else
-							{
-								String urlval = miscur879.getString(miscur879.getColumnIndex(DatabaseForDemo.MISCEL_PAGEURL));
+							} else {
+								String urlval = miscur879 .getString(miscur879 .getColumnIndex(DatabaseForDemo.MISCEL_PAGEURL));
 								isurlval = true;
 								Parameters.OriginalUrl = urlval;
 								System.out.println("url val is:" + urlval);
@@ -176,12 +195,12 @@ public class LoginHomeActivity extends Activity {
 			miscur879.close();
 			String selectQuery = "SELECT  * FROM " + DatabaseForDemo.INVENTORY_TABLE;
 			Cursor mCursors201 = dbforloginlogoutRead.rawQuery(selectQuery, null);
-			if (mCursors201.getCount()>0 || isurlval == true) {
+			if (mCursors201.getCount() > 0 || isurlval == true) {
 
-			}else{ 
-				String atavffal="asdf";
-				JSONforDemoData client = new JSONforDemoData(LoginHomeActivity.this);
-				client.execute(atavffal);	    	
+			} else {
+				String atavffal = "asdf";
+				JSONforDemoData client = new JSONforDemoData(LoginHomeActivity.this,Data_type_demo);
+				client.execute(atavffal);
 			}
 			mCursors201.close();
 			Log.v("ddd", "sitharam");
@@ -189,13 +208,11 @@ public class LoginHomeActivity extends Activity {
 			filebutton = (Button) findViewById(R.id.filebutton);
 			userName = (EditText) findViewById(R.id.userName);
 			passWord = (EditText) findViewById(R.id.passWord);
-			passWord.setOnEditorActionListener(new OnEditorActionListener() 
-			{
+			passWord.setOnEditorActionListener(new OnEditorActionListener() {
 				@Override
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) 
 				{
-					if (actionId == EditorInfo.IME_ACTION_DONE) 
-					{
+					if (actionId == EditorInfo.IME_ACTION_DONE) {
 						loginMainMethod();
 					}
 					return false;
@@ -207,8 +224,7 @@ public class LoginHomeActivity extends Activity {
 			tv3 = (TextView) findViewById(R.id.textView3);
 			imageView = (ImageView) findViewById(R.id.companylogo);
 			File image = new File("/mnt/sdcard/harinath/hari.jpg");
-			if (image.exists()) 
-			{
+			if (image.exists()) {
 				imageView.setImageBitmap(BitmapFactory.decodeFile(image .getAbsolutePath()));
 			}
 
@@ -226,43 +242,30 @@ public class LoginHomeActivity extends Activity {
 				@Override
 				public void onClick(View arg0) {
 					// TODO Auto-generated method stub
-					final AlertDialog alertDialog2 = new AlertDialog.Builder(
-							LoginHomeActivity.this,
-							android.R.style.Theme_Translucent_NoTitleBar).create();
+					final AlertDialog alertDialog2 = new AlertDialog.Builder( LoginHomeActivity.this, android.R.style.Theme_Translucent_NoTitleBar) .create();
 					LayoutInflater mInflater1 = LayoutInflater .from(LoginHomeActivity.this);
 					View layout1 = mInflater1.inflate(R.layout.options_popup, null);
-					final ImageView nameR = (ImageView) layout1
-							.findViewById(R.id.imageView1);
-					final ImageView emailR = (ImageView) layout1
-							.findViewById(R.id.imageView2);
-					final ImageView phoneR = (ImageView) layout1
-							.findViewById(R.id.imageView3);
+					final ImageView nameR = (ImageView) layout1 .findViewById(R.id.imageView1);
+					final ImageView emailR = (ImageView) layout1 .findViewById(R.id.imageView2);
+					final ImageView phoneR = (ImageView) layout1 .findViewById(R.id.imageView3);
+					final ImageView setting = (ImageView) layout1 .findViewById(R.id.imageView4);
 
 					nameR.setOnClickListener(new OnClickListener() {
 
-						@Override		
+						@Override
 						public void onClick(View arg0) {
 							// TODO Auto-generated method stub
 							nameR.setBackgroundResource(R.drawable.registerbuttonpressed);
 							alertDialog2.dismiss();
-							final AlertDialog alertDialog2 = new AlertDialog.Builder(
-									LoginHomeActivity.this).create();
-							LayoutInflater mInflater1 = LayoutInflater
-									.from(LoginHomeActivity.this);
-							View layout1 = mInflater1.inflate(
-									R.layout.register_xml, null);
-							Button accept = (Button) layout1
-									.findViewById(R.id.button1);
-							Button decline = (Button) layout1
-									.findViewById(R.id.button2);
-							final EditText nameR = (EditText) layout1
-									.findViewById(R.id.nameR);
-							final EditText emailR = (EditText) layout1
-									.findViewById(R.id.emailR);
-							final EditText phoneR = (EditText) layout1
-									.findViewById(R.id.phoneR);
-							final EditText companyR = (EditText) layout1
-									.findViewById(R.id.companyR);
+							final AlertDialog alertDialog2 = new AlertDialog.Builder( LoginHomeActivity.this).create();
+							LayoutInflater mInflater1 = LayoutInflater .from(LoginHomeActivity.this);
+							View layout1 = mInflater1.inflate( R.layout.register_xml, null);
+							Button accept = (Button) layout1 .findViewById(R.id.button1);
+							Button decline = (Button) layout1 .findViewById(R.id.button2);
+							final EditText nameR = (EditText) layout1 .findViewById(R.id.nameR);
+							final EditText emailR = (EditText) layout1 .findViewById(R.id.emailR);
+							final EditText phoneR = (EditText) layout1 .findViewById(R.id.phoneR);
+							final EditText companyR = (EditText) layout1 .findViewById(R.id.companyR);
 							// WebView licence=(WebView)
 							// layout1.findViewById(R.id.licence);
 
@@ -274,38 +277,26 @@ public class LoginHomeActivity extends Activity {
 								public void onClick(View arg0) {
 									// TODO Auto-generated method stub
 
-									String name = nameR.getText().toString().trim();
-									String email = emailR.getText().toString()
-											.trim();
-									String phone = phoneR.getText().toString()
-											.trim();
-									String company = companyR.getText().toString()
-											.trim();
+									String name = nameR.getText().toString() .trim();
+									String email = emailR.getText().toString() .trim();
+									String phone = phoneR.getText().toString() .trim();
+									String company = companyR.getText() .toString().trim();
 									if (name.length() > 3) {
 										if (checkEmail(email)) {
 											if (company.length() > 3) {
 												String url = "http://www.aonepos.com/customer-register.php";
-												JsonPostWithAsnk client1 = new JsonPostWithAsnk(
-														LoginHomeActivity.this, l,
-														name, email, phone, company);
+												JsonPostWithAsnk client1 = new JsonPostWithAsnk( LoginHomeActivity.this, l, name, email, phone, company);
 												client1.execute(url);
 
 												alertDialog2.dismiss();
 											} else {
-												Toast.makeText(
-														LoginHomeActivity.this,
-														"Enter Full Company Name",
-														Toast.LENGTH_SHORT).show();
+												Toast.makeText( LoginHomeActivity.this, "Enter Full Company Name", Toast.LENGTH_SHORT) .show();
 											}
 										} else {
-											Toast.makeText(LoginHomeActivity.this,
-													"Invalid Email Addresss",
-													Toast.LENGTH_SHORT).show();
+											Toast.makeText( LoginHomeActivity.this, "Invalid Email Addresss", Toast.LENGTH_SHORT).show();
 										}
 									} else {
-										Toast.makeText(getApplicationContext(),
-												"Enter Name above 4 Characters",
-												2000).show();
+										Toast.makeText( getApplicationContext(), "Enter Name above 4 Characters", 2000).show();
 									}
 
 								}
@@ -319,8 +310,7 @@ public class LoginHomeActivity extends Activity {
 								}
 							});
 							alertDialog2.setView(layout1);
-							alertDialog2.getWindow().setSoftInputMode(
-									WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+							alertDialog2 .getWindow() .setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 							alertDialog2.show();
 
 						}
@@ -332,61 +322,51 @@ public class LoginHomeActivity extends Activity {
 							// TODO Auto-generated method stub
 							emailR.setBackgroundResource(R.drawable.aboutbuttonpressed);
 							alertDialog2.dismiss();
-							final AlertDialog alertDialog1 = new AlertDialog.Builder(
-									LoginHomeActivity.this).create();
-							LayoutInflater mInflater = LayoutInflater
-									.from(LoginHomeActivity.this);
-							View layout = mInflater
-									.inflate(R.layout.about_us, null);
+							final AlertDialog alertDialog1 = new AlertDialog.Builder( LoginHomeActivity.this).create();
+							LayoutInflater mInflater = LayoutInflater .from(LoginHomeActivity.this);
+							View layout = mInflater.inflate(R.layout.about_us, null);
 							Button ok = (Button) layout.findViewById(R.id.okkk);
-							TextView viewlicense = (TextView) layout
-									.findViewById(R.id.viewlicense);
-							TextView topnormaltext = (TextView) layout
-									.findViewById(R.id.topnormaltext);
-							TextView Buttomtext = (TextView) layout
-									.findViewById(R.id.Buttomtext);
+							TextView viewlicense = (TextView) layout .findViewById(R.id.viewlicense);
+							TextView topnormaltext = (TextView) layout .findViewById(R.id.topnormaltext);
+							TextView Buttomtext = (TextView) layout .findViewById(R.id.Buttomtext);
 							topnormaltext.setText(data);
 							Buttomtext.setText(data1);
-							viewlicense.setOnClickListener(new OnClickListener() {
-
-								@Override
-								public void onClick(View arg0) {
-									// TODO Auto-generated method stub
-									final AlertDialog alertDialog2 = new AlertDialog.Builder(
-											LoginHomeActivity.this).create();
-									LayoutInflater mInflater1 = LayoutInflater
-											.from(LoginHomeActivity.this);
-									View layout1 = mInflater1.inflate(
-											R.layout.licence_agreement, null);
-									Button accept = (Button) layout1
-											.findViewById(R.id.accept);
-									Button decline = (Button) layout1
-											.findViewById(R.id.decline);
-									WebView licence = (WebView) layout1
-											.findViewById(R.id.licence);
-
-									licence.loadUrl("file:///android_asset/register.html");
-
-									accept.setOnClickListener(new OnClickListener() {
+							viewlicense .setOnClickListener(new OnClickListener() {
 
 										@Override
 										public void onClick(View arg0) {
 											// TODO Auto-generated method stub
-											alertDialog2.dismiss();
-										}
-									});
-									decline.setOnClickListener(new OnClickListener() {
+											final AlertDialog alertDialog2 = new AlertDialog.Builder( LoginHomeActivity.this) .create();
+											LayoutInflater mInflater1 = LayoutInflater .from(LoginHomeActivity.this);
+											View layout1 = mInflater1.inflate( R.layout.licence_agreement, null);
+											Button accept = (Button) layout1 .findViewById(R.id.accept);
+											Button decline = (Button) layout1 .findViewById(R.id.decline);
+											WebView licence = (WebView) layout1 .findViewById(R.id.licence);
 
-										@Override
-										public void onClick(View arg0) {
-											// TODO Auto-generated method stub
-											alertDialog2.dismiss();
+											licence.loadUrl("file:///android_asset/register.html");
+
+											accept.setOnClickListener(new OnClickListener() {
+
+												@Override
+												public void onClick(View arg0) {
+													// TODO Auto-generated
+													// method stub
+													alertDialog2.dismiss();
+												}
+											});
+											decline.setOnClickListener(new OnClickListener() {
+
+												@Override
+												public void onClick(View arg0) {
+													// TODO Auto-generated
+													// method stub
+													alertDialog2.dismiss();
+												}
+											});
+											alertDialog2.setView(layout1);
+											alertDialog2.show();
 										}
 									});
-									alertDialog2.setView(layout1);
-									alertDialog2.show();
-								}
-							});
 							ok.setOnClickListener(new OnClickListener() {
 
 								@Override
@@ -406,7 +386,18 @@ public class LoginHomeActivity extends Activity {
 							// TODO Auto-generated method stub
 							alertDialog2.dismiss();
 							finish();
-
+						}
+					});
+					
+					setting.setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							// to set the sliding drawer off if gone from this activity 
+							session.addData("setting", "off");
+							Intent intent1 = new Intent(LoginHomeActivity.this, SettingsActivity.class);
+							startActivity(intent1);
+							finish();
 						}
 					});
 					alertDialog2.setView(layout1);
@@ -414,7 +405,7 @@ public class LoginHomeActivity extends Activity {
 					// filemenu.setVisibility(View.VISIBLE);
 				}
 			});
-		}catch (Exception e) {
+		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
@@ -423,20 +414,19 @@ public class LoginHomeActivity extends Activity {
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
-		try{		
-			Parameters.printerContext=LoginHomeActivity.this;
+		try {
+			Parameters.printerContext = LoginHomeActivity.this;
 			imageView = (ImageView) findViewById(R.id.companylogo);
 			File image = new File("/mnt/sdcard/harinath/hari.jpg");
 			if (image.exists()) {
-				imageView.setImageBitmap(BitmapFactory.decodeFile(image
-						.getAbsolutePath()));
+				imageView.setImageBitmap(BitmapFactory.decodeFile(image .getAbsolutePath()));
 			}
-			Parameters.menufinish=false;
-//			sqlA1 = new DatabaseForDemo(LoginHomeActivity.this);
-//			dbforloginlogoutWrite = sqlA1.getWritableDatabase();
-//			dbforloginlogoutRead = sqlA1.getReadableDatabase();
+			Parameters.menufinish = false;
+			// sqlA1 = new DatabaseForDemo(LoginHomeActivity.this);
+			// dbforloginlogoutWrite = sqlA1.getWritableDatabase();
+			// dbforloginlogoutRead = sqlA1.getReadableDatabase();
 			super.onResume();
-		}catch (Exception e) {
+		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
@@ -447,57 +437,50 @@ public class LoginHomeActivity extends Activity {
 		@Override
 		public void onRemoteCallComplete(JSONObject jsonFromNet) {
 
-			if(jsonFromNet.length()>2){
+			if (jsonFromNet.length() > 2) {
 				Log.v("josn", "" + jsonFromNet);
 				toastForRegister(jsonFromNet);
 			}
-
 		}
 
 		private void toastForRegister(JSONObject jsonFromNet) {
 			// TODO Auto-generated method stub
-			if(jsonFromNet!=null&&jsonFromNet.length()>2){
+			if (jsonFromNet != null && jsonFromNet.length() > 2) {
 				try {
 					JSONObject job = jsonFromNet.getJSONObject("response");
 					String msg = job.getString("status");
-					Toast.makeText(getApplicationContext(), "" + msg,
-							Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), "" + msg, Toast.LENGTH_LONG).show();
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		}
+
 		private void jsonParseFormServer(JSONObject jsonFromNet) {
 			// TODO Auto-generated method stub
-			if(jsonFromNet!=null&&jsonFromNet.length()>2){ 
+			if (jsonFromNet != null && jsonFromNet.length() > 2) {
 				try {
-					JSONArray deletequeries = jsonFromNet
-							.getJSONArray("delete-queries");
+					JSONArray deletequeries = jsonFromNet .getJSONArray("delete-queries");
 					for (int i = 0; i < deletequeries.length(); i++) {
 						String dQueries = deletequeries.getString(i);
 						Log.v("DQ", dQueries);
-
 						dbforloginlogoutWrite.execSQL(dQueries);
 
-						Toast.makeText(LoginHomeActivity.this, "deleted", 1000)
-						.show();
+						Toast.makeText(LoginHomeActivity.this, "deleted", 1000) .show();
 					}
-					JSONArray insertqueries = jsonFromNet
-							.getJSONArray("insert-queries");
+					JSONArray insertqueries = jsonFromNet .getJSONArray("insert-queries");
 					for (int i = 0; i < insertqueries.length(); i++) {
 						String iQueries = insertqueries.getString(i);
 						Log.v("DQ", iQueries);
 
 						dbforloginlogoutWrite.execSQL(iQueries);
 
-						Toast.makeText(LoginHomeActivity.this, "inserted", 1000)
-						.show();
+						Toast.makeText(LoginHomeActivity.this, "inserted", 1000) .show();
 					}
 					JSONObject response = jsonFromNet.getJSONObject("response");
 					String severtime = response.getString("server-time");
-					String timeinSeconds = response
-							.getString("time-difference-in-seconds");
+					String timeinSeconds = response .getString("time-difference-in-seconds");
 					Log.v("DQ" + severtime, timeinSeconds);
 					// // String severtime=response.getString("server-time");
 					// String severtime=response.getString("server-time");
@@ -506,8 +489,9 @@ public class LoginHomeActivity extends Activity {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}else{
-				//			Toast.makeText(EmployeeActivity.this, "Server Error", 1000).show();
+			} else {
+				// Toast.makeText(EmployeeActivity.this, "Server Error",
+				// 1000).show();
 				Log.v("errorr", "server");
 			}
 		}
@@ -525,9 +509,10 @@ public class LoginHomeActivity extends Activity {
 	private void orDatabase() {
 		String cat_id = "", dp_dp = "", dp_id = "", food = "";
 
-		String selectQuery = "SELECT  * FROM "
-				+ DatabaseForDemo.INVENTORY_TABLE;
+		String selectQuery = "SELECT  * FROM " + DatabaseForDemo.INVENTORY_TABLE;
 		Cursor mCursors202 = dbforloginlogoutWrite.rawQuery(selectQuery, null);
+		POIFSFileSystem myFileSystem ;
+		
 		if (mCursors202 != null) {
 			Log.v("gfdkg", "super333");
 			String server_Url = "nnn";
@@ -535,8 +520,15 @@ public class LoginHomeActivity extends Activity {
 				Log.v("gfdkg", "super2");
 				int p = 0;
 				try {
-
-					POIFSFileSystem myFileSystem = new POIFSFileSystem( getAssets().open("department.xls"));
+					if(!Data_type_demo.equalsIgnoreCase("mobile"))
+					{
+//						myFileSystem = new POIFSFileSystem( getAssets().open("department.xls"));
+						myFileSystem = new POIFSFileSystem( getAssets().open("department_restaurant.xls"));
+					}
+					else
+					{
+						myFileSystem = new POIFSFileSystem( getAssets().open("department_mobile.xls"));
+					}
 					HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
 					HSSFSheet mySheet = myWorkBook.getSheetAt(0);
 					Iterator<Row> rowIter = mySheet.rowIterator();
@@ -549,7 +541,7 @@ public class LoginHomeActivity extends Activity {
 
 							while (cellIter.hasNext()) {
 								HSSFCell myCell = (HSSFCell) cellIter.next();
-								Log.e("  myCell", "" + myCell);
+								Log.e("  myCell 2 ", "" + myCell);
 								if (i == 0)
 									cat_id = "" + myCell;
 								if (i == 1)
@@ -558,28 +550,25 @@ public class LoginHomeActivity extends Activity {
 									dp_dp = "" + myCell;
 								if (i == 3)
 									food = "" + myCell;
-
 								i++;
 							}
 							String random = Parameters.randomValue();
 							String now_date = Parameters.currentTime();
 
 							ContentValues contentValues = new ContentValues();
-
-							contentValues.put(DatabaseForDemo.UNIQUE_ID, Parameters.randomValue());
-							contentValues.put(DatabaseForDemo.CREATED_DATE, Parameters.currentTime());
-							contentValues.put(DatabaseForDemo.MODIFIED_DATE, Parameters.currentTime());
+							contentValues.put(DatabaseForDemo.UNIQUE_ID,Parameters.randomValue());
+							contentValues.put(DatabaseForDemo.CREATED_DATE,Parameters.currentTime());
+							contentValues.put(DatabaseForDemo.MODIFIED_DATE,Parameters.currentTime());
 							contentValues.put(DatabaseForDemo.MODIFIED_IN, "Local");
-							contentValues.put(DatabaseForDemo.DepartmentID, dp_id);
-							contentValues.put(DatabaseForDemo.DepartmentDesp, dp_dp);
-							contentValues.put( DatabaseForDemo.CategoryForDepartment, cat_id);
-							contentValues.put( DatabaseForDemo.FoodstampableForDept, "no");
-							contentValues.put(DatabaseForDemo.TaxValForDept, "");
-							contentValues.put(DatabaseForDemo.CHECKED_VALUE, "true");
-							dbforloginlogoutWrite.insert( DatabaseForDemo.DEPARTMENT_TABLE, null, contentValues);
+							contentValues.put(DatabaseForDemo.DepartmentID,dp_id);
+							contentValues.put(DatabaseForDemo.DepartmentDesp,dp_dp);
+							contentValues.put(DatabaseForDemo.CategoryForDepartment,cat_id);
+							contentValues.put(DatabaseForDemo.FoodstampableForDept,"no");
+							contentValues.put(DatabaseForDemo.TaxValForDept,"");
+							contentValues.put(DatabaseForDemo.CHECKED_VALUE,"true");
+							dbforloginlogoutWrite.insert( DatabaseForDemo.DEPARTMENT_TABLE, null,contentValues);
 						}
 					}
-
 				} catch (Exception ex) {
 				}
 
@@ -593,9 +582,10 @@ public class LoginHomeActivity extends Activity {
 	private void orDatabaseCat() {
 		String cat_id = "", cat_cat = "";
 
-		String selectQuery = "SELECT  * FROM "
-				+ DatabaseForDemo.INVENTORY_TABLE;
+		String selectQuery = "SELECT  * FROM " + DatabaseForDemo.INVENTORY_TABLE;
 		Cursor mCursors203 = dbforloginlogoutWrite.rawQuery(selectQuery, null);
+		POIFSFileSystem myFileSystem;
+		
 		if (mCursors203 != null) {
 			Log.v("gfdkg", "super333");
 			if (mCursors203.getCount() < 10) {
@@ -603,8 +593,15 @@ public class LoginHomeActivity extends Activity {
 				int p = 0;
 				try {
 
-					POIFSFileSystem myFileSystem = new POIFSFileSystem(
-							getAssets().open("categoryaaa.xls"));
+					if(!Data_type_demo.equalsIgnoreCase("mobile"))
+					{
+//						 myFileSystem = new POIFSFileSystem( getAssets().open("categoryaaa.xls"));
+						 myFileSystem = new POIFSFileSystem( getAssets().open("category_restaurant.xls"));
+					}
+					else
+					{
+						myFileSystem = new POIFSFileSystem( getAssets().open("categoryaaa_mobile.xls"));
+					}
 					Log.e(" before myFileSystem", "" + myFileSystem);
 					// Create a workbookusing the File System
 					HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
@@ -620,7 +617,7 @@ public class LoginHomeActivity extends Activity {
 
 							while (cellIter.hasNext()) {
 								HSSFCell myCell = (HSSFCell) cellIter.next();
-								Log.e("  myCell", "" + myCell);
+								Log.e("  myCell1", "" + myCell);
 								if (i == 0)
 									cat_id = "" + myCell;
 								if (i == 1)
@@ -638,7 +635,6 @@ public class LoginHomeActivity extends Activity {
 							dbforloginlogoutWrite.insert( DatabaseForDemo.CATEGORY_TABLE, null, contentValues);
 						}
 					}
-
 				} catch (Exception ex) {
 				}
 
@@ -648,89 +644,88 @@ public class LoginHomeActivity extends Activity {
 		}
 		mCursors203.close();
 	}
+
 	/**
 	 * 
 	 */
-	void loginFunction() 
-	{
-		Log.d("LoginHomeActivity","loginFunction() Enter");
-		try{
+	void loginFunction() {
+		Log.d("LoginHomeActivity", "loginFunction() Enter");
+		try {
 			Parameters.logintime = Parameters.currentTime();
 			uName = userName.getText().toString().trim();
 			pWord = passWord.getText().toString().trim();
-			Parameters.sessionidforloginlogout ="";
-			if(uName.length()==0 || pWord.length()==0)
-			{
+			Parameters.sessionidforloginlogout = "";
+			if (uName.length() == 0 || pWord.length() == 0) {
 				Toast.makeText(getApplicationContext(), "Enter Username and password", 1000).show();
 				return;
 			}
-			if (Parameters.OriginalUrl.equals("")) 
-			{
+			if (Parameters.OriginalUrl.equals("")) {
 				System.out.println("there is no server url val");
-				if (uName != null || pWord != null) 
-				{
+				if (uName != null || pWord != null) {
 					Cursor cursorlogin = dbforloginlogoutRead.rawQuery(
-							"select * from " + DatabaseForDemo.ADMIN_TABLE+" where "+DatabaseForDemo.USERID+"='"+uName+"' and "
-									+DatabaseForDemo.PASSWORD+"='"+Parameters.MD5(pWord)+"';", null);
-					if (cursorlogin.getCount() > 0)
-					{
+							"select * from " + DatabaseForDemo.ADMIN_TABLE
+									+ " where " + DatabaseForDemo.USERID + "='"
+									+ uName + "' and "
+									+ DatabaseForDemo.PASSWORD + "='"
+									+ Parameters.MD5(pWord) + "';", null);
+					if (cursorlogin.getCount() > 0) {
 						Log.d("sss", "dbforloginlogoutRead.close()");
-						
+
+						session.addData("setting", "on");
 						Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
 						startActivity(intent);
 						Parameters.loggedinusertype = "admin";
-						Parameters.usertype="admin";
+						Parameters.usertype = "admin";
 						Parameters.userid = uName;
 						Parameters.usertypeloginvalue = uName;
 						adminPermissions(true);
 						insertLoginTime();
 
-					} 
-					else 
-					{
+					} else {
 						Log.d("sss", "else1");
 						Cursor cursoremp = dbforloginlogoutRead.rawQuery(
-								"select * from " + DatabaseForDemo.EMPLOYEE_TABLE+" where "+DatabaseForDemo.EMPLOYEE_EMPLOYEE_ID+"='"+uName+"' and "
-										+DatabaseForDemo.EMPLOYEE_PASSWORD+"='"+Parameters.MD5(pWord)+"';",
-										null);
-						if (cursoremp.getCount() > 0) 
-						{
+								"select * from "
+										+ DatabaseForDemo.EMPLOYEE_TABLE
+										+ " where "
+										+ DatabaseForDemo.EMPLOYEE_EMPLOYEE_ID
+										+ "='" + uName + "' and "
+										+ DatabaseForDemo.EMPLOYEE_PASSWORD
+										+ "='" + Parameters.MD5(pWord) + "';",
+								null);
+						if (cursoremp.getCount() > 0) {
 							Log.d("sss", "else2");
+							session.addData("setting", "on");
 							Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
 							startActivity(intent);
 							permissions();
 							insertLoginTime();
 							Parameters.loggedinusertype = "employee";
-							Parameters.usertype="employee";
+							Parameters.usertype = "employee";
 							Parameters.userid = uName;
 							Parameters.usertypeloginvalue = uName;
 							setEmployeePermissions();
 
-						}
-						else
-						{
+						} else {
 							Log.d("sss", "else3");
-							if (uName.equals("01") && pWord.equals("admin")) 
-							{
+							if (uName.equals("01") && pWord.equals("admin")) {
 								Log.d("sss", "else4");
 								Parameters.loggedinusertype = "admin";
-								Parameters.usertype="admin";
+								Parameters.usertype = "admin";
 								Parameters.userid = uName;
 								Parameters.usertypeloginvalue = uName;
 								adminPermissions(true);
 								insertLoginTime();
 								permissions();
 								Log.d("sss", "mmmmmmm");
-								Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
+								session.addData("setting", "on");
+								Intent intent = new Intent( LoginHomeActivity.this, MenuActivity.class);
 								Log.d("sss", "nnnnnnnnnn");
 								startActivity(intent);
-//								onDestroy();
+								// onDestroy();
 								LoginHomeActivity.this.finish();
 								Log.d("sss", "oooooooo");
-								
-							} 
-							else 
-							{
+
+							} else {
 								Toast.makeText(getApplicationContext(), "Enter correct Username and password", 1000).show();
 							}
 						}
@@ -739,110 +734,109 @@ public class LoginHomeActivity extends Activity {
 					}
 					cursorlogin.close();// close the cursor
 					Log.d("sss", "22222222");
-					
-				}
-				else 
-				{
+
+				} else {
 					Toast.makeText(getApplicationContext(), "Enter correct Username and password", 1000).show();
 				}
-			} 
-			else 
-			{
-				System.out.println("server url val: "+Parameters.OriginalUrl);
+			} else {
+				System.out.println("server url val: " + Parameters.OriginalUrl);
 
-				if (Parameters.isNetworkAvailable(LoginHomeActivity.this))
-				{
-//					String ataval=Parameters.OriginalUrl+"user-login.php?username="+uName+"&password="+Parameters.MD5(pWord)+"&deviceid="
-//							+Parameters.randomValue()+"&systemtime="+Parameters.currentTime()+"&Currentsystemtime=".replace(" ", "%20");
-//					System.out.println("ataval: "+ataval);
+				if (Parameters.isNetworkAvailable(LoginHomeActivity.this)) {
+					// String
+					// ataval=Parameters.OriginalUrl+"user-login.php?username="+uName+"&password="+Parameters.MD5(pWord)+"&deviceid="
+					// +Parameters.randomValue()+"&systemtime="+Parameters.currentTime()+"&Currentsystemtime=".replace(" ",
+					// "%20");
+					// System.out.println("ataval: "+ataval);
 
-//					JSONLoginFunction client = new JSONLoginFunction(LoginHomeActivity.this, forlogin);
-//					Log.d("sss", "ppppppppppp");
-//					client.execute(ataval);	  
-					
+					// JSONLoginFunction client = new
+					// JSONLoginFunction(LoginHomeActivity.this, forlogin);
+					// Log.d("sss", "ppppppppppp");
+					// client.execute(ataval);
+
 					// get the server response
-					
+
 					HashMap<String, String> hashMap = new HashMap<String, String>();
-					hashMap.put("username",uName );
-					hashMap.put("password",Parameters.MD5(pWord) );
-					hashMap.put("deviceid",Parameters.randomValue() );
+					hashMap.put("username", uName);
+					hashMap.put("password", Parameters.MD5(pWord));
+					hashMap.put("deviceid", Parameters.randomValue());
 					hashMap.put("systemtime", Parameters.currentTime());
 					hashMap.put("Currentsystemtime", Parameters.currentTime());
-					System.out.println("PARAM: "+hashMap);
-					System.out.println("Parameters.OriginalUrl: "+Parameters.OriginalUrl);
-					new AsyncTaskUtility(LoginHomeActivity.this, hashMap, Parameters.OriginalUrl+"user-login.php").getJSONResponse(new AsyncTaskInterface() 
-					{
-						@Override
-						public void getJSONObjectFromAsynTask(JSONObject json) 
-						{
-							LoginformServer(json.toString());
-						}
-					});
-				}
-				else
-				{
+					System.out.println("PARAM: " + hashMap);
+					System.out.println("Parameters.OriginalUrl: " + Parameters.OriginalUrl);
+					new AsyncTaskUtility(LoginHomeActivity.this, hashMap, Parameters.OriginalUrl + "user-login.php") .getJSONResponse(new AsyncTaskInterface() {
+								@Override
+								public void getJSONObjectFromAsynTask( JSONObject json) {
+									LoginformServer(json.toString());
+								}
+							});
+				} else {
 					System.out.println("There is no net connection");
 					if (uName != null || pWord != null) {
 						Cursor cursorlogin23 = dbforloginlogoutRead.rawQuery(
-								"select * from " + DatabaseForDemo.ADMIN_TABLE+" where "+DatabaseForDemo.USERID+"='"+uName+"' and "
-										+DatabaseForDemo.PASSWORD+"='"+Parameters.MD5(pWord)+"';", null);
-						if (cursorlogin23.getCount() > 0) 
-						{
+								"select * from " + DatabaseForDemo.ADMIN_TABLE
+										+ " where " + DatabaseForDemo.USERID
+										+ "='" + uName + "' and "
+										+ DatabaseForDemo.PASSWORD + "='"
+										+ Parameters.MD5(pWord) + "';", null);
+						if (cursorlogin23.getCount() > 0) {
+							session.addData("setting", "on");
 							Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
 							startActivity(intent);
 							saveinpendingQry();
 							permissions();
 							Parameters.loggedinusertype = "admin";
-							Parameters.usertype="admin";
+							Parameters.usertype = "admin";
 							Parameters.userid = uName;
 							Parameters.usertypeloginvalue = uName;
 							adminPermissions(true);
 							insertLoginTime();
 							permissions();
-						}
-						else 
-						{
-							Cursor cursoremp23 = dbforloginlogoutRead.rawQuery( "select * from " + DatabaseForDemo.EMPLOYEE_TABLE+" where "+DatabaseForDemo.EMPLOYEE_EMPLOYEE_ID+"='"+uName+"' and " +DatabaseForDemo.EMPLOYEE_PASSWORD+"='"+Parameters.MD5(pWord)+"';", null);
-							if (cursoremp23.getCount() > 0) 
-							{
-								Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
+						} else {
+							Cursor cursoremp23 = dbforloginlogoutRead .rawQuery(
+											"select * from "
+													+ DatabaseForDemo.EMPLOYEE_TABLE
+													+ " where "
+													+ DatabaseForDemo.EMPLOYEE_EMPLOYEE_ID
+													+ "='"
+													+ uName
+													+ "' and "
+													+ DatabaseForDemo.EMPLOYEE_PASSWORD
+													+ "='"
+													+ Parameters.MD5(pWord)
+													+ "';", null);
+							if (cursoremp23.getCount() > 0) {
+								session.addData("setting", "on");
+								Intent intent = new Intent( LoginHomeActivity.this, MenuActivity.class);
 								startActivity(intent);
 								saveinpendingQry();
 								permissions();
 								insertLoginTime();
 								Parameters.loggedinusertype = "employee";
-								Parameters.usertype="employee";
+								Parameters.usertype = "employee";
 								Parameters.userid = uName;
 								Parameters.usertypeloginvalue = uName;
 								setEmployeePermissions();
 
-							}
-							else
-							{
-								Cursor cursorlogin0123 = dbforloginlogoutRead.rawQuery( "select * from " + DatabaseForDemo.ADMIN_TABLE, null);
-								if (cursorlogin0123.getCount() > 0) 
-								{
-									Toast.makeText(getApplicationContext(), "Enter correct Username and password", 1000).show();
-								}
-								else
-								{
-									if (uName.equals("01") && pWord.equals("admin")) 
-									{
+							} else {
+								Cursor cursorlogin0123 = dbforloginlogoutRead .rawQuery("select * from " + DatabaseForDemo.ADMIN_TABLE, null);
+								if (cursorlogin0123.getCount() > 0) {
+									Toast.makeText( getApplicationContext(), "Enter correct Username and password", 1000).show();
+								} else {
+									if (uName.equals("01") && pWord.equals("admin")) {
 										Parameters.loggedinusertype = "admin";
-										Parameters.usertype="admin";
+										Parameters.usertype = "admin";
 										Parameters.userid = uName;
 										Parameters.usertypeloginvalue = uName;
 										adminPermissions(true);
 										insertLoginTime();
 										permissions();
-										Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
+										session.addData("setting", "on");
+										Intent intent = new Intent( LoginHomeActivity.this, MenuActivity.class);
 										onDestroy();
 										startActivity(intent);
 										saveinpendingQry();
-									}
-									else 
-									{
-										Toast.makeText(getApplicationContext(), "Enter correct Username and password", 1000).show();
+									} else {
+										Toast.makeText( getApplicationContext(), "Enter correct Username and password", 1000).show();
 									}
 								}
 								cursorlogin0123.close();
@@ -850,20 +844,19 @@ public class LoginHomeActivity extends Activity {
 							cursoremp23.close();
 						}
 						cursorlogin23.close();
-					} 
-					else 
-					{
-						Toast.makeText(getApplicationContext(), "Enter correct Username and password", 1000).show();
+					} else {
+						Toast.makeText(getApplicationContext(), "Enter correct Username and password", 1000) .show();
 					}
 				}
 			}
 			Log.d("sss", "jjjjjjjjj");
-		}catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Log.d("LoginHomeActivity","loginFunction() Exit");
+		Log.d("LoginHomeActivity", "loginFunction() Exit");
 		Log.d("sss", "ffffffffff");
 	}
+
 	LoginReturnJson forlogin = new LoginReturnJson() {
 
 		@Override
@@ -872,21 +865,22 @@ public class LoginHomeActivity extends Activity {
 			LoginformServer(jsontext.toString());
 		}
 	};
-	void LoginformServer(String response){
-		try{
+
+	void LoginformServer(String response) {
+		try {
 			String servertime = "";
-			if(response!=null&&response.length()>2){ 
+			if (response != null && response.length() > 2) {
 				try {
 					JSONObject jsonObj = new JSONObject(response);
-					JSONObject responseobj = jsonObj .getJSONObject("response");
+					JSONObject responseobj = jsonObj.getJSONObject("response");
 					servertime = responseobj.getString("server-time");
 					status_first = jsonObj.getString("server-user-exists");
 					status = jsonObj.getString("login-status");
-					if(status_first.equals("true")){
-						if(status.equals("true")){
-							Parameters.sessionidforloginlogout = jsonObj.getString("sessionid");
-							Parameters.loggedinusertype = jsonObj.getString("user-type");
-							Parameters.usertype=jsonObj.getString("user-type");
+					if (status_first.equals("true")) {
+						if (status.equals("true")) {
+							Parameters.sessionidforloginlogout = jsonObj .getString("sessionid");
+							Parameters.loggedinusertype = jsonObj .getString("user-type");
+							Parameters.usertype = jsonObj .getString("user-type");
 						}
 					}
 					System.out.println("response value is:" + jsonObj.toString(4));
@@ -903,77 +897,71 @@ public class LoginHomeActivity extends Activity {
 				Cursor mCursors204 = dbforloginlogoutWrite.rawQuery(select, null);
 				if (mCursors204.getCount() > 0) {
 					dbforloginlogoutWrite.execSQL("update "
-							+ DatabaseForDemo.MISCELLANEOUS_TABLE
-							+ " set "
+							+ DatabaseForDemo.MISCELLANEOUS_TABLE + " set "
 							+ DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL
 							+ "=\"" + servertime + "\"");
 
 				} else {
 
 					ContentValues contentValues1 = new ContentValues();
-					contentValues1.put(DatabaseForDemo.MISCEL_STORE,
-							"store1");
-					contentValues1.put(DatabaseForDemo.MISCEL_PAGEURL,
-							Parameters.OriginalUrl);
-					contentValues1.put(
-							DatabaseForDemo.MISCEL_UPDATE_LOCAL,
-							Parameters.currentTime());
-					contentValues1.put(
-							DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL,
-							Parameters.currentTime());
-					dbforloginlogoutWrite.insert(DatabaseForDemo.MISCELLANEOUS_TABLE,
-							null, contentValues1);
+					contentValues1.put(DatabaseForDemo.MISCEL_STORE, "store1");
+					contentValues1.put(DatabaseForDemo.MISCEL_PAGEURL, Parameters.OriginalUrl);
+					contentValues1.put(DatabaseForDemo.MISCEL_UPDATE_LOCAL, Parameters.currentTime());
+					contentValues1.put( DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL, Parameters.currentTime());
+					dbforloginlogoutWrite.insert( DatabaseForDemo.MISCELLANEOUS_TABLE, null, contentValues1);
 
 				}
 				mCursors204.close();
 				Log.d("sss", "6666666");
-			}else{
-				Toast.makeText(getApplicationContext(), "Server Error", 1000).show();
+			} else {
+				Toast.makeText(getApplicationContext(), "Server Error", 1000) .show();
 			}
 
-			if(status_first.equals("true")){
+			if (status_first.equals("true")) {
 				System.out.println("status_first true");
 				if (status.equals("true")) {
 					System.out.println("status true");
 					insertLoginTime();
-					if(Parameters.usertype.equals("admin")){
+					if (Parameters.usertype.equals("admin")) {
 						Parameters.userid = uName;
 						Parameters.usertypeloginvalue = uName;
 						adminPermissions(true);
 						permissions();
-						Intent intent = new Intent(LoginHomeActivity.this,
-								MenuActivity.class);
+						session.addData("setting", "on");
+						Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
 						startActivity(intent);
 
-					}else{
+					} else {
 						Parameters.userid = uName;
 						Parameters.usertypeloginvalue = uName;
 						setEmployeePermissions();
 						permissions();
-						Intent intent = new Intent(LoginHomeActivity.this,
-								MenuActivity.class);
+						session.addData("setting", "on");
+						Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
 						startActivity(intent);
 					}
 
 				} else {
-					Toast.makeText(getApplicationContext(),
-							"Enter correct Username and password", 1000).show();
+					Toast.makeText(getApplicationContext(), "Enter correct Username and password", 1000).show();
 				}
-			}else {
+			} else {
 				System.out.println("status_first flase");
 				if (uName != null || pWord != null) {
-					Log.v("1","1");
+					Log.v("1", "1");
 					Cursor cursorlogin1 = dbforloginlogoutRead.rawQuery(
-							"select * from " + DatabaseForDemo.ADMIN_TABLE+" where "+DatabaseForDemo.USERID+"='"+uName+"' and "
-									+DatabaseForDemo.PASSWORD+"='"+Parameters.MD5(pWord)+"';", null);
+							"select * from " + DatabaseForDemo.ADMIN_TABLE
+									+ " where " + DatabaseForDemo.USERID + "='"
+									+ uName + "' and "
+									+ DatabaseForDemo.PASSWORD + "='"
+									+ Parameters.MD5(pWord) + "';", null);
 					// startManagingCursor(cursorlogin1);
 					if (cursorlogin1.getCount() > 0) {
-						Intent intent = new Intent(LoginHomeActivity.this,
-								MenuActivity.class);
+						session.addData("setting", "on");
+						Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
 						startActivity(intent);
 						permissions();
 						Parameters.loggedinusertype = "admin";
-						Parameters.usertype="admin";
+						Parameters.usertype = "admin";
 						Parameters.userid = uName;
 						Parameters.usertypeloginvalue = uName;
 						adminPermissions(true);
@@ -981,45 +969,47 @@ public class LoginHomeActivity extends Activity {
 						permissions();
 					} else {
 						Cursor cursoremp1 = dbforloginlogoutRead.rawQuery(
-								"select * from " + DatabaseForDemo.EMPLOYEE_TABLE+" where "+DatabaseForDemo.EMPLOYEE_EMPLOYEE_ID+"='"+uName+"' and "
-										+DatabaseForDemo.EMPLOYEE_PASSWORD+"='"+Parameters.MD5(pWord)+"';",
-										null);
+								"select * from "
+										+ DatabaseForDemo.EMPLOYEE_TABLE
+										+ " where "
+										+ DatabaseForDemo.EMPLOYEE_EMPLOYEE_ID
+										+ "='" + uName + "' and "
+										+ DatabaseForDemo.EMPLOYEE_PASSWORD
+										+ "='" + Parameters.MD5(pWord) + "';",
+								null);
 						if (cursoremp1.getCount() > 0) {
-							Intent intent = new Intent(LoginHomeActivity.this,
-									MenuActivity.class);
+							session.addData("setting", "on");
+							Intent intent = new Intent(LoginHomeActivity.this, MenuActivity.class);
 							startActivity(intent);
 							permissions();
 							insertLoginTime();
 							Parameters.loggedinusertype = "employee";
-							Parameters.usertype="employee";
+							Parameters.usertype = "employee";
 							Parameters.userid = uName;
 							Parameters.usertypeloginvalue = uName;
 							setEmployeePermissions();
 
-						}else{
-							Log.v("133","133");
-							Cursor cursorlogin011 = dbforloginlogoutRead.rawQuery(
-									"select * from " + DatabaseForDemo.ADMIN_TABLE, null);
+						} else {
+							Log.v("133", "133");
+							Cursor cursorlogin011 = dbforloginlogoutRead .rawQuery("select * from " + DatabaseForDemo.ADMIN_TABLE, null);
 							if (cursorlogin011.getCount() > 0) {
-								Toast.makeText(getApplicationContext(),
-										"Enter correct Username and password", 1000).show();
-							}else{
+								Toast.makeText(getApplicationContext(), "Enter correct Username and password", 1000).show();
+							} else {
 								if (uName.equals("01") && pWord.equals("admin")) {
 									Parameters.loggedinusertype = "admin";
-									Parameters.usertype="admin";
+									Parameters.usertype = "admin";
 									Parameters.userid = uName;
 									Parameters.usertypeloginvalue = uName;
 									adminPermissions(true);
 									insertLoginTime();
 									permissions();
-									Log.v("1vcb","1vcb");
-									Intent intent = new Intent(LoginHomeActivity.this,
-											MenuActivity.class);
+									Log.v("1vcb", "1vcb");
+									session.addData("setting", "on");
+									Intent intent = new Intent( LoginHomeActivity.this, MenuActivity.class);
 									startActivity(intent);
-									Log.v("1zzz","zzz1");
+									Log.v("1zzz", "zzz1");
 								} else {
-									Toast.makeText(getApplicationContext(),
-											"Enter correct Username and password", 1000).show();
+									Toast.makeText( getApplicationContext(), "Enter correct Username and password", 1000).show();
 								}
 							}
 							cursorlogin011.close();
@@ -1031,43 +1021,42 @@ public class LoginHomeActivity extends Activity {
 					cursorlogin1.close();
 					Log.d("sss", "999999999");
 				} else {
-					Toast.makeText(getApplicationContext(),
-							"Enter correct Username and password", 1000).show();
+					Toast.makeText(getApplicationContext(), "Enter correct Username and password", 1000).show();
 				}
 			}
-		}catch(Exception ee){
+		} catch (Exception ee) {
 			ee.printStackTrace();
 		}
 	}
+
 	@Override
-	protected void onStop()
-	{
+	protected void onStop() {
 		super.onStop();
-//		Log.d("sss", "dbforloginlogoutRead: "+dbforloginlogoutRead);
-//		Log.d("sss", "dbforloginlogoutWrite: "+dbforloginlogoutWrite);
-//		Log.d("sss", "sqlA1: "+sqlA1);
-//		Log.d("sss", "onStop()");
-//		dbforloginlogoutRead.close();
-//		dbforloginlogoutWrite.close();
-//		sqlA1.close();
-//		sqlA1=null;
-//		Log.d("sss", "dbforloginlogoutRead: "+dbforloginlogoutRead);
-//		Log.d("sss", "dbforloginlogoutWrite: "+dbforloginlogoutWrite);
-//		Log.d("sss", "sqlA1: "+sqlA1);
+		// Log.d("sss", "dbforloginlogoutRead: "+dbforloginlogoutRead);
+		// Log.d("sss", "dbforloginlogoutWrite: "+dbforloginlogoutWrite);
+		// Log.d("sss", "sqlA1: "+sqlA1);
+		// Log.d("sss", "onStop()");
+		// dbforloginlogoutRead.close();
+		// dbforloginlogoutWrite.close();
+		// sqlA1.close();
+		// sqlA1=null;
+		// Log.d("sss", "dbforloginlogoutRead: "+dbforloginlogoutRead);
+		// Log.d("sss", "dbforloginlogoutWrite: "+dbforloginlogoutWrite);
+		// Log.d("sss", "sqlA1: "+sqlA1);
 	}
 
 	@Override
 	protected void onDestroy() {
 		Log.d("sss", "onDestroy() method");
-//		sqlA1.close();
+		// sqlA1.close();
 		super.onDestroy();
-//		dbforloginlogoutRead.close();
-//		dbforloginlogoutWrite.close();
-		if(sqlA1!=null)
-		{
+		// dbforloginlogoutRead.close();
+		// dbforloginlogoutWrite.close();
+		if (sqlA1 != null) {
 			sqlA1.close();
 		}
 	}
+
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		switch (keyCode) {
@@ -1087,7 +1076,7 @@ public class LoginHomeActivity extends Activity {
 	}
 
 	void micellaneousTable() {
-		try{
+		try {
 			String selectQuery = "SELECT  * FROM " + DatabaseForDemo.MISCELLANEOUS_TABLE;
 			Cursor mCursors34 = dbforloginlogoutWrite.rawQuery(selectQuery, null);
 			if (mCursors34 != null) {
@@ -1099,14 +1088,14 @@ public class LoginHomeActivity extends Activity {
 					contentValues.put(DatabaseForDemo.MISCEL_STORE, "Store1");
 					contentValues.put(DatabaseForDemo.MISCEL_PAGEURL, Parameters.OriginalUrl);
 					contentValues.put(DatabaseForDemo.MISCEL_UPDATE_LOCAL, Parameters.currentTime());
-					contentValues.put(DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL, Parameters.currentTime());
+					contentValues.put( DatabaseForDemo.MISCEL_SERVER_UPDATE_LOCAL, Parameters.currentTime());
 					Log.i("select", "" + contentValues);
-					dbforloginlogoutWrite.insert(DatabaseForDemo.MISCELLANEOUS_TABLE, null, contentValues);
+					dbforloginlogoutWrite.insert( DatabaseForDemo.MISCELLANEOUS_TABLE, null, contentValues);
 					contentValues.clear();
 				} else {
 					if (mCursors34.moveToFirst()) {
 
-						String url = mCursors34.getString(mCursors34 .getColumnIndex(DatabaseForDemo.MISCEL_PAGEURL));
+						String url = mCursors34 .getString(mCursors34 .getColumnIndex(DatabaseForDemo.MISCEL_PAGEURL));
 						if (url.length() > 3) {
 							Parameters.OriginalUrl = url;
 						}
@@ -1114,33 +1103,29 @@ public class LoginHomeActivity extends Activity {
 				}
 			}
 			mCursors34.close();
-		}catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 	void loginMainMethod() {
-		try{
+		try {
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(passWord.getWindowToken(), 0);
 			String query = "select " + DatabaseForDemo.MISCEL_PAGEURL + " from " + DatabaseForDemo.MISCELLANEOUS_TABLE;
 			Cursor miscurq123 = dbforloginlogoutRead.rawQuery(query, null);
 
 			if (miscurq123 != null) {
-				if (miscurq123.getCount() > 0) 
-				{
-					if (miscurq123.moveToFirst()) 
-					{
-						do
-						{
-							if (miscurq123.isNull(miscurq123.getColumnIndex(DatabaseForDemo.MISCEL_PAGEURL)))
+				if (miscurq123.getCount() > 0) {
+					if (miscurq123.moveToFirst()) {
+						do {
+							if (miscurq123 .isNull(miscurq123 .getColumnIndex(DatabaseForDemo.MISCEL_PAGEURL))) 
 							{
 								Parameters.OriginalUrl = "";
-								Log.d("sss","loginMainMethod()-if Parameters.OriginalUrl:"+Parameters.OriginalUrl);
-							}
-							else 
-							{
+								Log.d("sss", "loginMainMethod()-if Parameters.OriginalUrl:" + Parameters.OriginalUrl);
+							} else {
 								Parameters.OriginalUrl = miscurq123 .getString(miscurq123 .getColumnIndex(DatabaseForDemo.MISCEL_PAGEURL));
-								Log.d("sss","loginMainMethod()-else Parameters.OriginalUrl:"+Parameters.OriginalUrl);
+								Log.d("sss", "loginMainMethod()-else Parameters.OriginalUrl:" + Parameters.OriginalUrl);
 							}
 						} while (miscurq123.moveToNext());
 					}
@@ -1148,12 +1133,13 @@ public class LoginHomeActivity extends Activity {
 			}
 			miscurq123.close();
 			loginFunction();
-		}catch (Exception e) {
+		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
-		Log.d("sss","llllllllll");
+		Log.d("sss", "llllllllll");
 	}
+
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
@@ -1161,49 +1147,51 @@ public class LoginHomeActivity extends Activity {
 		userName.setText("");
 		passWord.setText("");
 	}
-	void printerDemoData(){
-		try{
+
+	void printerDemoData() {
+		try {
 			ContentValues contentValues = new ContentValues();
-			contentValues.put(DatabaseForDemo.PRINTER_TEXT, "      AONEPOS" );
-			contentValues.put(DatabaseForDemo.PRINTER_UNIT, "30" );
+			contentValues.put(DatabaseForDemo.PRINTER_TEXT, "      AONEPOS");
+			contentValues.put(DatabaseForDemo.PRINTER_UNIT, "30");
 			contentValues.put(DatabaseForDemo.PRINTER_SPACING, "30");
-			contentValues.put(DatabaseForDemo.PRINTER_FONT, "0" );
-			contentValues.put(DatabaseForDemo.PRINTER_ALIGN, "0"  );
-			contentValues.put(DatabaseForDemo.PRINTER_LANGUAGE, "0"  );
-			contentValues.put(DatabaseForDemo.PRINTER_WSIZE, "1"   );
-			contentValues.put(DatabaseForDemo.PRINTER_HSIZE, "1"  );
-			contentValues.put(DatabaseForDemo.PRINTER_BOLD, "0" );
-			contentValues.put(DatabaseForDemo.PRINTER_UNDERLINE, "0" );
-			contentValues.put(DatabaseForDemo.PRINTER_XPOSITION, "0" );
-			contentValues.put(DatabaseForDemo.PRINTER_TYPE, "EPSON" );
+			contentValues.put(DatabaseForDemo.PRINTER_FONT, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_ALIGN, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_LANGUAGE, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_WSIZE, "1");
+			contentValues.put(DatabaseForDemo.PRINTER_HSIZE, "1");
+			contentValues.put(DatabaseForDemo.PRINTER_BOLD, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_UNDERLINE, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_XPOSITION, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_TYPE, "EPSON");
 			contentValues.put(DatabaseForDemo.PRINTER_NAME, "TM-T82II");
 			contentValues.put(DatabaseForDemo.PRINTER_IP, "192.168.1.168");
-			contentValues.put(DatabaseForDemo.PRINTER_ID,"printer1" );
+			contentValues.put(DatabaseForDemo.PRINTER_ID, "printer1");
 			dbforloginlogoutWrite.insert(DatabaseForDemo.PRINTER_TABLE, null, contentValues);
 			contentValues.clear();
 
-			contentValues.put(DatabaseForDemo.PRINTER_TEXT, "      AONEPOS" );
-			contentValues.put(DatabaseForDemo.PRINTER_UNIT, "30" );
+			contentValues.put(DatabaseForDemo.PRINTER_TEXT, "      AONEPOS");
+			contentValues.put(DatabaseForDemo.PRINTER_UNIT, "30");
 			contentValues.put(DatabaseForDemo.PRINTER_SPACING, "30");
-			contentValues.put(DatabaseForDemo.PRINTER_FONT, "0" );
-			contentValues .put(DatabaseForDemo.PRINTER_ALIGN, "0"  );
-			contentValues .put(DatabaseForDemo.PRINTER_LANGUAGE, "0"  );
-			contentValues .put(DatabaseForDemo.PRINTER_WSIZE, "1"   );
-			contentValues .put(DatabaseForDemo.PRINTER_HSIZE, "1"  );
-			contentValues.put(DatabaseForDemo.PRINTER_BOLD, "0" );
-			contentValues.put(DatabaseForDemo.PRINTER_UNDERLINE, "0" );
-			contentValues.put(DatabaseForDemo.PRINTER_XPOSITION, "0" );
-			contentValues.put(DatabaseForDemo.PRINTER_TYPE, "STAR" );
+			contentValues.put(DatabaseForDemo.PRINTER_FONT, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_ALIGN, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_LANGUAGE, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_WSIZE, "1");
+			contentValues.put(DatabaseForDemo.PRINTER_HSIZE, "1");
+			contentValues.put(DatabaseForDemo.PRINTER_BOLD, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_UNDERLINE, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_XPOSITION, "0");
+			contentValues.put(DatabaseForDemo.PRINTER_TYPE, "STAR");
 			contentValues.put(DatabaseForDemo.PRINTER_NAME, "TSP100");
 			contentValues.put(DatabaseForDemo.PRINTER_IP, "192.168.1.12");
-			contentValues.put(DatabaseForDemo.PRINTER_ID,"printer2" );
+			contentValues.put(DatabaseForDemo.PRINTER_ID, "printer2");
 			dbforloginlogoutWrite.insert(DatabaseForDemo.PRINTER_TABLE, null, contentValues);
-		}catch(SQLiteException e){
+		} catch (SQLiteException e) {
 			e.printStackTrace();
 		}
 	}
-	void insertLoginTime(){
-		try{
+
+	void insertLoginTime() {
+		try {
 			ContentValues values = new ContentValues();
 			values.put(DatabaseForDemo.LOGIN_EMPLOYEE_NAME, uName);
 			values.put(DatabaseForDemo.LOGIN_EMPLOYEE_ID, uName);
@@ -1217,22 +1205,19 @@ public class LoginHomeActivity extends Activity {
 			values.put(DatabaseForDemo.MODIFIED_IN, "Local");
 			values.put(DatabaseForDemo.SESSIONIDVAL, Parameters.sessionidforloginlogout);
 			dbforloginlogoutWrite.insert(DatabaseForDemo.LOGIN_LOGOUT_TABLE, null, values);
-		}catch(SQLiteException e){
+		} catch (SQLiteException e) {
 			e.printStackTrace();
 		}
 	}
-	void setEmployeePermissions()
-	{
-		try
-		{
-			Cursor cursoremployeepermission =dbforloginlogoutRead.rawQuery(
-					"select *from "
-							+ DatabaseForDemo.EMP_PERMISSIONS_TABLE
-							+ " where "
-							+ DatabaseForDemo.EMPLOYEE_EMPLOYEE_ID
+
+	void setEmployeePermissions() {
+		try {
+			Cursor cursoremployeepermission = dbforloginlogoutRead.rawQuery(
+					"select *from " + DatabaseForDemo.EMP_PERMISSIONS_TABLE
+							+ " where " + DatabaseForDemo.EMPLOYEE_EMPLOYEE_ID
 							+ "=\"" + uName + "\"", null);
 			if (cursoremployeepermission != null) {
-				if (cursoremployeepermission.getCount()>0) {
+				if (cursoremployeepermission.getCount() > 0) {
 					if (cursoremployeepermission.moveToFirst()) {
 						do {
 							String inventory = cursoremployeepermission .getString(cursoremployeepermission .getColumnIndex(DatabaseForDemo.EMP_INVENTORY));
@@ -1241,7 +1226,7 @@ public class LoginHomeActivity extends Activity {
 							} else {
 								Parameters.inventory_permission = false;
 							}
-							System.out .println("inventory permission is:" + Parameters.inventory_permission);
+							System.out.println("inventory permission is:" + Parameters.inventory_permission);
 							String customer = cursoremployeepermission .getString(cursoremployeepermission .getColumnIndex(DatabaseForDemo.EMP_CUSTOMERS));
 							if (customer.equals("Enable")) {
 								Parameters.customer_permission = true;
@@ -1269,23 +1254,21 @@ public class LoginHomeActivity extends Activity {
 							} else {
 								Parameters.settings_permission = false;
 							}
-							System.out.println("settings_permission permission is:"+ Parameters.settings_permission);
-							String pricechange = cursoremployeepermission.getString(cursoremployeepermission.getColumnIndex(DatabaseForDemo.EMP_PRICE));
+							System.out .println("settings_permission permission is:" + Parameters.settings_permission);
+							String pricechange = cursoremployeepermission .getString(cursoremployeepermission .getColumnIndex(DatabaseForDemo.EMP_PRICE));
 							if (pricechange.equals("Enable")) {
 								Parameters.invoice_price_change_permission = true;
 							} else {
 								Parameters.invoice_price_change_permission = false;
 							}
-							System.out.println("invoice_price_change_permission permission is:"+ Parameters.invoice_price_change_permission);
+							System.out .println("invoice_price_change_permission permission is:" + Parameters.invoice_price_change_permission);
 							String allowexit = cursoremployeepermission .getString(cursoremployeepermission .getColumnIndex(DatabaseForDemo.EMP_EXIT));
 							if (allowexit.equals("Enable")) {
 								Parameters.allow_exit_permission = true;
 							} else {
 								Parameters.allow_exit_permission = false;
 							}
-							System.out
-							.println("allow_exit_permission permission is:"
-									+ Parameters.allow_exit_permission);
+							System.out .println("allow_exit_permission permission is:" + Parameters.allow_exit_permission);
 							String payouts = cursoremployeepermission .getString(cursoremployeepermission .getColumnIndex(DatabaseForDemo.EMP_PAYOUTS));
 							if (payouts.equals("Enable")) {
 								Parameters.vendor_payouts_permission = true;
@@ -1338,26 +1321,25 @@ public class LoginHomeActivity extends Activity {
 
 						} while (cursoremployeepermission.moveToNext());
 					}
-				}else{
+				} else {
 					adminPermissions(false);
 				}
-			}else{
+			} else {
 				adminPermissions(false);
 			}
 			cursoremployeepermission.close();
-		}catch(SQLiteException e){
+		} catch (SQLiteException e) {
 			e.printStackTrace();
-		}catch (Exception e1) {
+		} catch (Exception e1) {
 			// TODO: handle exception
 			e1.printStackTrace();
 		}
 	}
-	void saveinpendingQry()
-	{
-		try
-		{
-			String parameterval = "?username=" + uName
-					+ "&password=" + Parameters.MD5(pWord) + "&deviceid="
+
+	void saveinpendingQry() {
+		try {
+			String parameterval = "?username=" + uName + "&password="
+					+ Parameters.MD5(pWord) + "&deviceid="
 					+ Parameters.randomValue() + "&systemtime="
 					+ Parameters.currentTime().replace(" ", "%20");
 			ContentValues contentValues1 = new ContentValues();
@@ -1365,28 +1347,30 @@ public class LoginHomeActivity extends Activity {
 			contentValues1.put(DatabaseForDemo.PENDING_USER_ID, Parameters.userid);
 			contentValues1.put(DatabaseForDemo.PAGE_URL, "user-login.php");
 			contentValues1.put(DatabaseForDemo.TABLE_NAME_PENDING, "");
-			contentValues1.put( DatabaseForDemo.CURRENT_TIME_PENDING, Parameters.currentTime());
+			contentValues1.put(DatabaseForDemo.CURRENT_TIME_PENDING, Parameters.currentTime());
 			contentValues1.put(DatabaseForDemo.PARAMETERS, parameterval);
-			dbforloginlogoutWrite.insert( DatabaseForDemo.PENDING_QUERIES_TABLE, null, contentValues1);
-		}catch(SQLiteException e){
+			dbforloginlogoutWrite.insert(DatabaseForDemo.PENDING_QUERIES_TABLE, null, contentValues1);
+		} catch (SQLiteException e) {
 			e.printStackTrace();
-		}catch (Exception e1) {
+		} catch (Exception e1) {
 			// TODO: handle exception
 			e1.printStackTrace();
 		}
 	}
-	void permissions(){
-		if(Parameters.usertype.equals("admin")){
-			Parameters.stores_permission=true;
-			Parameters.profile_permission=true;
-			Parameters.employee_permission=true;
-		}else{
-			Parameters.stores_permission=false;
-			Parameters.profile_permission=false;
-			Parameters.employee_permission=false;
+
+	void permissions() {
+		if (Parameters.usertype.equals("admin")) {
+			Parameters.stores_permission = true;
+			Parameters.profile_permission = true;
+			Parameters.employee_permission = true;
+		} else {
+			Parameters.stores_permission = false;
+			Parameters.profile_permission = false;
+			Parameters.employee_permission = false;
 		}
 	}
-	void adminPermissions(boolean value){
+
+	void adminPermissions(boolean value) {
 
 		Parameters.inventory_permission = value;
 
@@ -1416,6 +1400,42 @@ public class LoginHomeActivity extends Activity {
 
 		Parameters.invoice_price_change_permission = value;
 
+	}
+	
+	public void show_select_Demo_DB_dialog()
+	{
+		final Dialog myDialog = new Dialog(LoginHomeActivity.this);
+		myDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		myDialog.setContentView(R.layout.activity_select_demo_database);
+		myDialog.getWindow().setLayout(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		myDialog.setCancelable(true);
+		
+		ImageView iv_retail_store = (ImageView) myDialog.findViewById(R.id.iv_retail_store),
+		iv_mobile_store = (ImageView) myDialog.findViewById(R.id.iv_mobile_store);
+		
+		iv_retail_store.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				session.addData("Data_value", "retail");
+				init_var();
+				myDialog.dismiss();
+			}
+		});
+		
+		iv_mobile_store.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				session.addData("Data_value", "mobile");
+				init_var();
+				myDialog.dismiss();
+			}
+		});
+		
+		myDialog.show();
 	}
 
 }

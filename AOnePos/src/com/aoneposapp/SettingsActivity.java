@@ -179,6 +179,9 @@ PrinterEditAdapter.OnWidgetItemClicked {
 
 	DatabaseForDemo sqlDB;
 	SQLiteDatabase dbforloginlogoutWrite1,dbforloginlogoutRead1;
+	String sliding_drawer_visibility;
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -191,8 +194,17 @@ PrinterEditAdapter.OnWidgetItemClicked {
 			
 			dbforloginlogoutWrite1 = sqlDB.getWritableDatabase();
 			dbforloginlogoutRead1 = sqlDB.getReadableDatabase();
+			
 			slideButton = (ImageView) findViewById(R.id.slideButton);
 			slidingDrawer = (SlidingDrawer) findViewById(R.id.SlidingDrawer);
+			
+			 sliding_drawer_visibility = session.getData("setting");
+			if(sliding_drawer_visibility.equalsIgnoreCase("off")){
+				slidingDrawer.setVisibility(View.GONE);
+			}else {
+				slidingDrawer.setVisibility(View.VISIBLE);
+			}
+			
 			image0 = (ImageView) findViewById(R.id.image0);
 			image1 = (ImageView) findViewById(R.id.image1);
 			image2 = (ImageView) findViewById(R.id.image2);
@@ -215,28 +227,21 @@ PrinterEditAdapter.OnWidgetItemClicked {
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-					Intent intent1 = new Intent(SettingsActivity.this,
-							PosMainActivity.class);
+					Intent intent1 = new Intent(SettingsActivity.this, PosMainActivity.class);
 					startActivity(intent1);
 					finish();
 				}
 			});
 			image1.setOnClickListener(new OnClickListener() {
-
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
 					if (Parameters.inventory_permission) {
-						Intent intent1 = new Intent(SettingsActivity.this,
-								InventoryActivity.class);
+						Intent intent1 = new Intent(SettingsActivity.this, InventoryActivity.class);
 						startActivity(intent1);
 						finish();
 					} else {
-						showAlertDialogforpermission(
-								SettingsActivity.this,
-								"Sorry",
-								"You are not authenticated to perform this operation.",
-								false);
+						showAlertDialogforpermission( SettingsActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 					}
 				}
 			});
@@ -246,8 +251,7 @@ PrinterEditAdapter.OnWidgetItemClicked {
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
 					if(Parameters.stores_permission){
-						Intent intent1 = new Intent(SettingsActivity.this,
-								StoresActivity.class);
+						Intent intent1 = new Intent(SettingsActivity.this, StoresActivity.class);
 						startActivity(intent1);
 						finish();
 					} else {
@@ -261,8 +265,7 @@ PrinterEditAdapter.OnWidgetItemClicked {
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
 					if (Parameters.customer_permission) {
-						Intent intent1 = new Intent(SettingsActivity.this,
-								CustomerActivity.class);
+						Intent intent1 = new Intent(SettingsActivity.this, CustomerActivity.class);
 						startActivity(intent1);
 						finish();
 					} else {
@@ -280,8 +283,7 @@ PrinterEditAdapter.OnWidgetItemClicked {
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
 					if(Parameters.employee_permission){
-						Intent intent1 = new Intent(SettingsActivity.this,
-								EmployeeActivity.class);
+						Intent intent1 = new Intent(SettingsActivity.this, EmployeeActivity.class);
 						startActivity(intent1);
 						finish();
 					} else {
@@ -299,8 +301,7 @@ PrinterEditAdapter.OnWidgetItemClicked {
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
 					if (Parameters.reports_permission) {
-						Intent intent1 = new Intent(SettingsActivity.this,
-								ReportsActivity.class);
+						Intent intent1 = new Intent(SettingsActivity.this, ReportsActivity.class);
 						startActivity(intent1);
 						finish();
 					} else {
@@ -325,8 +326,7 @@ PrinterEditAdapter.OnWidgetItemClicked {
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-					Intent intent1 = new Intent(SettingsActivity.this,
-							ContactsActivity.class);
+					Intent intent1 = new Intent(SettingsActivity.this, ContactsActivity.class);
 					startActivity(intent1);
 					finish();
 				}
@@ -337,8 +337,7 @@ PrinterEditAdapter.OnWidgetItemClicked {
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
 					if (Parameters.profile_permission) {
-						Intent intent1 = new Intent(SettingsActivity.this,
-								ProfileActivity.class);
+						Intent intent1 = new Intent(SettingsActivity.this, ProfileActivity.class);
 						startActivity(intent1);
 						finish();
 					} else {
@@ -1146,8 +1145,6 @@ PrinterEditAdapter.OnWidgetItemClicked {
 							} else if (typeOfPrinter.getItem(position).equals( "POSX")) {
 								typeofprinting.setVisibility(View.GONE);
 								spinnername.setVisibility(View.GONE);
-								
-								
 							}
 						}
 
@@ -1706,8 +1703,12 @@ PrinterEditAdapter.OnWidgetItemClicked {
 					else
 					{
 						demoselection.setSelection(0);
-						mUrl.setText(Parameters.OriginalUrl);
-						mUrl.setText(Parameters.MyTempLocalServerURL);
+						if(Parameters.OriginalUrl.equals("")){
+							mUrl.setText(Parameters.MyTempLocalServerURL);
+						}else {
+							mUrl.setText(Parameters.OriginalUrl);
+						}
+						
 					}
 
 					demoselection.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -1734,8 +1735,11 @@ PrinterEditAdapter.OnWidgetItemClicked {
 
 							}else{
 								//mUrl.setText("");
-								mUrl.setText(Parameters.OriginalUrl);
-								mUrl.setText(Parameters.MyTempLocalServerURL);
+								if(Parameters.OriginalUrl.equals("")){
+									mUrl.setText(Parameters.MyTempLocalServerURL);
+								}else {
+									mUrl.setText(Parameters.OriginalUrl);
+								}
 							}
 						}
 						
@@ -1746,7 +1750,11 @@ PrinterEditAdapter.OnWidgetItemClicked {
 
 						}
 					});
-					mUrl.setText(Parameters.MyTempLocalServerURL);
+					if(Parameters.OriginalUrl.equals("")){
+						mUrl.setText(Parameters.MyTempLocalServerURL);
+					}else {
+						mUrl.setText(Parameters.OriginalUrl);
+					}
 					mUrl.setOnEditorActionListener(new OnEditorActionListener()
 					{
 						@Override
@@ -3373,10 +3381,15 @@ PrinterEditAdapter.OnWidgetItemClicked {
 						if(!Parameters.OriginalUrl.equalsIgnoreCase(""))
 						{
 							System.out.println("isFirstSynchronization: "+session.isFirstSynchronization());
+							System.out.println("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
 							if(!session.isFirstSynchronization())
 								new ExportDatabaseCSVTask().execute();
 							else
+							{
+								deletetablesdata();
+								deleteadmintablesdata();
 								get_data_from_server();
+							}
 //							deletetablesdata();
 //							deleteadmintablesdata();
 //							if(forurlSave.length()>3)
@@ -3530,6 +3543,7 @@ PrinterEditAdapter.OnWidgetItemClicked {
 			Log.v("Log...response12 ",""+result);
 
 			mSpinnerProgress.cancel();
+			System.out.println("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
 			session.addBooleanData("isFirstSynchronization", false);
 			Parameters.methodForLogout(SettingsActivity.this);
 			finish();
@@ -5817,8 +5831,8 @@ PrinterEditAdapter.OnWidgetItemClicked {
 
 	public void get_data_from_server() 
 	{
-		deletetablesdata();
-		deleteadmintablesdata();
+//		deletetablesdata();
+//		deleteadmintablesdata();
 		if(forurlSave.length()>3)
 		{
 			Log.v("seeewww", "forurlSave");
@@ -5838,9 +5852,9 @@ PrinterEditAdapter.OnWidgetItemClicked {
 			System.out.println("Parameters.OriginalUrl333: "+Parameters.OriginalUrl);
 
 			Parameters.methodForLogout(SettingsActivity.this);
+			System.out.println("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
 			session.addBooleanData("isFirstSynchronization", false);
 			finish();
-
 		}
 		else
 		{
@@ -5854,5 +5868,22 @@ PrinterEditAdapter.OnWidgetItemClicked {
 				Log.e("showAlertDialogforpermission1","g " + e.getLocalizedMessage());
 			}
 		}
+	}
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onBackPressed()
+	 */
+	@Override
+	public void onBackPressed()
+	{
+		if(sliding_drawer_visibility.equalsIgnoreCase("off")){
+		Intent i = new Intent(SettingsActivity.this,LoginHomeActivity.class);
+		startActivity(i);
+		}else {
+			Intent i = new Intent(SettingsActivity.this,PosMainActivity.class);
+			startActivity(i);
+		}
+		super.onBackPressed();
+		
+		
 	}
 }
