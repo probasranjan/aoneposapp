@@ -76,7 +76,6 @@ public class ImageAdapterForCategory extends BaseAdapter{
 		    System.out.println(desc.get(position));
 		    
 		    edit.setOnClickListener(new OnClickListener() {
-				
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
