@@ -2830,4 +2830,14 @@ public class uniMagIIDemo extends Activity implements  uniMagReaderMsg ,uniMagRe
 		setResult(123456, i);
 		finish();
 	}
+
+	/* (non-Javadoc)
+	 * @see IDTech.MSR.uniMag.uniMagReaderMsg#onReceiveMsgToCalibrateReader()
+	 */
+	@Override
+	public void onReceiveMsgToCalibrateReader()
+	{
+		// TODO Auto-generated method stub
+		
+	}
 }
