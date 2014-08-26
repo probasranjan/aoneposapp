@@ -22,7 +22,8 @@ public class MercuryActivity extends Activity{
 	SharedPreferences prefs;
 	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) 
+	{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.urls_list);
@@ -58,12 +59,11 @@ public class MercuryActivity extends Activity{
 				edi.putString("password", edit_password.getText().toString().trim());
 				edi.commit();
 				
-				
 				Intent i = new Intent(MercuryActivity.this,MagTekDemo.class);
 				startActivity(i);
 				finish();
 
-			}//Aone#2013
+			}//Aone#2013rr
 			
 		});
 		
