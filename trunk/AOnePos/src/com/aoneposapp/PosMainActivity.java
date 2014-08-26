@@ -676,6 +676,8 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 				}
 			}
 		});
+		
+		
 		image6.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -690,6 +692,7 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 				}
 			}
 		});
+		
 		image7.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -700,6 +703,7 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 				finish();
 			}
 		});
+		
 		image8.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -3611,7 +3615,7 @@ try{
 						twenty.setEnabled(false);
 						fifty.setEnabled(false);
 						bigbutton.setEnabled(false);
-						new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
+//						new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
 					}else{
 						one.setEnabled(false);
 						five.setEnabled(false);
@@ -7615,7 +7619,7 @@ try{
 			InputStream in = getResources().openRawResource(R.raw.idt_unimagcfg_default);
 			int length = in.available();
 			byte [] buffer = new byte[length];
-			in.read(buffer);    	   
+			in.read(buffer); 
 			in.close();
 			deleteFile(fileNameWithPath);
 			FileOutputStream fout = openFileOutput(fileNameWithPath, MODE_PRIVATE);
@@ -9234,6 +9238,8 @@ try{
     	String part2 = parts[1]; // 034556
     	String part3 = parts[2];
     	
+    	System.out.println("strMsrData2 : "+strMsrData2);
+    	
     	System.out.println("Data of card card number "+strMsrData2.substring(2,strMsrData2.indexOf("^")));
     	System.out.println("Data of card card year"+part3.substring(0, 2));
     	System.out.println("Data of card card month "+part3.substring(2, 4));
@@ -9381,5 +9387,17 @@ System.out.println("Clear_all_display");
 				catch (IOException e)
 				{
 				}	
+			}
+
+
+
+			/* (non-Javadoc)
+			 * @see IDTech.MSR.uniMag.uniMagReaderMsg#onReceiveMsgToCalibrateReader()
+			 */
+			@Override
+			public void onReceiveMsgToCalibrateReader()
+			{
+				
+				
 			}
 }
