@@ -198,7 +198,7 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 	SlidingDrawer slidingDrawer;
 	ImageView slideButton, image0, image1, image2, image3, image4, image5,
 			image6, image7, image8, logout;
-	 DecimalFormat df = new DecimalFormat("#.##");
+	 DecimalFormat df = new DecimalFormat("0.00");
 	Double change = 0.0;
 	StoreItemAdapter DPadapter;
 	ArrayList<String> storearray = new ArrayList<String>();
@@ -1107,9 +1107,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 								mTaxTotal = 0;
 								fetchOnHoldButton.setTag("1");
 								fetchOnHoldButton.setText("Fetch On Hold");
-								subTotalView.setText(String.valueOf("$" + mSubTotal));
-								taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-								grandTotalview.setText(String.valueOf("$" + mSubTotal));
+								subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+								taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+								grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 							}
 							alertDialog12.dismiss();
 						}
@@ -1414,10 +1414,13 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 		 * -1){ tv.setTextColor(Color.WHITE); } }
 		 * setitemList(deptspinnerdata.get(arg2)); } });
 		 */
+		
 		itemlistView.setOnScrollListener(new OnScrollListener() {
 
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				
+				System.out.println("scrollState :"+scrollState);
 			}
 
 			@Override
@@ -1480,9 +1483,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 											fetchOnHoldButton.setText("Fetch On Hold");
 											mSubTotal = 0;
 											mTaxTotal = 0;
-											subTotalView.setText(String.valueOf("$" + mSubTotal));
-											taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-											grandTotalview.setText(String.valueOf("$" + mSubTotal));
+											subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+											taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+											grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 										}
 
 										if (showPrintTimer()) {
@@ -1656,9 +1659,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 														fetchOnHoldButton.setText("Fetch On Hold");
 														mSubTotal = 0;
 														mTaxTotal = 0;
-														subTotalView.setText(String.valueOf("$"+ mSubTotal));
-														taxTotalview.setText(String.valueOf("$"+ mTaxTotal));
-														grandTotalview.setText(String.valueOf("$"+ mSubTotal));
+														subTotalView.setText(String.valueOf("$"+ df.format(mSubTotal)));
+														taxTotalview.setText(String.valueOf("$"+ df.format(mTaxTotal)));
+														grandTotalview.setText(String.valueOf("$"+ df.format(mSubTotal)));
 													}
 												}
 											});
@@ -1685,9 +1688,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 												fetchOnHoldButton.setText("Fetch On Hold");
 												mSubTotal = 0;
 												mTaxTotal = 0;
-												subTotalView.setText(String.valueOf("$"+ mSubTotal));
-												taxTotalview.setText(String .valueOf("$" + mTaxTotal));
-												grandTotalview.setText(String .valueOf("$" + mSubTotal));
+												subTotalView.setText(String.valueOf("$"+ df.format(mSubTotal)));
+												taxTotalview.setText(String .valueOf("$" + df.format(mTaxTotal)));
+												grandTotalview.setText(String .valueOf("$" + df.format(mSubTotal)));
 											}
 										}
 									}
@@ -1884,9 +1887,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 										fetchOnHoldButton .setText("Fetch On Hold");
 										mSubTotal = 0;
 										mTaxTotal = 0;
-										subTotalView.setText(String.valueOf("$" + mSubTotal));
-										taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-										grandTotalview.setText(String .valueOf("$" + mSubTotal));
+										subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+										taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+										grandTotalview.setText(String .valueOf("$" + df.format(mSubTotal)));
 									}
 										} catch (NumberFormatException e) {
 											e.printStackTrace();
@@ -1918,9 +1921,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 								fetchOnHoldButton.setText("Fetch On Hold");
 								mSubTotal = 0;
 								mTaxTotal = 0;
-								subTotalView.setText(String.valueOf("$" + mSubTotal));
-								taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-								grandTotalview.setText(String.valueOf("$" + mSubTotal));
+								subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+								taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+								grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 							}
 
 						}
@@ -2216,7 +2219,7 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 													mGrandTotal = mGrandTotal - discount;
 												}
 												mGrandTotal = Double.valueOf(df .format(mGrandTotal));
-												grandTotalview.setText(String .valueOf("$" + mGrandTotal));
+												grandTotalview.setText(String .valueOf("$" + df.format(mGrandTotal)));
 												mAdapter.setListener(PosMainActivity.this);
 												mAdapter.notifyDataSetChanged();
 												alertDialog1.dismiss();
@@ -2292,9 +2295,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 								mTaxTotal = 0;
 								fetchOnHoldButton.setTag("1");
 								fetchOnHoldButton.setText("Fetch On Hold");
-								subTotalView.setText(String.valueOf("$" + mSubTotal));
-								taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-								grandTotalview.setText(String.valueOf("$" + mSubTotal));
+								subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+								taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+								grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 							}
 
 							alertDialog1.dismiss();
@@ -2352,9 +2355,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 										mTaxTotal = 0;
 										fetchOnHoldButton.setTag("1");
 										fetchOnHoldButton .setText("Fetch On Hold");
-										subTotalView.setText(String.valueOf("$" + mSubTotal));
-										taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-										grandTotalview.setText(String .valueOf("$" + mSubTotal));
+										subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+										taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+										grandTotalview.setText(String .valueOf("$" + df.format(mSubTotal)));
 									}
 									
 								} else {
@@ -2398,9 +2401,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 										mTaxTotal = 0;
 										fetchOnHoldButton.setTag("1");
 										fetchOnHoldButton .setText("Fetch On Hold");
-										subTotalView.setText(String.valueOf("$" + mSubTotal));
-										taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-										grandTotalview.setText(String .valueOf("$" + mSubTotal));
+										subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+										taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+										grandTotalview.setText(String .valueOf("$" + df.format(mSubTotal)));
 									}
 								}
 								alertDialog1.dismiss();
@@ -2464,9 +2467,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 						mTaxTotal = 0;
 						fetchOnHoldButton.setTag("1");
 						fetchOnHoldButton.setText("Fetch On Hold");
-						subTotalView.setText(String.valueOf("$" + mSubTotal));
-						taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-						grandTotalview.setText(String.valueOf("$" + mSubTotal));
+						subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+						taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+						grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 					}
 				} else {
 					if (mItemList.size() > 0) {
@@ -2535,70 +2538,69 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				
-				if (mItemList.size() > 0) {
-					if (mSelectedItem != null) {
-						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(quantityEdit.getWindowToken(), 0);
-						String mQuantity = quantityEdit.getText().toString().trim();
-						/*final AlertDialog alertDialog1 = new AlertDialog.Builder(
-								PosMainActivity.this).create();
-						LayoutInflater mInflater = LayoutInflater
-								.from(PosMainActivity.this);
-						View layout = mInflater.inflate(
-								R.layout.pricechange_popup, null);
-						final EditText price = (EditText) layout
-								.findViewById(R.id.pricesave);
-						Button ok = (Button) layout.findViewById(R.id.ok);
-						Button cancel = (Button) layout
-								.findViewById(R.id.cancel);
-
-						alertDialog1.setTitle("Enter Quantity");*/
-
-						//ok.setOnClickListener(new OnClickListener() {
-
-						//	@Override
-							//public void onClick(View arg0) {
-								// TODO Auto-generated method stub
-							//	String mQuantity1 = price.getText().toString()
-								//		.trim();
-
-								if (mQuantity != null && mQuantity.length() > 0) {
-
-									if (mSelectedItem != null) {
-										mSubTotal = 0;
-										mTaxTotal = 0;
-										getItemDetails(true, mSelectedItem.getItemNoAdd(), mQuantity);
-										//alertDialog1.dismiss();
-									} else {
-										Toast.makeText(getApplicationContext(), "Select List Item", 1000) .show();
-									}
-								} else {
-									Toast.makeText(getApplicationContext(), "Enter Quantity", 1000).show();
-								}
-
-							/*}
-						});
-						cancel.setOnClickListener(new OnClickListener() {
-
-							@Override
-							public void onClick(View arg0) {
-								// TODO Auto-generated method stub
-								alertDialog1.dismiss();
-							}
-						});
-						alertDialog1.setView(layout);
-						alertDialog1.show();*/
-					} else {
-						Toast.makeText(getApplicationContext(), "Select List Item", 1000).show();
-					}
-				} else {
-					Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
-				}
-				/*System.out.println("barcode val is:"+quantityEdit.getText().toString()+":val is");
+				String mQuantity = quantityEdit.getText().toString().trim();
+//				if (mItemList.size() > 0) {
+//					if (mSelectedItem != null) {
+//						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//						imm.hideSoftInputFromWindow(quantityEdit.getWindowToken(), 0);
+//						
+//						/*final AlertDialog alertDialog1 = new AlertDialog.Builder(
+//								PosMainActivity.this).create();
+//						LayoutInflater mInflater = LayoutInflater
+//								.from(PosMainActivity.this);
+//						View layout = mInflater.inflate(
+//								R.layout.pricechange_popup, null);
+//						final EditText price = (EditText) layout
+//								.findViewById(R.id.pricesave);
+//						Button ok = (Button) layout.findViewById(R.id.ok);
+//						Button cancel = (Button) layout
+//								.findViewById(R.id.cancel);
+//
+//						alertDialog1.setTitle("Enter Quantity");*/
+//
+//						//ok.setOnClickListener(new OnClickListener() {
+//
+//						//	@Override
+//							//public void onClick(View arg0) {
+//								// TODO Auto-generated method stub
+//							//	String mQuantity1 = price.getText().toString()
+//								//		.trim();
+//
+//								if (mQuantity != null && mQuantity.length() > 0) {
+//
+//									if (mSelectedItem != null) {
+//										mSubTotal = 0;
+//										mTaxTotal = 0;
+//										getItemDetails(true, mSelectedItem.getItemNoAdd(), mQuantity);
+//										//alertDialog1.dismiss();
+//									} else {
+//										Toast.makeText(getApplicationContext(), "Select List Item", 1000) .show();
+//									}
+//								} else {
+//									Toast.makeText(getApplicationContext(), "Enter Quantity", 1000).show();
+//								}
+//
+//							/*}
+//						});
+//						cancel.setOnClickListener(new OnClickListener() {
+//
+//							@Override
+//							public void onClick(View arg0) {
+//								// TODO Auto-generated method stub
+//								alertDialog1.dismiss();
+//							}
+//						});
+//						alertDialog1.setView(layout);
+//						alertDialog1.show();*/
+//					} else {
+//						Toast.makeText(getApplicationContext(), "Select List Item", 1000).show();
+//					}
+//				} else {
+//					Toast.makeText(getApplicationContext(), "Add Item", Toast.LENGTH_LONG).show();
+//				}
+				System.out.println("barcode val is:"+quantityEdit.getText().toString()+":val is");
 				String mBarcode = barcodeEdit.getText().toString().trim();
-				if (mBarcode.length() > 0 && mBarcode != null
-						&& mQuantity != null && mQuantity.length() > 0) {
+				if (mBarcode.length() > 0 && mBarcode != null && mQuantity != null && mQuantity.length() > 0) {
 					mSubTotal = 0;
 					mTaxTotal = 0;
 					if (checkitemExists("", mQuantity)) {
@@ -2618,18 +2620,15 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 						if (mSelectedItem != null) {
 							mSubTotal = 0;
 							mTaxTotal = 0;
-							getItemDetails(true, mSelectedItem.getItemNoAdd(),
-									mQuantity);
+							getItemDetails(true, mSelectedItem.getItemNoAdd(), mQuantity);
 							// getItemDetailsAndQuantitiy(true,mBarcode,mQuantity);
 						} else {
-							Toast.makeText(getApplicationContext(),
-									"Select List Item", 1000).show();
+							Toast.makeText(getApplicationContext(), "Select List Item", 1000).show();
 						}
 					}
-
 				}
 				quantityEdit.setText("");
-				barcodeEdit.setText("");*/
+				barcodeEdit.setText("");
 			}
 		});
 		itemlistView.setOnItemClickListener(new OnItemClickListener() {
@@ -2642,7 +2641,7 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 				Log.w("mSelectedPositions",""+arg2);
 			}
 		});
-	//	new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
+//		new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
 		
 		sample = new ESCPOSSample();	
 		
@@ -2773,17 +2772,17 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 												holdidexist = "";
 												fetchOnHoldButton.setTag("1");
 												fetchOnHoldButton.setText("Fetch On Hold");
-												subTotalView.setText(String.valueOf("$" + mSubTotal));
-												taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-												grandTotalview.setText(String.valueOf("$" + mSubTotal));
+												subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+												taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+												grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 											}
 											mSubTotal = Double.valueOf(df.format(mSubTotal));
 											mTaxTotal = Double.valueOf(df.format(mTaxTotal));
-											subTotalView.setText(String.valueOf("$" + mSubTotal));
-											taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+											subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+											taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
 											mGrandTotal = mSubTotal + mTaxTotal;
 											mGrandTotal = Double.valueOf(df.format(mGrandTotal));
-											grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+											grandTotalview.setText(String.valueOf("$" + df.format(mGrandTotal)));
 
 										
 									} catch (NumberFormatException e) {
@@ -2875,12 +2874,15 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 					}
 
 					if (mAdapter == null) {
+						System.out.println("mItemList :"+mItemList);
 						mAdapter = new InventoryListAdapter(PosMainActivity.this,mItemList);
 						mAdapter.setListener(PosMainActivity.this);
 						itemlistView.setAdapter(mAdapter);
 					} else {
+						System.out.println("mItemList1 :"+mItemList);
 						mAdapter.setListener(PosMainActivity.this);
 						mAdapter.notifyDataSetChanged();
+						new GetListFromEnd().execute();
 					}
 					mAdapter.setListener(PosMainActivity.this);
 					itemlistView.setSelection(0);
@@ -2892,17 +2894,17 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 					holdidexist = "";
 					fetchOnHoldButton.setTag("1");
 					fetchOnHoldButton.setText("Fetch On Hold");
-					subTotalView.setText(String.valueOf("$" + mSubTotal));
-					taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-					grandTotalview.setText(String.valueOf("$" + mSubTotal));
+					subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+					taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+					grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 				}
 				mSubTotal = Double.valueOf(df.format(mSubTotal));
 				mTaxTotal = Double.valueOf(df.format(mTaxTotal));
-				subTotalView.setText(String.valueOf("$" + mSubTotal));
-				taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+				subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+				taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
 				mGrandTotal = mSubTotal + mTaxTotal;
 				mGrandTotal = Double.valueOf(df.format(mGrandTotal));
-				grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+				grandTotalview.setText(String.valueOf("$" + df.format(mGrandTotal)));
 			
 
 //			if(price < 1){
@@ -2987,17 +2989,17 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 					holdidexist = "";
 					fetchOnHoldButton.setTag("1");
 					fetchOnHoldButton.setText("Fetch On Hold");
-					subTotalView.setText(String.valueOf("$" + mSubTotal));
-					taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-					grandTotalview.setText(String.valueOf("$" + mSubTotal));
+					subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+					taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+					grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 				}
 				mSubTotal = Double.valueOf(df.format(mSubTotal));
 				mTaxTotal = Double.valueOf(df.format(mTaxTotal));
-				subTotalView.setText(String.valueOf("$" + mSubTotal));
-				taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+				subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+				taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
 				mGrandTotal = mSubTotal + mTaxTotal;
 				mGrandTotal = Double.valueOf(df.format(mGrandTotal));
-				grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+				grandTotalview.setText(String.valueOf("$" + df.format(mGrandTotal)));
 			
 
 //			if(price < 1){
@@ -3182,17 +3184,17 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 			holdidexist = "";
 			fetchOnHoldButton.setTag("1");
 			fetchOnHoldButton.setText("Fetch On Hold");
-			subTotalView.setText(String.valueOf("$" + mSubTotal));
-			taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-			grandTotalview.setText(String.valueOf("$" + mSubTotal));
+			subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+			taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+			grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 		}
 		mSubTotal = Double.valueOf(df.format(mSubTotal));
 		mTaxTotal = Double.valueOf(df.format(mTaxTotal));
-		subTotalView.setText(String.valueOf("$" + mSubTotal));
-		taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+		subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+		taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
 		mGrandTotal = mSubTotal + mTaxTotal;
 		mGrandTotal = Double.valueOf(df.format(mGrandTotal));
-		grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+		grandTotalview.setText(String.valueOf("$" + df.format(mGrandTotal)));
 		/*
 		 * Date now = new Date(); mCurrentDate = new
 		 * SimpleDateFormat("dd-MM-yyyy").format(now);
@@ -3226,11 +3228,11 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 			}
 			mSubTotal = Double.valueOf(df.format(mSubTotal));
 			mTaxTotal = Double.valueOf(df.format(mTaxTotal));
-			subTotalView.setText(String.valueOf("$" + mSubTotal));
-			taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+			subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+			taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
 			mGrandTotal = mSubTotal + mTaxTotal;
 			mGrandTotal = Double.valueOf(df.format(mGrandTotal));
-			grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+			grandTotalview.setText(String.valueOf("$" + df.format(mGrandTotal)));
 			mItemList.remove(Integer.parseInt(string));
 			mAdapter.notifyDataSetChanged();
 			mAdapter.setListener(PosMainActivity.this);
@@ -3244,9 +3246,9 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 				holdidexist = "";
 				fetchOnHoldButton.setTag("1");
 				fetchOnHoldButton.setText("Fetch On Hold");
-				subTotalView.setText(String.valueOf("$" + mSubTotal));
-				taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-				grandTotalview.setText(String.valueOf("$" + mSubTotal));
+				subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+				taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+				grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 			}
 		}
 		} catch (NumberFormatException e) {
@@ -3377,11 +3379,11 @@ public class PosMainActivity extends SimpleActivity implements uniMagReaderMsg ,
 				}
 				mSubTotal = Double.valueOf(df.format(mSubTotal));
 				mTaxTotal = Double.valueOf(df.format(mTaxTotal));
-				subTotalView.setText(String.valueOf("$" + mSubTotal));
-				taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+				subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+				taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
 				mGrandTotal = mSubTotal + mTaxTotal;
-				mGrandTotal = Double.valueOf(df.format(mGrandTotal));
-				grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+				mGrandTotal = Double.valueOf(mGrandTotal);
+				grandTotalview.setText(String.valueOf("$" + df.format(mGrandTotal)));
 			}
 
 			if (mAdapter == null) {
@@ -3466,7 +3468,7 @@ try{
 				tvv.setSelected(true);
 				
 			//	LayoutParams lp = new LayoutParams(100, 40);
-				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(100,40, 1.0f);
+				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0,40, 1.0f);
 				tvv.setPadding(5, 5, 5, 5);
 				roww.addView(tvv, lp);
 				tvv.setOnClickListener(new OnClickListener() {
@@ -3576,8 +3578,8 @@ try{
 				}
 			});
 			mGrandTotal = (double) Math.round(mGrandTotal * 100) / (double) 100;
-			total.setText("$" + mGrandTotal);
-			remaining.setText("" + mGrandTotal);
+			total.setText("$" + df.format(mGrandTotal));
+			remaining.setText("" + df.format(mGrandTotal));
 			remainingamount = mGrandTotal;
 			cashpaymentAmount = Math.ceil(mGrandTotal);
 			bigbutton.setText("" + cashpaymentAmount);
@@ -3615,7 +3617,7 @@ try{
 						twenty.setEnabled(false);
 						fifty.setEnabled(false);
 						bigbutton.setEnabled(false);
-//						new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
+						new Dialog_swipcard(PosMainActivity.this,PosMainActivity.this);
 					}else{
 						one.setEnabled(false);
 						five.setEnabled(false);
@@ -3641,7 +3643,7 @@ try{
 					if (remainingamount > 1) {
 						remainingamount = remainingamount - 1;
 						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
-						total.setText("$" + remainingamount);
+						total.setText("$" + df.format(remainingamount));
 						cashpaymentAmount = Math.ceil(remainingamount);
 						bigbutton.setText("" + cashpaymentAmount);
 						cashPayTypeforNotComplete(0.0, "1", "", "", paymentTypestr);
@@ -3668,7 +3670,7 @@ try{
 					if (remainingamount > 5) {
 						remainingamount = remainingamount - 5;
 						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
-						total.setText("$" + remainingamount);
+						total.setText("$" + df.format(remainingamount));
 						
 						cashpaymentAmount = Math.ceil(remainingamount);
 						bigbutton.setText("" + cashpaymentAmount);
@@ -3696,7 +3698,7 @@ try{
 					if (remainingamount > 10) {
 						remainingamount = remainingamount - 10;
 						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
-						total.setText("$" + remainingamount);
+						total.setText("$" + df.format(remainingamount));
 						
 						cashpaymentAmount = Math.ceil(remainingamount);
 						bigbutton.setText("" + cashpaymentAmount);
@@ -3725,7 +3727,7 @@ try{
 					if (remainingamount > 20) {
 						remainingamount = remainingamount - 20;
 						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
-						total.setText("$" + remainingamount);
+						total.setText("$" + df.format(remainingamount));
 						
 						cashpaymentAmount = Math.ceil(remainingamount);
 						bigbutton.setText("" + cashpaymentAmount);
@@ -3753,7 +3755,7 @@ try{
 					if (remainingamount > 50) {
 						remainingamount = remainingamount - 50;
 						remainingamount = (double) Math .round(remainingamount * 100) / (double) 100;
-						total.setText("$" + remainingamount);
+						total.setText("$" + df.format(remainingamount));
 						
 						cashpaymentAmount = Math.ceil(remainingamount);
 						bigbutton.setText("" + cashpaymentAmount);
@@ -3814,7 +3816,7 @@ try{
 								} else {
 									remainingamount = remainingamount - given;
 									remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
-									total.setText("$" + remainingamount);
+									total.setText("$" + df.format(remainingamount));
 									cashpaymentAmount = Math .ceil(remainingamount);
 									bigbutton.setText("" + cashpaymentAmount);
 									
@@ -3849,7 +3851,7 @@ try{
 								} else {
 									remainingamount = remainingamount - given;
 									remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
-									total.setText("$" + remainingamount);
+									total.setText("$" + df.format(remainingamount));
 									cashpaymentAmount = Math .ceil(remainingamount);
 									bigbutton.setText("" + cashpaymentAmount);
 									
@@ -3912,7 +3914,7 @@ try{
 										System.out.println("express manual is encountered");
 										remainingamount = remainingamount - given;
 										remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
-										total.setText("$" + remainingamount);
+										total.setText("$" + df.format(remainingamount));
 										cashpaymentAmount = Math .ceil(remainingamount);
 										bigbutton.setText("" + cashpaymentAmount);
 										
@@ -3988,7 +3990,7 @@ try{
 								} else {
 									remainingamount = remainingamount - given;
 									remainingamount = (int) Math .round(remainingamount * 100) / (double) 100;
-									total.setText("$" + remainingamount);
+									total.setText("$" + df.format(remainingamount));
 									cashpaymentAmount = Math .ceil(remainingamount);
 									bigbutton.setText("" + cashpaymentAmount);
 									
@@ -4069,9 +4071,9 @@ try{
 			mTaxTotal = 0;
 			fetchOnHoldButton.setTag("1");
 			fetchOnHoldButton.setText("Fetch On Hold");
-			subTotalView.setText(String.valueOf("$" + mSubTotal));
-			taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-			grandTotalview.setText(String.valueOf("$" + mSubTotal));
+			subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+			taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+			grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 		}
 		Bitmap map=null;
 		showAlertDialogforPrint(PosMainActivity.this,"","Do You Want Recipt?",true,"printer1", "", map);
@@ -6288,9 +6290,9 @@ try{
 			mSubTotal = Double.valueOf(df.format(mSubTotal));
 			mTaxTotal = Double.valueOf(df.format(mTaxTotal));
 			mGrandTotal = Double.valueOf(df.format(mSubTotal + mTaxTotal));
-			subTotalView.setText(String.valueOf("$" + mSubTotal));
-			taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-			grandTotalview.setText(String.valueOf("$" + (mGrandTotal)));
+			subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+			taxTotalview.setText(String.valueOf("$" + df.format( mTaxTotal)));
+			grandTotalview.setText(String.valueOf("$" + df.format(mGrandTotal)));
 			mAdapter.setListener(PosMainActivity.this);
 			itemlistView.setSelection(0);
 		}
@@ -6363,7 +6365,7 @@ try{
 					total.setText(""+remainingamount);
 					EditText remaining = (EditText) layouttop .findViewById(R.id.remaining);
 					remaining.setText(""+remainingamount);
-					total.setText("$" + remainingamount);
+					total.setText("$" + df.format(remainingamount));
 					cashpaymentAmount = Math .ceil(remainingamount);
 					Button bigbutton = (Button) layouttop .findViewById(R.id.roundvalue);
 					bigbutton.setText("" + cashpaymentAmount);
@@ -6772,9 +6774,9 @@ try{
 			fetchOnHoldButton.setText("Fetch On Hold");
 			mSubTotal = 0;
 			mTaxTotal = 0;
-			subTotalView.setText(String.valueOf("$" + mSubTotal));
-			taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-			grandTotalview.setText(String.valueOf("$" + mSubTotal));
+			subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+			taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+			grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 		}
 
 		final AlertDialog alertDialog = new AlertDialog.Builder( PosMainActivity.this, android.R.style.Theme_Translucent_NoTitleBar).create();
@@ -6885,9 +6887,9 @@ try{
 					fetchOnHoldButton.setText("Fetch On Hold");
 					mSubTotal = 0;
 					mTaxTotal = 0;
-					subTotalView.setText(String.valueOf("$" + mSubTotal));
-					taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-					grandTotalview.setText(String.valueOf("$" + mSubTotal));
+					subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+					taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+					grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 				}
 			}
 		});
@@ -7106,11 +7108,11 @@ try{
 
 		mSubTotal = Double.valueOf(df.format(mSubTotal));
 		mTaxTotal = Double.valueOf(df.format(mTaxTotal));
-		subTotalView.setText(String.valueOf("$" + mSubTotal));
-		taxTotalview.setText(String.valueOf("$" + mTaxTotal));
+		subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+		taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
 		mGrandTotal = mSubTotal + mTaxTotal;
 		mGrandTotal = Double.valueOf(df.format(mGrandTotal));
-		grandTotalview.setText(String.valueOf("$" + mGrandTotal));
+		grandTotalview.setText(String.valueOf("$" + df.format(mGrandTotal)));
 		} catch (NumberFormatException e) {
 			  e.printStackTrace();
 			} catch (SQLiteException e12) {
@@ -9263,9 +9265,9 @@ System.out.println("Clear_all_display");
 			mTaxTotal = 0;
 			fetchOnHoldButton.setTag("1");
 			fetchOnHoldButton.setText("Fetch On Hold");
-			subTotalView.setText(String.valueOf("$" + mSubTotal));
-			taxTotalview.setText(String.valueOf("$" + mTaxTotal));
-			grandTotalview.setText(String.valueOf("$" + mSubTotal));
+			subTotalView.setText(String.valueOf("$" + df.format(mSubTotal)));
+			taxTotalview.setText(String.valueOf("$" + df.format(mTaxTotal)));
+			grandTotalview.setText(String.valueOf("$" + df.format(mSubTotal)));
 		}
 	}
 	
@@ -9399,5 +9401,51 @@ System.out.println("Clear_all_display");
 			{
 				
 				
+			}
+			
+			public class GetListFromEnd extends AsyncTask<Void, Void, Void> {
+
+				@Override
+				protected void onPreExecute() {
+					super.onPreExecute();
+				}
+
+				@Override
+				protected Void doInBackground(Void... params) {
+
+					PosMainActivity.this.runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+							try {
+								int count = itemlistView.getCount();
+								int firstVisibleItem = itemlistView .getHeaderViewsCount();
+								int lastVisibleCount = itemlistView .getLastVisiblePosition();
+								if (lastVisibleCount != count) 
+								{
+									int count1 = lastVisibleCount;
+									// + (lastVisibleCount - firstVisibleItem);
+									if (count > count1) {
+										itemlistView.setSelection(count);
+										System.out.println("count");
+									} 
+									else {
+										itemlistView.setSelection(count1);
+										System.out.println("count1");
+									}
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+					return null;
+				}
+
+				@Override
+				protected void onPostExecute(Void result) {
+					super.onPostExecute(result);
+				}
 			}
 }
