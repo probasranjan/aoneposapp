@@ -8,6 +8,9 @@ import java.io.OutputStreamWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import net.authorize.android.model.CommonCode;
+
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -42,6 +45,7 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.provider.MediaStore.MediaColumns;
+import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -82,8 +86,10 @@ import com.epson.eposprint.Builder;
 import com.epson.eposprint.EposException;
 import com.epson.eposprint.Print;
 
-public class ReportsActivity extends Activity {
-	private EditText fromdate, todate, fromtime, totime;
+public class ReportsActivity extends FragmentActivity {
+//	private EditText fromdate,  totime;
+	TextView todate, fromtime, fromdate,  totime;
+	FragmentActivity activity;
 	private Spinner productType, paymentType, reportType, orderStatus,catspr1,dptspr1,
 			employee_id, stor_id1;
 	ArrayList<String> autoTextStringsItems = new ArrayList<String>();
@@ -159,10 +165,14 @@ public class ReportsActivity extends Activity {
 				// TODO Auto-generated method stub
 				layout_inflate.removeAllViews();
 				stockLayoutView();
-				fromdate.setText("");
-				todate.setText("");
-				fromtime.setText("");
-				totime.setText("");
+//				fromdate.setText("");
+//				todate.setText("");
+//				fromtime.setText("");
+//				totime.setText("");
+				fromdate.setText(CommonCode.getDateString("MM-dd-yyyy"));
+				todate.setText(CommonCode.getDateString("MM-dd-yyyy"));
+				fromtime.setText("12:00");
+				totime.setText("12:00");
 				invetory_reports.setBackgroundResource(R.drawable.highlightedtopmenuitem);
 				sales_reports.setBackgroundResource(R.drawable.toprightmenu);
 				inventory_layout.setVisibility(View.VISIBLE);
@@ -176,10 +186,14 @@ public class ReportsActivity extends Activity {
 		public void onClick(View v) {
 			// TODO Auto-generated method stub
 			layout_inflate.removeAllViews();
-			fromdate.setText("");
-			todate.setText("");
-			fromtime.setText("");
-			totime.setText("");
+//			fromdate.setText("");
+//			todate.setText("");
+//			fromtime.setText("");
+//			totime.setText("");
+			fromdate.setText(CommonCode.getDateString("MM-dd-yyyy"));
+			todate.setText(CommonCode.getDateString("MM-dd-yyyy"));
+			fromtime.setText("12:00");
+			totime.setText("12:00");
 			sales_reports.setBackgroundResource(R.drawable.highlightedtopmenuitem);
 			invetory_reports.setBackgroundResource(R.drawable.toprightmenu);
 			sales_layout.setVisibility(View.VISIBLE);
@@ -390,10 +404,15 @@ public class ReportsActivity extends Activity {
 		go = (Button) findViewById(R.id.go);
 		savefile = (Button) findViewById(R.id.savefile);
 		print_button = (Button) findViewById(R.id.print_button);
-		fromdate = (EditText) findViewById(R.id.fromDate);
-		todate = (EditText) findViewById(R.id.toDate);
-		fromtime = (EditText) findViewById(R.id.fromTime);
-		totime = (EditText) findViewById(R.id.toTime);
+		fromdate = (TextView) findViewById(R.id.fromDate);
+		todate = (TextView) findViewById(R.id.toDate);
+		fromtime = (TextView) findViewById(R.id.fromTime);
+		totime = (TextView) findViewById(R.id.toTime);
+		
+		fromdate.setText(CommonCode.getDateString("MM-dd-yyyy"));
+		todate.setText(CommonCode.getDateString("MM-dd-yyyy"));
+		fromtime.setText("12:00");
+		totime.setText("12:00");
 		productType = (Spinner) findViewById(R.id.prodactType);
 		item_auto = (AutoCompleteTextView) findViewById(R.id.itemauto);
 		reportType = (Spinner) findViewById(R.id.reporttype);
@@ -827,47 +846,85 @@ public class ReportsActivity extends Activity {
 			}
 		});
 
-		fromdate.setOnFocusChangeListener(new OnFocusChangeListener() {
+		activity = ReportsActivity.this;
+		fromdate.setOnClickListener(new OnClickListener()
+		{
 			@Override
-			public void onFocusChange(View arg0, boolean arg1) {
-				// TODO Auto-generated method stub
-				if (arg1) {
-					FDate = true;
-					showDialog(DATE_DIALOG_ID);
-				}
+			public void onClick(View v)
+			{
+				CommonCode.DatePickerFragment datePickerFragment = new CommonCode.DatePickerFragment(null, fromdate, false);
+				datePickerFragment.show(getSupportFragmentManager(), "datePicker");
 			}
 		});
-		todate.setOnFocusChangeListener(new OnFocusChangeListener() {
-
+		todate.setOnClickListener(new OnClickListener()
+		{
 			@Override
-			public void onFocusChange(View arg0, boolean arg1) {
-				// TODO Auto-generated method stub
-				if (arg1) {
-					TDate = true;
-					showDialog(DATE_DIALOG_ID);
-				}
+			public void onClick(View v)
+			{
+				CommonCode.DatePickerFragment datePickerFragment = new CommonCode.DatePickerFragment(null, todate, false);
+				datePickerFragment.show(getSupportFragmentManager(), "datePicker");
 			}
 		});
-		fromtime.setOnFocusChangeListener(new OnFocusChangeListener() {
+		fromtime.setOnClickListener(new OnClickListener()
+		{
 			@Override
-			public void onFocusChange(View arg0, boolean arg1) {
-				// TODO Auto-generated method stub
-				if (arg1) {
-					FTime = true;
-					showDialog(Time_PICKER_ID);
-				}
+			public void onClick(View v)
+			{
+				CommonCode.TimePickerFragment datePickerFragment = new CommonCode.TimePickerFragment(ReportsActivity.this,null,  fromtime, activity);
+				datePickerFragment.show(getSupportFragmentManager(), "datePicker");
 			}
 		});
-		totime.setOnFocusChangeListener(new OnFocusChangeListener() {
+		totime.setOnClickListener(new OnClickListener()
+		{
 			@Override
-			public void onFocusChange(View arg0, boolean arg1) {
-				// TODO Auto-generated method stub
-				if (arg1) {
-					TTime = true;
-					showDialog(Time_PICKER_ID);
-				}
+			public void onClick(View v)
+			{
+				CommonCode.TimePickerFragment datePickerFragment = new CommonCode.TimePickerFragment(ReportsActivity.this,null,  totime, activity);
+				datePickerFragment.show(getSupportFragmentManager(), "datePicker");
 			}
 		});
+//		fromdate.setOnFocusChangeListener(new OnFocusChangeListener() {
+//			@Override
+//			public void onFocusChange(View arg0, boolean arg1) {
+//				// TODO Auto-generated method stub
+//				if (arg1) {
+//					FDate = true;
+//					showDialog(DATE_DIALOG_ID);
+//				}
+//			}
+//		});
+//		
+//		todate.setOnFocusChangeListener(new OnFocusChangeListener() {
+//
+//			@Override
+//			public void onFocusChange(View arg0, boolean arg1) {
+//				// TODO Auto-generated method stub
+//				if (arg1) {
+//					TDate = true;
+//					showDialog(DATE_DIALOG_ID);
+//				}
+//			}
+//		});
+//		fromtime.setOnFocusChangeListener(new OnFocusChangeListener() {
+//			@Override
+//			public void onFocusChange(View arg0, boolean arg1) {
+//				// TODO Auto-generated method stub
+//				if (arg1) {
+//					FTime = true;
+//					showDialog(Time_PICKER_ID);
+//				}
+//			}
+//		});
+//		totime.setOnFocusChangeListener(new OnFocusChangeListener() {
+//			@Override
+//			public void onFocusChange(View arg0, boolean arg1) {
+//				// TODO Auto-generated method stub
+//				if (arg1) {
+//					TTime = true;
+//					showDialog(Time_PICKER_ID);
+//				}
+//			}
+//		});
 		print_button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -1851,47 +1908,19 @@ Cursor mCursor1 = dbforloginlogoutReadReport.rawQuery(selectQuery, null);
 if (mCursor1 != null) {
 	if (mCursor1.moveToFirst()) {
 		do {
-			String avgg = mCursor1
-					.getString(
-							mCursor1
-									.getColumnIndex(DatabaseForDemo.LOGIN_EMPLOYEE_ID))
-					.trim();
+			String avgg = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.LOGIN_EMPLOYEE_ID)) .trim();
 			arr1.add(avgg);
-			String your = mCursor1
-					.getString(
-							mCursor1
-									.getColumnIndex(DatabaseForDemo.LOGIN_EMPLOYEE_NAME))
-					.trim();
+			String your = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.LOGIN_EMPLOYEE_NAME)) .trim();
 			arr2.add(your);
-			String discount = mCursor1
-					.getString(
-							mCursor1
-									.getColumnIndex(DatabaseForDemo.LOGIN_TIME))
-					.trim();
+			String discount = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.LOGIN_TIME)) .trim();
 			arr3.add(discount);
-			String Qty = mCursor1
-					.getString(
-							mCursor1
-									.getColumnIndex(DatabaseForDemo.LOGOUT_TIME))
-					.trim();
+			String Qty = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.LOGOUT_TIME)) .trim();
 			arr4.add(Qty);
-			String date = mCursor1
-					.getString(
-							mCursor1
-									.getColumnIndex(DatabaseForDemo.DIFF_MINUTES))
-					.trim();
+			String date = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.DIFF_MINUTES)) .trim();
 			arr5.add(date);
-			String iddddd = mCursor1
-					.getString(
-							mCursor1
-									.getColumnIndex(DatabaseForDemo.DIFF_HOURS))
-					.trim();
+			String iddddd = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.DIFF_HOURS)) .trim();
 			arr6.add(iddddd);
-			String nameee = mCursor1
-					.getString(
-							mCursor1
-									.getColumnIndex(DatabaseForDemo.WAGES))
-					.trim();
+			String nameee = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.WAGES)) .trim();
 			arr7.add(nameee);
 			if (nameee.length() > 0)
 				itemNameArray.add(nameee);
@@ -1957,52 +1986,25 @@ ListView emp_reports=(ListView) layout.findViewById(R.id.emp_reports);
 			if (!emp_value.equals("All")) {
 				selectQuery = "select * from "  + DatabaseForDemo.LOGIN_LOGOUT_TABLE + " where " + DatabaseForDemo.LOGIN_EMPLOYEE_ID + "= \""+ emp_value +"\";";
 			}
+			System.out.println("============++++++++++++++++++++");
 			Log.v("ffff", selectQuery);
 	Cursor mCursor1 = dbforloginlogoutReadReport.rawQuery(selectQuery, null);
 	if (mCursor1 != null) {
 		if (mCursor1.moveToFirst()) {
 			do {
-				String avgg = mCursor1
-						.getString(
-								mCursor1
-										.getColumnIndex(DatabaseForDemo.LOGIN_EMPLOYEE_ID))
-						.trim();
+				String avgg = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.LOGIN_EMPLOYEE_ID)) .trim();
 				arr1.add(avgg);
-				String your = mCursor1
-						.getString(
-								mCursor1
-										.getColumnIndex(DatabaseForDemo.LOGIN_EMPLOYEE_NAME))
-						.trim();
+				String your = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.LOGIN_EMPLOYEE_NAME)) .trim();
 				arr2.add(your);
-				String discount = mCursor1
-						.getString(
-								mCursor1
-										.getColumnIndex(DatabaseForDemo.LOGIN_TIME))
-						.trim();
+				String discount = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.LOGIN_TIME)) .trim();
 				arr3.add(discount);
-				String Qty = mCursor1
-						.getString(
-								mCursor1
-										.getColumnIndex(DatabaseForDemo.LOGOUT_TIME))
-						.trim();
+				String Qty = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.LOGOUT_TIME)) .trim();
 				arr4.add(Qty);
-				String date = mCursor1
-						.getString(
-								mCursor1
-										.getColumnIndex(DatabaseForDemo.DIFF_MINUTES))
-						.trim();
+				String date = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.DIFF_MINUTES)) .trim();
 				arr5.add(date);
-				String iddddd = mCursor1
-						.getString(
-								mCursor1
-										.getColumnIndex(DatabaseForDemo.DIFF_HOURS))
-						.trim();
+				String iddddd = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.DIFF_HOURS)) .trim();
 				arr6.add(iddddd);
-				String nameee = mCursor1
-						.getString(
-								mCursor1
-										.getColumnIndex(DatabaseForDemo.WAGES))
-						.trim();
+				String nameee = mCursor1 .getString( mCursor1 .getColumnIndex(DatabaseForDemo.WAGES)) .trim();
 				arr7.add("");
 				arr8.add("");
 			} while (mCursor1.moveToNext());
@@ -2083,12 +2085,12 @@ ListView emp_reports=(ListView) layout.findViewById(R.id.emp_reports);
 			month = selectedMonth + 1;
 			day = selectedDay;
 			if (FDate)
-				fromdate.setText(new StringBuilder().append(pad(year))
-						.append("-").append(pad(month)).append("-")
-						.append(pad(day)));
+				fromdate.setText(new StringBuilder().append(pad(month))
+						.append("-").append(pad(day)).append("-")
+						.append(pad(year)));
 			if (TDate)
-				todate.setText(new StringBuilder().append(year).append("-")
-						.append(pad(month)).append("-").append(pad(day)));
+				todate.setText(new StringBuilder().append(month).append("-")
+						.append(pad(day)).append("-").append(pad(year)));
 			FDate = false;
 			TDate = false;
 			}catch(NumberFormatException n){
