@@ -660,220 +660,220 @@ PrinterEditAdapter.OnWidgetItemClicked {
 				}
 			});
 
-			printermainbtn.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-
-					detailslayout.removeAllViews();
-					tslookup.setBackgroundResource(R.drawable.toprightmenu);
-					printermainbtn
-					.setBackgroundResource(R.drawable.highlightedtopmenuitem);
-					tax.setBackgroundResource(R.drawable.toprightmenu);
-					paymentype.setBackgroundResource(R.drawable.toprightmenu);
-					database.setBackgroundResource(R.drawable.toprightmenu);
-					company.setBackgroundResource(R.drawable.toprightmenu);
-					serverurl.setBackgroundResource(R.drawable.toprightmenu);
-					card.setBackgroundResource(R.drawable.toprightmenu);
-					tslookup.setTextColor(Color.WHITE);
-					printermainbtn.setTextColor(Color.BLACK);
-					tax.setTextColor(Color.WHITE);
-					paymentype.setTextColor(Color.WHITE);
-					database.setTextColor(Color.WHITE);
-					company.setTextColor(Color.WHITE);
-					serverurl.setTextColor(Color.WHITE);
-					card.setTextColor(Color.WHITE);
-					LayoutInflater inflater = getLayoutInflater();
-					final View layout = inflater.inflate(R.layout.text,(ViewGroup) v.findViewById(R.id.inflatingLayout));
-
-					final Button addcat = (Button) layout.findViewById(R.id.addcat);
-					final Button viewcat = (Button) layout .findViewById(R.id.viewcat);
-					final LinearLayout ll_add = (LinearLayout) layout .findViewById(R.id.add_ll);
-					final LinearLayout ll_view = (LinearLayout) layout .findViewById(R.id.view_ll);
-
-					addcat.setBackgroundColor(Color.parseColor("#3c6586"));
-					viewcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
-					ll_add.setVisibility(View.VISIBLE);
-					ll_view.setVisibility(View.GONE);
-					addcat.setTextColor(Color.WHITE);
-					viewcat.setTextColor(Color.BLACK);
-
-					addcat.setOnClickListener(new OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							// TODO Auto-generated method stub
-							addcat.setBackgroundColor(Color.parseColor("#3c6586"));
-							viewcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
-							ll_add.setVisibility(View.VISIBLE);
-							ll_view.setVisibility(View.GONE);
-							addcat.setTextColor(Color.WHITE);
-							viewcat.setTextColor(Color.BLACK);
-						}
-					});
-
-					viewcat.setOnClickListener(new OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							// TODO Auto-generated method stub
-							addcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
-							viewcat.setBackgroundColor(Color.parseColor("#3c6586"));
-							ll_add.setVisibility(View.GONE);
-							ll_view.setVisibility(View.VISIBLE);
-							addcat.setTextColor(Color.BLACK);
-							viewcat.setTextColor(Color.WHITE);
-							listupdateforprinter();
-						}
-					});
-
-					printerlist = (ListView) layout.findViewById(R.id.listView1);
-					ll = (LinearLayout) layout.findViewById(R.id.linearLayout2);
-					printerlist.setItemsCanFocus(false);
-					printertype_spinner = (Spinner) layout .findViewById(R.id.spinner_printer_type);
-					final ArrayAdapter<String> typeOfPrinter = new ArrayAdapter<String>( SettingsActivity.this, android.R.layout.simple_spinner_item);
-					typeOfPrinter .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-					typeOfPrinter.add("EPSON");
-					typeOfPrinter.add("STAR");
-					// typeOfPrinter.add(getString(R.string.printername_p60ii));
-					final RadioGroup typeofprinting=(RadioGroup) layout.findViewById(R.id.typeofprinting);
-					printertype_spinner.setAdapter(typeOfPrinter);
-					spinnername = (Spinner) layout .findViewById(R.id.spinner_printer);
-					final ArrayAdapter<String> adaptername = new ArrayAdapter<String>( SettingsActivity.this, android.R.layout.simple_spinner_item);
-					adaptername .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-					printertype_spinner .setOnItemSelectedListener(new OnItemSelectedListener() {
-						@Override
-						public void onItemSelected( AdapterView<?> parentView, View selectedItemView, int position, long id) {
-							Log.v("janu", "" + typeOfPrinter.getItem(position));
-							if (typeOfPrinter.getItem(position).equals( "EPSON")) {
-								typeofprinting.setVisibility(View.GONE);
-								adaptername.clear();
-								adaptername .add(getString(R.string.printername_p60));
-								adaptername .add(getString(R.string.printername_p60ii));
-								adaptername .add(getString(R.string.printername_t20));
-								adaptername .add(getString(R.string.printername_t70));
-								adaptername .add(getString(R.string.printername_t70ii));
-								adaptername .add(getString(R.string.printername_t81ii));
-								adaptername .add(getString(R.string.printername_t82));
-								adaptername .add(getString(R.string.printername_t82ii));
-								adaptername .add(getString(R.string.printername_t88v));
-								adaptername .add(getString(R.string.printername_u220));
-							} else {
-								typeofprinting.setVisibility(View.VISIBLE);
-								adaptername.clear();
-								adaptername .add(getString(R.string.printername_star1));
-								adaptername .add(getString(R.string.printername_star2));
-								adaptername .add(getString(R.string.printername_star3));
-								adaptername .add(getString(R.string.printername_star4));
-								adaptername .add(getString(R.string.printername_star5));
-								adaptername .add(getString(R.string.printername_star6));
-								adaptername .add(getString(R.string.printername_star7));
-								adaptername .add(getString(R.string.printername_star8));
-								adaptername .add(getString(R.string.printername_star9));
-								adaptername .add(getString(R.string.printername_star10));
-								adaptername .add(getString(R.string.printername_star11));
-								adaptername .add(getString(R.string.printername_star12));
-								adaptername .add(getString(R.string.printername_star13));
-							}
-						}
-
-						@Override
-						public void onNothingSelected( AdapterView<?> parentView) {
-							// your code here
-							Log.v("janu", "seeeeeeeeeeeeeeeeeetha");
-						}
-
-					});
-
-					spinnername.setAdapter(adaptername);
-					printerid = (EditText) layout.findViewById(R.id.name);
-
-					/*// init font list
-				Spinner spinner = (Spinner) layout
-						.findViewById(R.id.spinner_font);
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-						SettingsActivity.this,
-						android.R.layout.simple_spinner_item);
-				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-				adapter.add(getString(R.string.font_a));
-				adapter.add(getString(R.string.font_b));
-				adapter.add(getString(R.string.font_c));
-				spinner.setAdapter(adapter);*/
-
-					prtip = (AutoCompleteTextView) layout.findViewById(R.id.ip);
-					prtip.setOnEditorActionListener(new OnEditorActionListener() {
-						@Override
-						public boolean onEditorAction(TextView v, int actionId,
-								KeyEvent event) {
-							if (actionId == EditorInfo.IME_ACTION_DONE) {
-								InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-								imm.hideSoftInputFromWindow(prtip.getWindowToken(), 0);
-							}
-							return false;
-						}
-					});
-					Spinner spinner = (Spinner) layout.findViewById(R.id.spinner_align);
-					ArrayAdapter<String> adapter = new ArrayAdapter<String>(SettingsActivity.this, android.R.layout.simple_spinner_item);
-					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-					adapter.add(getString(R.string.align_left));
-					adapter.add(getString(R.string.align_center));
-					adapter.add(getString(R.string.align_right));
-					spinner.setAdapter(adapter);
-					spinner = (Spinner) layout.findViewById(R.id.spinner_language);
-					adapter = new ArrayAdapter<String>(SettingsActivity.this, android.R.layout.simple_spinner_item);
-					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-					adapter.add(getString(R.string.language_ank));
-					adapter.add(getString(R.string.language_japanese));
-					adapter.add(getString(R.string.language_simplified_chinese));
-					adapter.add(getString(R.string.language_traditional_chinese));
-					adapter.add(getString(R.string.language_korean));
-					adapter.add(getString(R.string.language_thai));
-					adapter.add(getString(R.string.language_vietnamese));
-					spinner.setAdapter(adapter);
-					spinner = (Spinner) layout .findViewById(R.id.spinner_size_width);
-					adapter = new ArrayAdapter<String>(SettingsActivity.this, android.R.layout.simple_spinner_item);
-					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-					for (int i = 1; i <= SIZEWIDTH_MAX; i++) {
-						adapter.add(String.format("%d", i));
-					}
-					spinner.setAdapter(adapter);
-
-					spinner = (Spinner) layout .findViewById(R.id.spinner_size_height);
-					adapter = new ArrayAdapter<String>(SettingsActivity.this, android.R.layout.simple_spinner_item);
-					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-					for (int i = 1; i <= SIZEHEIGHT_MAX; i++) {
-						adapter.add(String.format("%d", i));
-					}
-					spinner.setAdapter(adapter);
-					TextView text = (TextView) layout .findViewById(R.id.editText_text);
-					String value = getString(R.string.text_edit_text);
-					value = value.replaceAll("\\*", " ");
-					text.setText(value);
-					text = (TextView) layout.findViewById(R.id.editText_linespace);
-					text.setText("30");
-					text = (TextView) layout.findViewById(R.id.editText_xposition);
-					text.setText("0");
-					text = (TextView) layout.findViewById(R.id.editText_feedunit);
-					text.setText("30");
-					Button button = (Button) layout.findViewById(R.id.button_print);
-					button.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							RadioButton	bluetoothradio=(RadioButton) layout.findViewById(R.id.bluetoothradio);
-							String type="TCP:";
-							if(bluetoothradio.isChecked()){
-								type="BT:";
-							}
-
-							printText(type);
-						}
-					});
-
-					detailslayout.addView(layout);
-
-				}
-			});
+//			printermainbtn.setOnClickListener(new OnClickListener() {
+//
+//				@Override
+//				public void onClick(View v) {
+//					// TODO Auto-generated method stub
+//
+//					detailslayout.removeAllViews();
+//					tslookup.setBackgroundResource(R.drawable.toprightmenu);
+//					printermainbtn
+//					.setBackgroundResource(R.drawable.highlightedtopmenuitem);
+//					tax.setBackgroundResource(R.drawable.toprightmenu);
+//					paymentype.setBackgroundResource(R.drawable.toprightmenu);
+//					database.setBackgroundResource(R.drawable.toprightmenu);
+//					company.setBackgroundResource(R.drawable.toprightmenu);
+//					serverurl.setBackgroundResource(R.drawable.toprightmenu);
+//					card.setBackgroundResource(R.drawable.toprightmenu);
+//					tslookup.setTextColor(Color.WHITE);
+//					printermainbtn.setTextColor(Color.BLACK);
+//					tax.setTextColor(Color.WHITE);
+//					paymentype.setTextColor(Color.WHITE);
+//					database.setTextColor(Color.WHITE);
+//					company.setTextColor(Color.WHITE);
+//					serverurl.setTextColor(Color.WHITE);
+//					card.setTextColor(Color.WHITE);
+//					LayoutInflater inflater = getLayoutInflater();
+//					final View layout = inflater.inflate(R.layout.text,(ViewGroup) v.findViewById(R.id.inflatingLayout));
+//
+//					final Button addcat = (Button) layout.findViewById(R.id.addcat);
+//					final Button viewcat = (Button) layout .findViewById(R.id.viewcat);
+//					final LinearLayout ll_add = (LinearLayout) layout .findViewById(R.id.add_ll);
+//					final LinearLayout ll_view = (LinearLayout) layout .findViewById(R.id.view_ll);
+//
+//					addcat.setBackgroundColor(Color.parseColor("#3c6586"));
+//					viewcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
+//					ll_add.setVisibility(View.VISIBLE);
+//					ll_view.setVisibility(View.GONE);
+//					addcat.setTextColor(Color.WHITE);
+//					viewcat.setTextColor(Color.BLACK);
+//
+//					addcat.setOnClickListener(new OnClickListener() {
+//
+//						@Override
+//						public void onClick(View v) {
+//							// TODO Auto-generated method stub
+//							addcat.setBackgroundColor(Color.parseColor("#3c6586"));
+//							viewcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
+//							ll_add.setVisibility(View.VISIBLE);
+//							ll_view.setVisibility(View.GONE);
+//							addcat.setTextColor(Color.WHITE);
+//							viewcat.setTextColor(Color.BLACK);
+//						}
+//					});
+//
+//					viewcat.setOnClickListener(new OnClickListener() {
+//
+//						@Override
+//						public void onClick(View v) {
+//							// TODO Auto-generated method stub
+//							addcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
+//							viewcat.setBackgroundColor(Color.parseColor("#3c6586"));
+//							ll_add.setVisibility(View.GONE);
+//							ll_view.setVisibility(View.VISIBLE);
+//							addcat.setTextColor(Color.BLACK);
+//							viewcat.setTextColor(Color.WHITE);
+//							listupdateforprinter();
+//						}
+//					});
+//
+//					printerlist = (ListView) layout.findViewById(R.id.listView1);
+//					ll = (LinearLayout) layout.findViewById(R.id.linearLayout2);
+//					printerlist.setItemsCanFocus(false);
+//					printertype_spinner = (Spinner) layout .findViewById(R.id.spinner_printer_type);
+//					final ArrayAdapter<String> typeOfPrinter = new ArrayAdapter<String>( SettingsActivity.this, android.R.layout.simple_spinner_item);
+//					typeOfPrinter .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//					typeOfPrinter.add("EPSON");
+//					typeOfPrinter.add("STAR");
+//					// typeOfPrinter.add(getString(R.string.printername_p60ii));
+//					final RadioGroup typeofprinting=(RadioGroup) layout.findViewById(R.id.typeofprinting);
+//					printertype_spinner.setAdapter(typeOfPrinter);
+//					spinnername = (Spinner) layout .findViewById(R.id.spinner_printer);
+//					final ArrayAdapter<String> adaptername = new ArrayAdapter<String>( SettingsActivity.this, android.R.layout.simple_spinner_item);
+//					adaptername .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//					printertype_spinner .setOnItemSelectedListener(new OnItemSelectedListener() {
+//						@Override
+//						public void onItemSelected( AdapterView<?> parentView, View selectedItemView, int position, long id) {
+//							Log.v("janu", "" + typeOfPrinter.getItem(position));
+//							if (typeOfPrinter.getItem(position).equals( "EPSON")) {
+//								typeofprinting.setVisibility(View.GONE);
+//								adaptername.clear();
+//								adaptername .add(getString(R.string.printername_p60));
+//								adaptername .add(getString(R.string.printername_p60ii));
+//								adaptername .add(getString(R.string.printername_t20));
+//								adaptername .add(getString(R.string.printername_t70));
+//								adaptername .add(getString(R.string.printername_t70ii));
+//								adaptername .add(getString(R.string.printername_t81ii));
+//								adaptername .add(getString(R.string.printername_t82));
+//								adaptername .add(getString(R.string.printername_t82ii));
+//								adaptername .add(getString(R.string.printername_t88v));
+//								adaptername .add(getString(R.string.printername_u220));
+//							} else {
+//								typeofprinting.setVisibility(View.VISIBLE);
+//								adaptername.clear();
+//								adaptername .add(getString(R.string.printername_star1));
+//								adaptername .add(getString(R.string.printername_star2));
+//								adaptername .add(getString(R.string.printername_star3));
+//								adaptername .add(getString(R.string.printername_star4));
+//								adaptername .add(getString(R.string.printername_star5));
+//								adaptername .add(getString(R.string.printername_star6));
+//								adaptername .add(getString(R.string.printername_star7));
+//								adaptername .add(getString(R.string.printername_star8));
+//								adaptername .add(getString(R.string.printername_star9));
+//								adaptername .add(getString(R.string.printername_star10));
+//								adaptername .add(getString(R.string.printername_star11));
+//								adaptername .add(getString(R.string.printername_star12));
+//								adaptername .add(getString(R.string.printername_star13));
+//							}
+//						}
+//
+//						@Override
+//						public void onNothingSelected( AdapterView<?> parentView) {
+//							// your code here
+//							Log.v("janu", "seeeeeeeeeeeeeeeeeetha");
+//						}
+//
+//					});
+//
+//					spinnername.setAdapter(adaptername);
+//					printerid = (EditText) layout.findViewById(R.id.name);
+//
+//					/*// init font list
+//				Spinner spinner = (Spinner) layout
+//						.findViewById(R.id.spinner_font);
+//				ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+//						SettingsActivity.this,
+//						android.R.layout.simple_spinner_item);
+//				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//				adapter.add(getString(R.string.font_a));
+//				adapter.add(getString(R.string.font_b));
+//				adapter.add(getString(R.string.font_c));
+//				spinner.setAdapter(adapter);*/
+//
+//					prtip = (AutoCompleteTextView) layout.findViewById(R.id.ip);
+//					prtip.setOnEditorActionListener(new OnEditorActionListener() {
+//						@Override
+//						public boolean onEditorAction(TextView v, int actionId,
+//								KeyEvent event) {
+//							if (actionId == EditorInfo.IME_ACTION_DONE) {
+//								InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//								imm.hideSoftInputFromWindow(prtip.getWindowToken(), 0);
+//							}
+//							return false;
+//						}
+//					});
+//					Spinner spinner = (Spinner) layout.findViewById(R.id.spinner_align);
+//					ArrayAdapter<String> adapter = new ArrayAdapter<String>(SettingsActivity.this, android.R.layout.simple_spinner_item);
+//					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//					adapter.add(getString(R.string.align_left));
+//					adapter.add(getString(R.string.align_center));
+//					adapter.add(getString(R.string.align_right));
+//					spinner.setAdapter(adapter);
+//					spinner = (Spinner) layout.findViewById(R.id.spinner_language);
+//					adapter = new ArrayAdapter<String>(SettingsActivity.this, android.R.layout.simple_spinner_item);
+//					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//					adapter.add(getString(R.string.language_ank));
+//					adapter.add(getString(R.string.language_japanese));
+//					adapter.add(getString(R.string.language_simplified_chinese));
+//					adapter.add(getString(R.string.language_traditional_chinese));
+//					adapter.add(getString(R.string.language_korean));
+//					adapter.add(getString(R.string.language_thai));
+//					adapter.add(getString(R.string.language_vietnamese));
+//					spinner.setAdapter(adapter);
+//					spinner = (Spinner) layout .findViewById(R.id.spinner_size_width);
+//					adapter = new ArrayAdapter<String>(SettingsActivity.this, android.R.layout.simple_spinner_item);
+//					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//					for (int i = 1; i <= SIZEWIDTH_MAX; i++) {
+//						adapter.add(String.format("%d", i));
+//					}
+//					spinner.setAdapter(adapter);
+//
+//					spinner = (Spinner) layout .findViewById(R.id.spinner_size_height);
+//					adapter = new ArrayAdapter<String>(SettingsActivity.this, android.R.layout.simple_spinner_item);
+//					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//					for (int i = 1; i <= SIZEHEIGHT_MAX; i++) {
+//						adapter.add(String.format("%d", i));
+//					}
+//					spinner.setAdapter(adapter);
+//					TextView text = (TextView) layout .findViewById(R.id.editText_text);
+//					String value = getString(R.string.text_edit_text);
+//					value = value.replaceAll("\\*", " ");
+//					text.setText(value);
+//					text = (TextView) layout.findViewById(R.id.editText_linespace);
+//					text.setText("30");
+//					text = (TextView) layout.findViewById(R.id.editText_xposition);
+//					text.setText("0");
+//					text = (TextView) layout.findViewById(R.id.editText_feedunit);
+//					text.setText("30");
+//					Button button = (Button) layout.findViewById(R.id.button_print);
+//					button.setOnClickListener(new OnClickListener() {
+//						@Override
+//						public void onClick(View v) {
+//							RadioButton	bluetoothradio=(RadioButton) layout.findViewById(R.id.bluetoothradio);
+//							String type="TCP:";
+//							if(bluetoothradio.isChecked()){
+//								type="BT:";
+//							}
+//
+//							printText(type);
+//						}
+//					});
+//
+//					detailslayout.addView(layout);
+//
+//				}
+//			});
 
 			tax.setOnClickListener(new OnClickListener() {
 
@@ -1025,6 +1025,9 @@ PrinterEditAdapter.OnWidgetItemClicked {
 					detailslayout.addView(layout);
 				}
 			});
+			
+			
+			
 			printermainbtn.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -1242,6 +1245,154 @@ PrinterEditAdapter.OnWidgetItemClicked {
 
 					detailslayout.addView(layout);
 
+				}
+			});
+			
+			paymentype.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					detailslayout.removeAllViews();
+					tslookup.setBackgroundResource(R.drawable.toprightmenu);
+					printermainbtn.setBackgroundResource(R.drawable.toprightmenu);
+					tax.setBackgroundResource(R.drawable.toprightmenu);
+					paymentype
+							.setBackgroundResource(R.drawable.highlightedtopmenuitem);
+					database.setBackgroundResource(R.drawable.toprightmenu);
+					company.setBackgroundResource(R.drawable.toprightmenu);
+					serverurl.setBackgroundResource(R.drawable.toprightmenu);
+					card.setBackgroundResource(R.drawable.toprightmenu);
+					tslookup.setTextColor(Color.WHITE);
+					printermainbtn.setTextColor(Color.WHITE);
+					tax.setTextColor(Color.WHITE);
+					paymentype.setTextColor(Color.BLACK);
+					database.setTextColor(Color.WHITE);
+					company.setTextColor(Color.WHITE);
+					serverurl.setTextColor(Color.WHITE);
+					card.setTextColor(Color.WHITE);
+					LayoutInflater inflater = getLayoutInflater();
+					final View layout = inflater.inflate(R.layout.paymentscreen,
+							(ViewGroup) v.findViewById(R.id.inflatingLayout));
+
+					final Button addcat = (Button) layout.findViewById(R.id.addcat);
+					final Button viewcat = (Button) layout
+							.findViewById(R.id.viewcat);
+					final LinearLayout ll_add = (LinearLayout) layout
+							.findViewById(R.id.add_ll);
+					final LinearLayout ll_view = (LinearLayout) layout
+							.findViewById(R.id.view_ll);
+
+					addcat.setBackgroundColor(Color.parseColor("#3c6586"));
+					viewcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
+					ll_add.setVisibility(View.VISIBLE);
+					ll_view.setVisibility(View.GONE);
+					addcat.setTextColor(Color.WHITE);
+					viewcat.setTextColor(Color.BLACK);
+
+					paymentlist = (ListView) layout.findViewById(R.id.listView1);
+					paymentlist.setItemsCanFocus(false);
+
+					addcat.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							// TODO Auto-generated method stub
+							addcat.setBackgroundColor(Color.parseColor("#3c6586"));
+							viewcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
+							ll_add.setVisibility(View.VISIBLE);
+							ll_view.setVisibility(View.GONE);
+							addcat.setTextColor(Color.WHITE);
+							viewcat.setTextColor(Color.BLACK);
+						}
+					});
+
+					viewcat.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							// TODO Auto-generated method stub
+							addcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
+							viewcat.setBackgroundColor(Color.parseColor("#3c6586"));
+							ll_add.setVisibility(View.GONE);
+							ll_view.setVisibility(View.VISIBLE);
+							addcat.setTextColor(Color.BLACK);
+							viewcat.setTextColor(Color.WHITE);
+							listUpdateforpayment();
+						}
+					});
+
+					final EditText payment_name = (EditText) layout
+							.findViewById(R.id.payment_name_edit);
+					final RadioGroup radioValue = (RadioGroup) layout
+							.findViewById(R.id.pay_radiogroup);
+					Button save = (Button) layout.findViewById(R.id.payment_save);
+					Button cancel = (Button) layout
+							.findViewById(R.id.payment_cancel);
+
+					save.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+
+							int selectedId = radioValue.getCheckedRadioButtonId();
+
+							RadioButton radioButton = (RadioButton) findViewById(selectedId);
+							// TODO Auto-generated method stub
+							payment_name.getText().toString();
+							if (payment_name.getText().length() > 2) {
+
+								
+								
+								
+								String query = "select *from "+DatabaseForDemo.PAYMENT_TABLE+" where "+DatabaseForDemo.PAYMENT_NAME+"=\""+payment_name.getText().toString()+"\"";
+								Cursor cursor = dbforloginlogoutWrite1.rawQuery(query, null);
+								startManagingCursor(cursor);
+								if(cursor.getCount()>=1){
+									Toast.makeText(SettingsActivity.this, "Payment type already exists", Toast.LENGTH_SHORT).show();
+								}else{
+								
+								ContentValues contentValues = new ContentValues();
+								contentValues.put(DatabaseForDemo.UNIQUE_ID,
+										Parameters.randomValue());
+								contentValues.put(DatabaseForDemo.CREATED_DATE,
+										Parameters.currentTime());
+								contentValues.put(DatabaseForDemo.MODIFIED_DATE,
+										Parameters.currentTime());
+								contentValues.put(DatabaseForDemo.MODIFIED_IN,
+										"Local");
+								contentValues.put(DatabaseForDemo.PAYMENT_NAME,
+										payment_name.getText().toString());
+								contentValues.put(DatabaseForDemo.PAYMENT_VALUE,
+										radioButton.getTag().toString());
+								dbforloginlogoutWrite1.insert(
+										DatabaseForDemo.PAYMENT_TABLE, null,
+										contentValues);
+
+								Toast.makeText(getApplicationContext(), "Saved",
+										1000).show();
+								sqlDB.close();
+								dbforloginlogoutWrite1.close();
+								payment_name.setText("");
+								}
+//								cursor.close();
+							} else {
+								Toast.makeText(getApplicationContext(),
+										"Enter Payment Name", 1000).show();
+							}
+						}
+					});
+
+					cancel.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+							// TODO Auto-generated method stub
+							payment_name.setText("");
+						}
+					});
+
+					detailslayout.addView(layout);
 				}
 			});
 			
@@ -3528,12 +3679,20 @@ PrinterEditAdapter.OnWidgetItemClicked {
 		}
 
 		@Override
-		protected String doInBackground(String... urls) {
+		protected String doInBackground(String... urls)
+		{
 			String response = "";
 			pendingclear();
-			System.out.println("pendingclear"+diff);
+			System.out.println("pendingclear" + diff);
 			JsonPostMethod postmethod = new JsonPostMethod();
-			String responsess = postmethod.postmethodforbackup(localSystemTimeString, "", "abcedefg", forAsync);
+			// String responsess =
+			// postmethod.postmethodforbackup(localSystemTimeString, "",
+			// "abcedefg", forAsync);
+
+			if (session.isFirstSynchronization())
+				previousServerSyncTimeString = "";
+
+			String responsess = postmethod.postmethodforbackup( localSystemTimeString, previousServerSyncTimeString, "abcedefg", forAsync);
 			backupcall(responsess);
 			return response;
 		}
@@ -3748,8 +3907,7 @@ PrinterEditAdapter.OnWidgetItemClicked {
 			System.out.println("vlaues_first size:" + id_data.size());
 			System.out.println("vlaues_first size:" + desc_data.size());
 
-			PrinterEditAdapter adapter = new PrinterEditAdapter(this, id_data,
-					desc_data);
+			PrinterEditAdapter adapter = new PrinterEditAdapter(this, id_data, desc_data);
 			adapter.setListener(SettingsActivity.this);
 			printerlist.setAdapter(adapter);
 		}catch(Exception e){
@@ -3757,8 +3915,7 @@ PrinterEditAdapter.OnWidgetItemClicked {
 		}
 	}
 
-	public ArrayList<String> getData(int offset, int limit,
-			ArrayList<String> list) {
+	public ArrayList<String> getData(int offset, int limit, ArrayList<String> list) {
 		ArrayList<String> newList = new ArrayList<String>(limit);
 		int end = limit;
 
