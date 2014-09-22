@@ -263,6 +263,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="510dp"
                             android:layout_marginBottom="3dp"
+                            android:cacheColorHint="@android:color/transparent"
+                            android:scrollingCache="false"
                             android:layout_weight="9"
                             android:listSelector="@android:color/darker_gray" >
                         </ListView>
