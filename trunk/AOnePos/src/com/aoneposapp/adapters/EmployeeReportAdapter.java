@@ -1,5 +1,6 @@
 package com.aoneposapp.adapters;
 
+import net.authorize.android.model.CommonCode;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
@@ -26,7 +27,7 @@ public class EmployeeReportAdapter  extends CursorAdapter{
 		public void bindView(View v, Context arg1, Cursor arg2) {
 			// TODO Auto-generated method stub
 			  String tv1 = arg2.getString(2);
-			  String tv3 = arg2.getString(3);
+			  String tv3 = CommonCode.change_Date_Format(arg2.getString(3), "yyyy-MM-dd HH:mm:ss", "MM-dd-yyyy HH:mm:ss");
 			  String tv4 = arg2.getString(4);
 			  String tv2 = arg2.getString(1);
 			  String tv6 = arg2.getString(7);
