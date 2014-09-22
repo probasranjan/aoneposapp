@@ -3,8 +3,11 @@ package com.aoneposapp;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,10 +23,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
 import android.net.ParseException;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -35,9 +40,9 @@ import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -50,11 +55,11 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SlidingDrawer;
-import android.widget.TextView;
 import android.widget.SlidingDrawer.OnDrawerCloseListener;
 import android.widget.SlidingDrawer.OnDrawerOpenListener;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.aoneposapp.adapters.ImageAdapterForCategory;
@@ -137,7 +142,11 @@ public class InventoryActivity extends Activity implements
 			instock;
 	DatabaseForDemo sqlDBInvetory;
 	SQLiteDatabase dbforloginlogoutWriteInvetory,dbforloginlogoutReadInvetory;
-	ListView list;
+	ListView list_View;
+	ImageAdapterForProduct imageAdapterForProduct;
+	String sortBy= "";
+	boolean sortType = true;
+	ArrayList<HashMap<String, String>> arrayList_Items;
 	ArrayList<String> displayarray = new ArrayList<String>();
 	ArrayList<String> pomethodList = new ArrayList<String>();
 	ArrayList<String> no_data = new ArrayList<String>();
@@ -211,12 +220,12 @@ public class InventoryActivity extends Activity implements
 	ArrayList<String> total_pricetax_data = new ArrayList<String>();
 	ArrayList<String> total_tax_product_data = new ArrayList<String>();
 	ArrayList<String> printerlistfordisplay = new ArrayList<String>();
-	 ArrayList<String> autoTextStrings = new ArrayList<String>();
-	 ArrayList<String> autoTextStringsname = new ArrayList<String>();
-     ArrayList<String> autoTextStringsvendor = new ArrayList<String>();
+	ArrayList<String> autoTextStrings = new CustomStringList3();
+	ArrayList<String> autoTextStringsname = new CustomStringList3();
+	ArrayList<String> autoTextStringsvendor = new CustomStringList3();
 	private Spinner catspr, dptspr, displayspr;
 	private AutoCompleteTextView actv;
-	int pagenum = 1;
+	int pagenum = 1, prevLength = 0;
 	public static int pagecount = 20;
 	public static int testforid = 1;
 	int stLoop = 0;
@@ -271,8 +280,7 @@ public class InventoryActivity extends Activity implements
 		}
 		taxcursor.close();
 		if (android.os.Build.VERSION.SDK_INT > 9) {
-			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-					.permitAll().build();
+			StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder() .permitAll().build();
 			StrictMode.setThreadPolicy(policy);
 		}
 		Parameters.hai = false;
@@ -336,8 +344,7 @@ public class InventoryActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent intent1 = new Intent(InventoryActivity.this,
-						PosMainActivity.class);
+				Intent intent1 = new Intent(InventoryActivity.this, PosMainActivity.class);
 				startActivity(intent1);
 				finish();
 			}
@@ -355,8 +362,7 @@ public class InventoryActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent intent1 = new Intent(InventoryActivity.this,
-						StoresActivity.class);
+				Intent intent1 = new Intent(InventoryActivity.this, StoresActivity.class);
 				startActivity(intent1);
 				finish();
 			}
@@ -367,16 +373,11 @@ public class InventoryActivity extends Activity implements
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if (Parameters.customer_permission) {
-					Intent intent1 = new Intent(InventoryActivity.this,
-							CustomerActivity.class);
+					Intent intent1 = new Intent(InventoryActivity.this, CustomerActivity.class);
 					startActivity(intent1);
 					finish();
 				} else {
-					showAlertDialog(
-							InventoryActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( InventoryActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -385,8 +386,7 @@ public class InventoryActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent intent1 = new Intent(InventoryActivity.this,
-						EmployeeActivity.class);
+				Intent intent1 = new Intent(InventoryActivity.this, EmployeeActivity.class);
 				startActivity(intent1);
 				finish();
 			}
@@ -397,16 +397,11 @@ public class InventoryActivity extends Activity implements
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if (Parameters.reports_permission) {
-					Intent intent1 = new Intent(InventoryActivity.this,
-							ReportsActivity.class);
+					Intent intent1 = new Intent(InventoryActivity.this, ReportsActivity.class);
 					startActivity(intent1);
 					finish();
 				} else {
-					showAlertDialog(
-							InventoryActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( InventoryActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -416,16 +411,11 @@ public class InventoryActivity extends Activity implements
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if (Parameters.settings_permission) {
-					Intent intent1 = new Intent(InventoryActivity.this,
-							SettingsActivity.class);
+					Intent intent1 = new Intent(InventoryActivity.this, SettingsActivity.class);
 					startActivity(intent1);
 					finish();
 				} else {
-					showAlertDialog(
-							InventoryActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( InventoryActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -434,8 +424,7 @@ public class InventoryActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent intent1 = new Intent(InventoryActivity.this,
-						ContactsActivity.class);
+				Intent intent1 = new Intent(InventoryActivity.this, ContactsActivity.class);
 				startActivity(intent1);
 				finish();
 			}
@@ -446,16 +435,11 @@ public class InventoryActivity extends Activity implements
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				if(Parameters.usertype.equals("admin")){
-				Intent intent1 = new Intent(InventoryActivity.this,
-						ProfileActivity.class);
+				Intent intent1 = new Intent(InventoryActivity.this, ProfileActivity.class);
 				startActivity(intent1);
 				finish();
 				} else {
-					showAlertDialog(
-							InventoryActivity.this,
-							"Sorry",
-							"You are not authenticated to perform this operation.",
-							false);
+					showAlertDialog( InventoryActivity.this, "Sorry", "You are not authenticated to perform this operation.", false);
 				}
 			}
 		});
@@ -471,64 +455,48 @@ public class InventoryActivity extends Activity implements
 		deptspinnerdataSearch.add("All");
 		catspinnerdataSearch.add("All");
 
-		Cursor mCursor1 = dbforloginlogoutReadInvetory.rawQuery(
-				"select " + DatabaseForDemo.DepartmentID + " from "
-						+ DatabaseForDemo.DEPARTMENT_TABLE, null);
+		Cursor mCursor1 = dbforloginlogoutReadInvetory.rawQuery( "select " + DatabaseForDemo.DepartmentID + " from " + DatabaseForDemo.DEPARTMENT_TABLE, null);
 		if (mCursor1 != null) {
 			if (mCursor1.moveToFirst()) {
 				do {
-					String catid = mCursor1.getString(mCursor1
-							.getColumnIndex(DatabaseForDemo.DepartmentID));
+					String catid = mCursor1.getString(mCursor1 .getColumnIndex(DatabaseForDemo.DepartmentID));
 					deptspinnerdataSearch.add(catid);
 				} while (mCursor1.moveToNext());
 			}
 		} else {
-			Toast.makeText(getApplicationContext(), "there is no data",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), "there is no data", Toast.LENGTH_SHORT).show();
 		}
 		mCursor1.close();
-		final ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(
-				InventoryActivity.this, android.R.layout.simple_spinner_item,
-				deptspinnerdataSearch);
+		final ArrayAdapter<String> adapter1 = new ArrayAdapter<String>( InventoryActivity.this, android.R.layout.simple_spinner_item, deptspinnerdataSearch);
 		adapter1.setDropDownViewResource(android.R.layout.simple_spinner_item);
 		dptspr.setAdapter(adapter1);
 
-		Cursor mCursor3 = dbforloginlogoutReadInvetory.rawQuery(
-				"select " + DatabaseForDemo.CategoryId + " from "
-						+ DatabaseForDemo.CATEGORY_TABLE, null);
+		Cursor mCursor3 = dbforloginlogoutReadInvetory.rawQuery( "select " + DatabaseForDemo.CategoryId + " from " + DatabaseForDemo.CATEGORY_TABLE, null);
 		System.out.println(mCursor3);
 		if (mCursor3 != null) {
 			if (mCursor3.moveToFirst()) {
 				do {
-					String catid = mCursor3.getString(mCursor3
-							.getColumnIndex(DatabaseForDemo.CategoryId));
+					String catid = mCursor3.getString(mCursor3 .getColumnIndex(DatabaseForDemo.CategoryId));
 					catspinnerdataSearch.add(catid);
 				} while (mCursor3.moveToNext());
 			}
 		} else {
-			Toast.makeText(getApplicationContext(), "there is no data",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), "there is no data", Toast.LENGTH_SHORT).show();
 		}
 		mCursor3.close();
 		gettingCount();
 		ArrayList<String> autoTextStringsItems = new ArrayList<String>();
 		autoTextStringsItems.addAll(autoTextStrings);
-		autoTextStringsItems
-				.addAll(autoTextStringsname);
-		autoTextStringsItems
-				.addAll(autoTextStringsvendor);
+		autoTextStringsItems .addAll(autoTextStringsname);
+		autoTextStringsItems .addAll(autoTextStringsvendor);
 
-		ArrayAdapter<String> adapterauto = new ArrayAdapter<String>(
-				InventoryActivity.this,
-				android.R.layout.select_dialog_item,
-				autoTextStringsItems);
+		ArrayAdapter<String> adapterauto = new ArrayAdapter<String>( InventoryActivity.this, android.R.layout.select_dialog_item, autoTextStringsItems);
 		actv.setThreshold(1);
 		actv.setAdapter(adapterauto);
+		System.out.println("1111111111111111111");
 		actv.setTextColor(Color.BLACK);
 		
-		ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(
-				InventoryActivity.this, android.R.layout.simple_spinner_item,
-				catspinnerdataSearch);
+		ArrayAdapter<String> adapter2 = new ArrayAdapter<String>( InventoryActivity.this, android.R.layout.simple_spinner_item, catspinnerdataSearch);
 		adapter2.setDropDownViewResource(android.R.layout.simple_spinner_item);
 		catspr.setAdapter(adapter2);
 		
@@ -537,21 +505,16 @@ public class InventoryActivity extends Activity implements
 			public boolean onTouch(View v, MotionEvent event) {
 				// TODO Auto-generated method stub
 				displayarray.clear();
-				ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(
-						InventoryActivity.this,
-						android.R.layout.simple_spinner_item, displayarray);
+				ArrayAdapter<String> adapter2 = new ArrayAdapter<String>( InventoryActivity.this, android.R.layout.simple_spinner_item, displayarray);
 				adapter2.setDropDownViewResource(android.R.layout.simple_spinner_item);
 				displayspr.setAdapter(adapter2);
 				deptspinnerdataSearch.clear();
 				deptspinnerdataSearch.add("All");
 				String urlval = catspr.getSelectedItem().toString();
-				String qqqqqq="select " + DatabaseForDemo.DepartmentID + " from "
-						+ DatabaseForDemo.DEPARTMENT_TABLE;
+				String qqqqqq="select " + DatabaseForDemo.DepartmentID + " from " + DatabaseForDemo.DEPARTMENT_TABLE;
 				if(!urlval.equals("All")){
 
-					qqqqqq="select " + DatabaseForDemo.DepartmentID + " from "
-							+ DatabaseForDemo.DEPARTMENT_TABLE +" where "+DatabaseForDemo.CategoryForDepartment+ "=\""
-									+ urlval + "\"";
+					qqqqqq="select " + DatabaseForDemo.DepartmentID + " from " + DatabaseForDemo.DEPARTMENT_TABLE +" where "+DatabaseForDemo.CategoryForDepartment+ "=\"" + urlval + "\"";
 				}
 				Cursor mCursor = dbforloginlogoutReadInvetory.rawQuery(qqqqqq, null);
 				// startManagingCursor(mCursor);
@@ -559,8 +522,7 @@ public class InventoryActivity extends Activity implements
 				if (mCursor != null) {
 					if (mCursor.moveToFirst()) {
 						do {
-							String catid = mCursor.getString(mCursor
-									.getColumnIndex(DatabaseForDemo.DepartmentID));
+							String catid = mCursor.getString(mCursor .getColumnIndex(DatabaseForDemo.DepartmentID));
 							deptspinnerdataSearch.add(catid);
 						} while (mCursor.moveToNext());
 					}
@@ -577,9 +539,7 @@ public class InventoryActivity extends Activity implements
 			public boolean onTouch(View v, MotionEvent event) {
 				// TODO Auto-generated method stub
 				displayarray.clear();
-				ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(
-						InventoryActivity.this,
-						android.R.layout.simple_spinner_item, displayarray);
+				ArrayAdapter<String> adapter2 = new ArrayAdapter<String>( InventoryActivity.this, android.R.layout.simple_spinner_item, displayarray);
 				adapter2.setDropDownViewResource(android.R.layout.simple_spinner_item);
 				displayspr.setAdapter(adapter2);
 				return false;
@@ -619,104 +579,121 @@ public class InventoryActivity extends Activity implements
 					offsetvalingo = "1";
 				} else {
 					pages = displayspr.getSelectedItem().toString();
-					System.out
-							.println("pages offset val is///////////" + pages);
+					System.out .println("pages offset val is///////////" + pages);
 					String[] a = pages.split("-");
 					System.out.println("the array values are:" + a.length);
 					for (int i = 0; i < a.length; i++) {
 						offsetvalingo = a[0].trim();
-						System.out.println("offset val is///////////:"
-								+ offsetvalingo);
+						System.out.println("offset val is///////////:" + offsetvalingo);
 					}
 				}
 				System.out.println("66666666666666666666666666");
 				String str = actv.getText().toString().trim();
 				String selectQuery = null;
 				System.out.println("auto text view val is:" + str);
-				if (str.length() > 0) {
-					if (autoTextStrings.contains(str)) {
+				if (str.length() > 0)
+				{
+					if(containsCaseInsensitive(str, autoTextStrings))
+//					if (autoTextStrings.contains(str))
+					{
 						selectQuery = "SELECT  * FROM "
 								+ DatabaseForDemo.INVENTORY_TABLE + " where "
-								+ DatabaseForDemo.INVENTORY_ITEM_NO + "=\""
-								+ str + "\"";
-
-					} else {
-
-						if (autoTextStringsname.contains(str)) {
+								+ DatabaseForDemo.INVENTORY_ITEM_NO + " like \""
+								+ str + "%\"";
+						System.out.println("selectQuery111: "+selectQuery);
+					}
+					else
+					{
+						if(containsCaseInsensitive(str, autoTextStringsname))
+//						if (autoTextStringsname.contains(str))
+						{
 							selectQuery = "SELECT  * FROM "
 									+ DatabaseForDemo.INVENTORY_TABLE
 									+ " where "
 									+ DatabaseForDemo.INVENTORY_ITEM_NAME
-									+ "=\"" + str + "\"";
-
-						} else {
+									+ " like \"" + str + "%\"";
+							System.out.println("selectQuery222: "+selectQuery);
+						}
+						else 
+						{
 							selectQuery = "SELECT  * FROM "
 									+ DatabaseForDemo.ORDERING_INFO_TABLE
 									+ " where " + DatabaseForDemo.VENDERPART_NO
-									+ "=\"" + str + "\"";
+									+ " like \"" + str + "%\"";
+							System.out.println("selectQuery333: "+selectQuery);
 						}
 
 					}
 
-				} else {
+				} 
+				else 
+				{
 					String dp = dptspr.getSelectedItem().toString();
 					String cat = catspr.getSelectedItem().toString();
 					Log.d("dp", "" + dp);
 					Log.d("cat", "" + cat);
 
-					if (dp.equals("All") && cat.equals("All")) {
-						selectQuery = "SELECT  * FROM "
-								+ DatabaseForDemo.INVENTORY_TABLE;
-					} else {
-						if (!dp.equals("All") && !cat.equals("All")) {
+					if (dp.equals("All") && cat.equals("All"))
+					{
+						selectQuery = "SELECT  * FROM " + DatabaseForDemo.INVENTORY_TABLE;
+					} 
+					else
+					{
+						if (!dp.equals("All") && !cat.equals("All"))
+						{
 							selectQuery = "SELECT  * FROM "
 									+ DatabaseForDemo.INVENTORY_TABLE
 									+ " where "
-									+ DatabaseForDemo.INVENTORY_CATEGORY + "=\""
-									+ cat + "\" and "
+									+ DatabaseForDemo.INVENTORY_CATEGORY + " like \""
+									+ cat + "%\" and "
 									+ DatabaseForDemo.INVENTORY_DEPARTMENT
-									+ "=\"" + dp + "\"";
+									+ " like \"" + dp + "%\"";
+							System.out.println("selectQuery444: "+selectQuery);
 						}
 
-						if (dp.equals("All") && !cat.equals("All")) {
+						if (dp.equals("All") && !cat.equals("All")) 
+						{
+//							selectQuery = "SELECT  * FROM "
+//									+ DatabaseForDemo.INVENTORY_TABLE
+//									+ " where "
+//									+ DatabaseForDemo.INVENTORY_CATEGORY + " like \""
+//									+ cat + "%\"";
 							selectQuery = "SELECT  * FROM "
 									+ DatabaseForDemo.INVENTORY_TABLE
 									+ " where "
-									+ DatabaseForDemo.INVENTORY_CATEGORY + "=\""
-									+ cat + "\"";
+									+ DatabaseForDemo.INVENTORY_DEPARTMENT + " like \""
+									+ cat + "%\"";
+							
+							System.out.println("selectQuery555: "+selectQuery);
 						}
-						if (!dp.equals("All") && cat.equals("All")) {
+						if (!dp.equals("All") && cat.equals("All")) 
+						{
 							selectQuery = "SELECT  * FROM "
 									+ DatabaseForDemo.INVENTORY_TABLE
 									+ " where "
 									+ DatabaseForDemo.INVENTORY_DEPARTMENT
-									+ "=\"" + dp + "\"";
+									+ " like \"" + dp + "%\"";
+							System.out.println("selectQuery666: "+selectQuery);
 						}
 
 					}
 
 				}
 				Log.v("ffff", selectQuery);
-				Cursor mCursor = dbforloginlogoutReadInvetory.rawQuery(
-						selectQuery, null);
+				Cursor mCursor = dbforloginlogoutReadInvetory.rawQuery( selectQuery, null);
 				int totalnoofrecords = mCursor.getCount();
 				if (mCursor != null) {
 					if (mCursor.moveToFirst()) {
 						do {
-							String itemno = mCursor.getString(mCursor
-									.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NO));
+							String itemno = mCursor.getString(mCursor .getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NO));
 							total_itemno_data.add(itemno);
-							String itemname = mCursor.getString(mCursor
-									.getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
+							String itemname = mCursor.getString(mCursor .getColumnIndex(DatabaseForDemo.INVENTORY_ITEM_NAME));
 							total_itemdesc_data.add(itemname);
-							String desc2 = mCursor.getString(mCursor
-									.getColumnIndex(DatabaseForDemo.INVENTORY_SECOND_DESCRIPTION));
+							String desc2 = mCursor.getString(mCursor .getColumnIndex(DatabaseForDemo.INVENTORY_SECOND_DESCRIPTION));
 							total_desc2_data.add(desc2);
-							String pricecharge = mCursor.getString(mCursor
-									.getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_CHANGE));
+							String pricecharge = mCursor.getString(mCursor .getColumnIndex(DatabaseForDemo.INVENTORY_PRICE_CHANGE));
 							total_pricecharge_data.add(pricecharge);
-							String instock = mCursor.getString(mCursor
-									.getColumnIndex(DatabaseForDemo.INVENTORY_IN_STOCK));
+							String instock = mCursor.getString(mCursor .getColumnIndex(DatabaseForDemo.INVENTORY_IN_STOCK));
 							total_stock_data.add(instock);
 						} while (mCursor.moveToNext());
 					}
@@ -732,20 +709,16 @@ public class InventoryActivity extends Activity implements
 							+ total_itemno_data.get(ii) + "\"" + " AND "
 							+ DatabaseForDemo.PREFERRED + "=\"true\"";
 
-					Cursor mCursorforvendor = dbforloginlogoutReadInvetory
-							.rawQuery(selectQueryforvendor, null);
+					Cursor mCursorforvendor = dbforloginlogoutReadInvetory .rawQuery(selectQueryforvendor, null);
 					if (mCursorforvendor.getCount() > 0) {
 						if (mCursorforvendor != null) {
 							if (mCursorforvendor.moveToFirst()) {
 								do {
-									if (mCursorforvendor.isNull(mCursorforvendor
-											.getColumnIndex(DatabaseForDemo.VENDERPART_NO))) {
+									if (mCursorforvendor.isNull(mCursorforvendor .getColumnIndex(DatabaseForDemo.VENDERPART_NO))) {
 
 									} else {
-										String vendornum = mCursorforvendor.getString(mCursorforvendor
-												.getColumnIndex(DatabaseForDemo.VENDERPART_NO));
-										System.out.println("vendro no is:"
-												+ vendornum);
+										String vendornum = mCursorforvendor.getString(mCursorforvendor .getColumnIndex(DatabaseForDemo.VENDERPART_NO));
+										System.out.println("vendro no is:" + vendornum);
 										total_vendor_data.add(vendornum);
 									}
 								} while (mCursorforvendor.moveToNext());
@@ -777,20 +750,16 @@ public class InventoryActivity extends Activity implements
 						displaystring = min + " - " + (i * resultsperset);
 					}
 					min = (i * resultsperset) + 1;
-					System.out.println("display string value is:"
-							+ displaystring);
+					System.out.println("display string value is:" + displaystring);
 					displayarray.add(displaystring);
 				}
 
 				System.out.println(displayarray);
-				ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(
-						InventoryActivity.this,
-						android.R.layout.simple_spinner_item, displayarray);
+				ArrayAdapter<String> adapter2 = new ArrayAdapter<String>( InventoryActivity.this, android.R.layout.simple_spinner_item, displayarray);
 				adapter2.setDropDownViewResource(android.R.layout.simple_spinner_item);
 				displayspr.setAdapter(adapter2);
 
-				if (selectQuery.equals("SELECT  * FROM "
-						+ DatabaseForDemo.INVENTORY_TABLE)) {
+				if (selectQuery.equals("SELECT  * FROM " + DatabaseForDemo.INVENTORY_TABLE)) {
 					listUpdateforproduct(offsetvalingo, "100", selectQuery);
 					gettingCount();
 					displayspr.setSelection(displayarray.indexOf(pages));
@@ -822,11 +791,11 @@ public class InventoryActivity extends Activity implements
 		addcat.setTextColor(Color.WHITE);
 		viewcat.setTextColor(Color.BLACK);
 
-		list = (ListView) findViewById(R.id.listView1);
+		list_View = (ListView) findViewById(R.id.listView1);
 		ll = (LinearLayout) findViewById(R.id.linearLayout1);
 		Button heading = (Button) findViewById(R.id.button2);
 		heading.setText("Product Details");
-		list.setItemsCanFocus(false);
+		list_View.setItemsCanFocus(false);
 
 		addcat.setOnClickListener(new OnClickListener() {
 			@Override
@@ -845,6 +814,7 @@ public class InventoryActivity extends Activity implements
 
 			@Override
 			public void onClick(View v) {
+				System.out.println("000000000000000000000");
 				// TODO Auto-generated method stub
 				addcat.setBackgroundColor(Color.parseColor("#cbcbcb"));
 				viewcat.setBackgroundColor(Color.parseColor("#3c6586"));
@@ -854,33 +824,109 @@ public class InventoryActivity extends Activity implements
 				viewcat.setTextColor(Color.WHITE);
 				gettingCount();
 				ArrayList<String> autoTextStringsItems = new ArrayList<String>();
-				autoTextStringsItems.addAll(autoTextStrings);
-				autoTextStringsItems.addAll(autoTextStringsname);
-				autoTextStringsItems.addAll(autoTextStringsvendor);
+				for (int i = 0; i < autoTextStrings.size(); i++)
+				{
+					if(!autoTextStringsItems.contains(autoTextStrings.get(i))){
+						autoTextStringsItems.add(autoTextStrings.get(i));
+					}
+				}
+				
+				for (int i = 0; i < autoTextStringsname.size(); i++)
+				{
+					if(!autoTextStringsItems.contains(autoTextStringsname.get(i))){
+						autoTextStringsItems.add(autoTextStringsname.get(i));
+					}
+				}
+				
+				for (int i = 0; i < autoTextStringsvendor.size(); i++)
+				{
+					if(!autoTextStringsItems.contains(autoTextStringsvendor.get(i))){
+						autoTextStringsItems.add(autoTextStringsvendor.get(i));
+					}
+				}
+				
+//				autoTextStringsItems.addAll(autoTextStrings);
+//				autoTextStringsItems.addAll(autoTextStringsname);
+//				autoTextStringsItems.addAll(autoTextStringsvendor);
 
-				ArrayAdapter<String> adapterauto = new ArrayAdapter<String>(
-						InventoryActivity.this,
-						android.R.layout.select_dialog_item,
-						autoTextStringsItems);
+				ArrayAdapter<String> adapterauto = new ArrayAdapter<String>( InventoryActivity.this, android.R.layout.select_dialog_item, autoTextStringsItems);
 				// Getting the instance of AutoCompleteTextView
 
 				actv.setThreshold(1);// will start working from first character
 				actv.setAdapter(adapterauto);// setting the adapter data into
 												// the AutoCompleteTextView
+				System.out.println("1111112222222222");
 				actv.setTextColor(Color.BLACK);
 
 				
-				ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(
-						InventoryActivity.this,
-						android.R.layout.simple_spinner_item, displayarray);
+				ArrayAdapter<String> adapter2 = new ArrayAdapter<String>( InventoryActivity.this, android.R.layout.simple_spinner_item, displayarray);
 				adapter2.setDropDownViewResource(android.R.layout.simple_spinner_item);
 				displayspr.setAdapter(adapter2);
 
 				listUpdateforproduct(offsetvals, "100", totalrecordselectQuery);
-
+				
+				((TextView)findViewById(R.id.itemname)).setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v) 
+					{
+						sortArrayList(arrayList_Items, "itemname");
+						imageAdapterForProduct.notifyDataSetChanged();
+					}
+				});
+				
+				((TextView)findViewById(R.id.itemno)).setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v) 
+					{
+						sortArrayList(arrayList_Items, "itemno");
+						imageAdapterForProduct.notifyDataSetChanged();
+					}
+				});
+				
+				((TextView)findViewById(R.id.price)).setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v) 
+					{
+						sortArrayList(arrayList_Items, "pricecharge");
+						imageAdapterForProduct.notifyDataSetChanged();
+					}
+				});
+				
+				((TextView)findViewById(R.id.stock)).setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v) 
+					{
+						sortArrayList(arrayList_Items, "stock");
+						imageAdapterForProduct.notifyDataSetChanged();
+					}
+				});
+				
+				((TextView)findViewById(R.id.desc2)).setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v) 
+					{
+						sortArrayList(arrayList_Items, "desc2");
+						imageAdapterForProduct.notifyDataSetChanged();
+					}
+				});
+				
+				((TextView)findViewById(R.id.tv_vendor)).setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v) 
+					{
+						sortArrayList(arrayList_Items, "vendor");
+						imageAdapterForProduct.notifyDataSetChanged();
+					}
+				});
 			}
 		});
-
+		
 		departmentspinner = (Spinner) findViewById(R.id.departmentspinner);
 		vendorspinner = (Spinner) findViewById(R.id.vendor);
 		tax1 = (CheckBox) findViewById(R.id.checkBox1);
@@ -925,29 +971,22 @@ public class InventoryActivity extends Activity implements
 		// if(Parameters.usertype.equals("demo")){
 
 		
-		Cursor mCursor = dbforloginlogoutReadInvetory.rawQuery(
-				"select " + DatabaseForDemo.DepartmentID + " from "
-						+ DatabaseForDemo.DEPARTMENT_TABLE, null);
+		Cursor mCursor = dbforloginlogoutReadInvetory.rawQuery( "select " + DatabaseForDemo.DepartmentID + " from " + DatabaseForDemo.DEPARTMENT_TABLE, null);
 		System.out.println(mCursor);
 		if (mCursor != null) {
 			if (mCursor.moveToFirst()) {
 				do {
-					String catid = mCursor.getString(mCursor
-							.getColumnIndex(DatabaseForDemo.DepartmentID));
+					String catid = mCursor.getString(mCursor .getColumnIndex(DatabaseForDemo.DepartmentID));
 					deptspinnerdata.add(catid);
 				} while (mCursor.moveToNext());
 			}
 			
 			
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-					InventoryActivity.this,
-					android.R.layout.simple_spinner_item, deptspinnerdata);
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>( InventoryActivity.this, android.R.layout.simple_spinner_item, deptspinnerdata);
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
 			departmentspinner.setAdapter(adapter);
 		} else {
-			Toast.makeText(getApplicationContext(),
-					"This is no profile data in demo login", Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(getApplicationContext(), "This is no profile data in demo login", Toast.LENGTH_SHORT) .show();
 		}
 		mCursor.close();
 		/*
@@ -975,26 +1014,22 @@ public class InventoryActivity extends Activity implements
 		 * "This is not demo login", Toast.LENGTH_SHORT).show(); }
 		 */
 
-		departmentspinner
-				.setOnItemSelectedListener(new OnItemSelectedListener() {
+		departmentspinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 					@Override
-					public void onItemSelected(AdapterView<?> arg0, View arg1,
-							int arg2, long arg3) {
+					public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 						// TODO Auto-generated method stub
 						tax1.setChecked(false);
 						tax2.setChecked(false);
 						tax3.setChecked(false);
 						bartax.setChecked(false);
 						// System.out.println("hi padma");
-						String deptspinnerval = departmentspinner
-								.getSelectedItem().toString();
+						String deptspinnerval = departmentspinner .getSelectedItem().toString();
 						// System.out.println("how r u padma");
 						if (deptspinnerval.equals("")) {
 
 						} else {
-							Cursor mCursor2 = dbforloginlogoutReadInvetory
-									.rawQuery(
+							Cursor mCursor2 = dbforloginlogoutReadInvetory .rawQuery(
 											"select "
 													+ DatabaseForDemo.FoodstampableForDept
 													+ ","
@@ -1009,36 +1044,27 @@ public class InventoryActivity extends Activity implements
 							if (mCursor2 != null) {
 								if (mCursor2.moveToFirst()) {
 									do {
-										if (mCursor2.isNull(mCursor2
-												.getColumnIndex(DatabaseForDemo.FoodstampableForDept))) {
+										if (mCursor2.isNull(mCursor2 .getColumnIndex(DatabaseForDemo.FoodstampableForDept))) {
 											foodstampableval = "no";
 										} else {
-											foodstampableval = mCursor2.getString(mCursor2
-													.getColumnIndex(DatabaseForDemo.FoodstampableForDept));
+											foodstampableval = mCursor2.getString(mCursor2 .getColumnIndex(DatabaseForDemo.FoodstampableForDept));
 										}
-										if (mCursor2.isNull(mCursor2
-												.getColumnIndex(DatabaseForDemo.FoodstampableForDept))) {
+										if (mCursor2.isNull(mCursor2 .getColumnIndex(DatabaseForDemo.FoodstampableForDept))) {
 											String taxval = "";
 										} else {
-											String taxval = mCursor2.getString(mCursor2
-													.getColumnIndex(DatabaseForDemo.TaxValForDept));
+											String taxval = mCursor2.getString(mCursor2 .getColumnIndex(DatabaseForDemo.TaxValForDept));
 											String mystring = taxval;
 											String[] a = mystring.split(",");
-											System.out
-													.println("the array values are:"
-															+ a.length);
+											System.out .println("the array values are:" + a.length);
 											for (int i = 0; i < a.length; i++) {
 												String substr = a[i];
 												if (substr.equals("Tax1")) {
 													tax1.setChecked(true);
-												} else if (substr
-														.equals("Tax2")) {
+												} else if (substr.equals("Tax2")) {
 													tax2.setChecked(true);
-												} else if (substr
-														.equals("Tax3")) {
+												} else if (substr .equals("Tax3")) {
 													tax3.setChecked(true);
-												} else if (substr
-														.equals("BarTax")) {
+												} else if (substr .equals("BarTax")) {
 													bartax.setChecked(true);
 												}
 											}
@@ -1085,9 +1111,7 @@ public class InventoryActivity extends Activity implements
 						if (cursor != null) {
 							if (cursor.moveToFirst()) {
 								do {
-									double taxvalpercent = Double.valueOf(df
-											.format(cursor.getDouble(cursor
-											.getColumnIndex(DatabaseForDemo.TAX_VALUE))));
+									double taxvalpercent = Double.valueOf(df.format(cursor.getDouble(cursor .getColumnIndex(DatabaseForDemo.TAX_VALUE))));
 									System.out.println("     " + taxvalpercent);
 									taxval = cost * (taxvalpercent / 100);
 								} while (cursor.moveToNext());
@@ -1095,8 +1119,7 @@ public class InventoryActivity extends Activity implements
 							
 							
 						} else {
-							Toast.makeText(getApplicationContext(),
-									"No Tax value", Toast.LENGTH_SHORT).show();
+							Toast.makeText(getApplicationContext(), "No Tax value", Toast.LENGTH_SHORT).show();
 						}
 						cursor.close();
 					} else {
@@ -2847,11 +2870,11 @@ try{
 														response);
 												JSONArray array = obj
 														.getJSONArray("insert-queries");
-												System.out.println("array list length for insert is:"
+												System.out.println("array_list length for insert is:"
 														+ array.length());
 												JSONArray array2 = obj
 														.getJSONArray("delete-queries");
-												System.out.println("array2 list length for delete is:"
+												System.out.println("array2_list length for delete is:"
 														+ array2.length());
 												for (int jj = 0, ii = 0; jj < array2
 														.length()
@@ -3493,11 +3516,11 @@ try{
 				addcat.setTextColor(Color.WHITE);
 				viewcat.setTextColor(Color.BLACK);
 
-				list = (ListView) layout.findViewById(R.id.listView1);
+				list_View = (ListView) layout.findViewById(R.id.listView1);
 				ll = (LinearLayout) layout.findViewById(R.id.linearLayout1);
 				Button heading = (Button) layout.findViewById(R.id.button2);
 				heading.setText("Product Details");
-				list.setItemsCanFocus(false);
+				list_View.setItemsCanFocus(false);
 
 				addcat.setOnClickListener(new OnClickListener() {
 
@@ -3596,6 +3619,7 @@ try{
 						actv.setAdapter(adapterauto);// setting the adapter data
 														// into the
 														// AutoCompleteTextView
+						System.out.println("11111113333333333333333");
 						actv.setTextColor(Color.BLACK);
 
 						
@@ -3817,75 +3841,104 @@ try{
 						String str = actv.getText().toString().trim();
 						String selectQuery = null;
 						System.out.println("auto text view val is:" + str);
-						if (str.length() > 0) {
-							if (autoTextStrings.contains(str)) {
+						if (str.length() > 0) 
+						{
+							System.out.println("1111111111111");
+							if (autoTextStrings.contains(str))
+							{
+								System.out.println("2222222222222");
 								selectQuery = "SELECT  * FROM "
 										+ DatabaseForDemo.INVENTORY_TABLE
-										+ " where "
+										+ " where upper("
 										+ DatabaseForDemo.INVENTORY_ITEM_NO
-										+ "=\"" + str + "\"";
-
-							} else {
-
-								if (autoTextStringsname
-										.contains(str)) {
+										+ ")= upper(\"" + str + "\")";
+								System.out.println("selectQuery11"+selectQuery);
+							}
+							else 
+							{
+								System.out.println("33333333333333");
+								if (autoTextStringsname .contains(str)) 
+								{
+									System.out.println("44444444444444");
 									selectQuery = "SELECT  * FROM "
 											+ DatabaseForDemo.INVENTORY_TABLE
-											+ " where "
+											+ " where upper("
 											+ DatabaseForDemo.INVENTORY_ITEM_NAME
-											+ "=\"" + str + "\"";
-
-								} else {
+											+ ")= upper(\"" + str + "\")";
+									System.out.println("selectQuery22"+selectQuery);
+								} 
+								else 
+								{
+									System.out.println("55555555555555555");
 									selectQuery = "SELECT  * FROM "
 											+ DatabaseForDemo.ORDERING_INFO_TABLE
-											+ " where "
+											+ " where upper("
 											+ DatabaseForDemo.VENDERPART_NO
-											+ "=\"" + str + "\"";
+											+ ")= upper(\"" + str + "\")";
+									System.out.println("selectQuery33"+selectQuery);
 								}
 
 							}
 
-						} else {
+						} 
+						else 
+						{
+							System.out.println("6666666666666");
 							String dp = dptspr.getSelectedItem().toString();
 							String cat = catspr.getSelectedItem().toString();
 							Log.d("dp", "" + dp);
 							Log.d("cat", "" + cat);
 
-							if (dp.equals("All") && cat.equals("All")) {
+							if (dp.equals("All") && cat.equals("All"))
+							{
+								System.out.println("77777777777777777");
 								selectQuery = "SELECT  * FROM "
 										+ DatabaseForDemo.INVENTORY_TABLE;
-
-							} else {
-								if (!dp.equals("All") && !cat.equals("All")) {
+								System.out.println("selectQuery44"+selectQuery);
+							}
+							else
+							{
+								System.out.println("888888888888888888");
+								if (!dp.equals("All") && !cat.equals("All"))
+								{
+									System.out.println("9999999999999999");
 									selectQuery = "SELECT  * FROM "
 											+ DatabaseForDemo.INVENTORY_TABLE
-											+ " where "
+											+ " where  upper("
 											+ DatabaseForDemo.INVENTORY_CATEGORY
-											+ "=\""
+											+ ")= upper(\""
 											+ cat
-											+ "\" and "
+											+ ")\" and  upper("
 											+ DatabaseForDemo.INVENTORY_DEPARTMENT
-											+ "=\"" + dp + "\"";
+											+ ")= upper(\"" + dp + "\")";
+									System.out.println("selectQuery55"+selectQuery);
 								}
 
-								if (dp.equals("All") && !cat.equals("All")) {
+								if (dp.equals("All") && !cat.equals("All")) 
+								{
+									System.out.println("111111111111111000000000");
 									selectQuery = "SELECT  * FROM "
 											+ DatabaseForDemo.INVENTORY_TABLE
-											+ " where "
+											+ " where  upper("
 											+ DatabaseForDemo.INVENTORY_CATEGORY
-											+ "=\"" + cat + "\"";
+											+ ")= upper(\"" + cat + "\")";
+									System.out.println("selectQuery66"+selectQuery);
 								}
-								if (!dp.equals("All") && cat.equals("All")) {
+								if (!dp.equals("All") && cat.equals("All")) 
+								{
+									System.out.println("11111111111122222222222222222");
 									selectQuery = "SELECT  * FROM "
 											+ DatabaseForDemo.INVENTORY_TABLE
-											+ " where "
+											+ " where  upper("
 											+ DatabaseForDemo.INVENTORY_DEPARTMENT
-											+ "=\"" + dp + "\"";
+											+ ")= upper(\"" + dp + "\")";
+									System.out.println("selectQuery77"+selectQuery);
 								}
 
 							}
 
 						}
+						
 						Log.v("ffff", ""+selectQuery);
 						Cursor mCursor = dbforloginlogoutReadInvetory
 								.rawQuery(selectQuery, null);
@@ -5053,11 +5106,11 @@ try{
 																		+ servertiem);
 														JSONArray array = obj
 																.getJSONArray("insert-queries");
-														System.out.println("array list length for insert is:"
+														System.out.println("array_list length for insert is:"
 																+ array.length());
 														JSONArray array2 = obj
 																.getJSONArray("delete-queries");
-														System.out.println("array2 list length for delete is:"
+														System.out.println("array2_list length for delete is:"
 																+ array2.length());
 														for (int jj = 0, ii = 0; jj < array2
 																.length()
@@ -6545,11 +6598,11 @@ try{
 				addcat.setTextColor(Color.WHITE);
 				viewcat.setTextColor(Color.BLACK);
 
-				list = (ListView) layout.findViewById(R.id.listView1);
+				list_View = (ListView) layout.findViewById(R.id.listView1);
 				ll = (LinearLayout) layout.findViewById(R.id.linearLayout1);
 				Button heading = (Button) layout.findViewById(R.id.button2);
 				heading.setText("Category Details");
-				list.setItemsCanFocus(false);
+				list_View.setItemsCanFocus(false);
 
 				addcat.setOnClickListener(new OnClickListener() {
 
@@ -6710,11 +6763,11 @@ try{
 																	+ servertiem);
 													JSONArray array = obj
 															.getJSONArray("insert-queries");
-													System.out.println("array list length for insert is:"
+													System.out.println("array_list length for insert is:"
 															+ array.length());
 													JSONArray array2 = obj
 															.getJSONArray("delete-queries");
-													System.out.println("array2 list length for delete is:"
+													System.out.println("array2_list length for delete is:"
 															+ array2.length());
 													for (int jj = 0, ii = 0; jj < array2
 															.length()
@@ -6908,11 +6961,11 @@ try{
 				bartaxdept = (CheckBox) layout.findViewById(R.id.checkBox4);
 				final ArrayList<String> spinnerData = new ArrayList<String>();
 				spinnerData.clear();
-				list = (ListView) layout.findViewById(R.id.listView1);
+				list_View = (ListView) layout.findViewById(R.id.listView1);
 				ll = (LinearLayout) layout.findViewById(R.id.linearLayout1);
 				Button heading = (Button) layout.findViewById(R.id.button2);
 				heading.setText("Department Details");
-				list.setItemsCanFocus(false);
+				list_View.setItemsCanFocus(false);
 
 				addcat = (Button) layout.findViewById(R.id.addcat);
 				viewcat = (Button) layout.findViewById(R.id.viewcat);
@@ -7316,11 +7369,11 @@ try{
 																		+ servertiem);
 														JSONArray array = obj
 																.getJSONArray("insert-queries");
-														System.out.println("array list length for insert is:"
+														System.out.println("array_list length for insert is:"
 																+ array.length());
 														JSONArray array2 = obj
 																.getJSONArray("delete-queries");
-														System.out.println("array2 list length for delete is:"
+														System.out.println("array2_list length for delete is:"
 																+ array2.length());
 														for (int jj = 0, ii = 0; jj < array2
 																.length()
@@ -7536,11 +7589,11 @@ try{
 						android.R.layout.simple_spinner_item, pomethodList);
 				poMethod.setAdapter(adapter);
 
-				list = (ListView) layout.findViewById(R.id.listView1);
+				list_View = (ListView) layout.findViewById(R.id.listView1);
 				ll = (LinearLayout) layout.findViewById(R.id.linearLayout1);
 				Button heading = (Button) layout.findViewById(R.id.button2);
 				heading.setText("Vendor Details");
-				list.setItemsCanFocus(false);
+				list_View.setItemsCanFocus(false);
 				dataclear();
 
 				addcat = (Button) layout.findViewById(R.id.addcat);
@@ -7867,11 +7920,11 @@ try{
 																	+ servertiem);
 													JSONArray array = obj
 															.getJSONArray("insert-queries");
-													System.out.println("array list length for insert is:"
+													System.out.println("array_list length for insert is:"
 															+ array.length());
 													JSONArray array2 = obj
 															.getJSONArray("delete-queries");
-													System.out.println("array2 list length for delete is:"
+													System.out.println("array2_list length for delete is:"
 															+ array2.length());
 													for (int jj = 0, ii = 0; jj < array2
 															.length()
@@ -8025,6 +8078,33 @@ try{
 			e.printStackTrace();
 		}
 	}
+	protected String capitalize_string(String s) 
+	{
+		System.out.println("source.length(): "+s.length());
+//		    StringBuffer res = new StringBuffer();
+//
+//		    String[] strArr = source.split(" ");
+//		    for (String str : strArr) {
+//		        char[] stringArray = str.trim().toCharArray();
+//		        stringArray[0] = Character.toUpperCase(stringArray[0]);
+//		        str = new String(stringArray);
+//
+//		        res.append(str).append("");
+//		    }
+//		    System.out.println("res.length(): "+res.length());
+//		    return res.toString().trim();
+		
+		final StringBuilder result = new StringBuilder(s.length());
+		String[] words = s.split("\\s");
+		for(int i=0,l=words.length;i<l;++i) {
+		  if(i>0) result.append(" ");      
+		  result.append(Character.toUpperCase(words[i].charAt(0)))
+		        .append(words[i].substring(1));
+
+		}
+		System.out.println("result.length()"+result.toString().length());
+		return result.toString();
+	}
 	@Override
 	public void onDeleteClickedforsku(View v, String text) {
 		skuarray.remove(text);
@@ -8078,11 +8158,26 @@ try{
 		stock_data = getDataforproduct(stLoop, endLoop, total_stock_data);
 		desc2_data = getDataforproduct(stLoop, endLoop, total_desc2_data);
 		vendor_data = getDataforproduct(stLoop, endLoop, total_vendor_data);
-		ImageAdapterForProduct adapter = new ImageAdapterForProduct(this,
-				itemno_data, itemdesc_data, pricecharge_data, stock_data,
-				desc2_data, vendor_data);
-		adapter.setListener(this);
-		list.setAdapter(adapter);
+		arrayList_Items = new ArrayList<HashMap<String,String>>();
+		for (int i = 0; i < itemno_data.size(); i++)
+		{
+			HashMap<String,String> hashMap = new HashMap<String, String>();
+			hashMap.put("itemno", itemno_data.get(i));
+			hashMap.put("itemname", itemdesc_data.get(i));
+			hashMap.put("pricecharge", pricecharge_data.get(i));
+			hashMap.put("stock", stock_data.get(i));
+			hashMap.put("desc2", desc2_data.get(i));
+			hashMap.put("vendor", vendor_data.get(i));
+			arrayList_Items.add(hashMap);
+		}
+		
+//		ImageAdapterForProduct adapter = new ImageAdapterForProduct(this,
+//				itemno_data, itemdesc_data, pricecharge_data, stock_data,
+//				desc2_data, vendor_data);
+		imageAdapterForProduct = new ImageAdapterForProduct(this,arrayList_Items);
+		imageAdapterForProduct.setListener(this);
+		System.out.println("lllllllliiiiiiiiiiiiiiiiiii");
+		list_View.setAdapter(imageAdapterForProduct);
 	}
 
 	public ArrayList<String> getDataforproduct(int offset, int limit,
@@ -8560,12 +8655,12 @@ try{
 										JSONArray array = obj
 												.getJSONArray("insert-queries");
 										System.out
-												.println("array list length for insert is:"
+												.println("array_list length for insert is:"
 														+ array.length());
 										JSONArray array2 = obj
 												.getJSONArray("delete-queries");
 										System.out
-												.println("array2 list length for delete is:"
+												.println("array2_list length for delete is:"
 														+ array2.length());
 										for (int jj = 0, ii = 0; jj < array2
 												.length()
@@ -8840,12 +8935,12 @@ try{
 							JSONArray array = obj
 									.getJSONArray("insert-queries");
 							System.out
-									.println("array list length for insert is:"
+									.println("array_list length for insert is:"
 											+ array.length());
 							JSONArray array2 = obj
 									.getJSONArray("delete-queries");
 							System.out
-									.println("array2 list length for delete is:"
+									.println("array2_list length for delete is:"
 											+ array2.length());
 							for (int jj = 0, ii = 0; jj < array2
 									.length()
@@ -11297,12 +11392,12 @@ Log.v("modifieritemval",""+modifieritemval);
 										JSONArray array = obj
 												.getJSONArray("insert-queries");
 										System.out
-												.println("array list length for insert is:"
+												.println("array_list length for insert is:"
 														+ array.length());
 										JSONArray array2 = obj
 												.getJSONArray("delete-queries");
 										System.out
-												.println("array2 list length for delete is:"
+												.println("array2_list length for delete is:"
 														+ array2.length());
 										for (int jj = 0, ii = 0; jj < array2
 												.length()
@@ -11355,12 +11450,12 @@ Log.v("modifieritemval",""+modifieritemval);
 										JSONArray array = obj
 												.getJSONArray("insert-queries");
 										System.out
-												.println("array list length for insert is:"
+												.println("array_list length for insert is:"
 														+ array.length());
 										JSONArray array2 = obj
 												.getJSONArray("delete-queries");
 										System.out
-												.println("array2 list length for delete is:"
+												.println("array2_list length for delete is:"
 														+ array2.length());
 										for (int jj = 0, ii = 0; jj < array2
 												.length()
@@ -11413,11 +11508,11 @@ Log.v("modifieritemval",""+modifieritemval);
 									 * array =
 									 * obj.getJSONArray("insert-queries");
 									 * System.out.println(
-									 * "array list length for insert is:"
+									 * "array_list length for insert is:"
 									 * +array.length()); JSONArray array2 =
 									 * obj.getJSONArray("delete-queries");
 									 * System.out.println(
-									 * "array2 list length for delete is:"
+									 * "array2_list length for delete is:"
 									 * +array2.length()); for(int jj = 0,ii = 0;
 									 * jj<array2.length() && ii<array.length();
 									 * jj++,ii++){ String deletequerytemp =
@@ -15185,7 +15280,7 @@ cursor.close();
 		ImageAdapterForCategory adapter = new ImageAdapterForCategory(this,
 				id_data, desc_data);
 		adapter.setListener(this);
-		list.setAdapter(adapter);
+		list_View.setAdapter(adapter);
 	}
 
 	public ArrayList<String> getDataforcategory(int offset, int limit,
@@ -15765,7 +15860,7 @@ cursor.close();
 		ImageAdapterForDepartment adapter = new ImageAdapterForDepartment(this,
 				id_data, desc_data, cat_data);
 		adapter.setListener(this);
-		list.setAdapter(adapter);
+		list_View.setAdapter(adapter);
 	}
 
 	public ArrayList<String> getDatafordepartment(int offset, int limit,
@@ -17148,7 +17243,7 @@ mCursor2.close();
 		ImageAdapterForVendor adapter = new ImageAdapterForVendor(this,
 				company_data, no_data);
 		adapter.setListener(this);
-		list.setAdapter(adapter);
+		list_View.setAdapter(adapter);
 	}
 
 	public ArrayList<String> getDataforvendor(int offset, int limit,
@@ -18185,5 +18280,59 @@ mCursor2.close();
 		// TODO Auto-generated method stub
 		Parameters.printerContext=InventoryActivity.this;
 		super.onResume();
+	}
+	
+	public class CustomStringList3 extends ArrayList<String> {
+	    @Override
+	    public boolean contains(Object o)
+	    {
+	    	System.out.println("============================");
+	        String paramStr = (String)o;
+	        for (String s : this) {
+	            if (paramStr.equalsIgnoreCase(s)) return true;
+	        }
+	        return false;
+	    }
+	}
+	
+	public boolean containsCaseInsensitive(String strToCompare, ArrayList<String>list)
+	{
+		for (int i = 0; i < list.size(); i++) 
+		{
+			if (list.get(i).toString().trim().toLowerCase(Locale.getDefault()).startsWith(strToCompare.toString().trim().toLowerCase(Locale.getDefault())))
+			{
+				return true;
+			}
+		}
+		return false;
+//	    for(String str:list)
+//	    {
+//	        if(str.equalsIgnoreCase(strToCompare))
+//	        {
+//	            return(true);
+//	        }
+//	    }
+//	    return(false);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void sortArrayList(ArrayList<HashMap<String,String>> arrayList, final String strHashMapKey) 
+	{
+		Collections.sort(arrayList, new Comparator()
+		{
+			@Override
+			public int compare(Object o2, Object o1) 
+			{
+				HashMap<String,String> map1=(HashMap)o1;
+				HashMap<String,String> map2=(HashMap)o2;
+				String s1=(String)map1.get(strHashMapKey);
+				String s2=(String)map2.get(strHashMapKey);
+				if(sortType)
+					return s2.compareTo(s1);
+				else
+					 return s1.compareTo(s2);
+			}
+		});
+		sortType = !sortType;
 	}
 }
