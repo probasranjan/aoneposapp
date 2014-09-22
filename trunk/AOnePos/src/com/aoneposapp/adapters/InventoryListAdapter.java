@@ -22,7 +22,7 @@ import com.aoneposapp.utils.Inventory;
 import com.aoneposapp.utils.Parameters;
 
 public class InventoryListAdapter extends BaseAdapter{
-	DecimalFormat df = new DecimalFormat("#.##");
+	DecimalFormat df = new DecimalFormat("0.00");
 	Context mContext;
 	ArrayList<Inventory> mInventoryList;
 	private OnDeleteClicked listener;
