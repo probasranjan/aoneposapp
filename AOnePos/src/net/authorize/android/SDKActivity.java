@@ -74,9 +74,10 @@ public class SDKActivity extends SimpleActivity {
     /**
      * Activity launcher for authCapture transactions.
      */
-    private void launchAuthCaptureIntent() {
+    private void launchAuthCaptureIntent() 
+    {
         String refId = Long.toString(System.currentTimeMillis());
-        BigDecimal totalAmount = new BigDecimal(19.99);
+        BigDecimal totalAmount = new BigDecimal(00.01);
  
         /*
          * listing these out only to show the required
