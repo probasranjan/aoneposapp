@@ -269,6 +269,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="500dp"
                             android:layout_weight="9"
+                            android:cacheColorHint="@android:color/transparent"
+                            android:scrollingCache="false"
                             android:listSelector="@android:color/darker_gray" >
                         </ListView>
                     </LinearLayout>
@@ -840,155 +842,154 @@
         </LinearLayout>
     </SlidingDrawer>
 
-    <RelativeLayout 
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="#2c3e50"
-    android:orientation="vertical" 
-    android:visibility="gone">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:orientation="horizontal" 
-        android:background="#e74c3c">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Swip Card"
-            android:padding="5dp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp"
-        android:orientation="vertical"
-        android:visibility="visible" >
-
-        <EditText
-            android:id="@+id/editText_CreditCard1"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:hint="CREDIT CARD NUMBER"
-            android:inputType="text" />
-
-        <EditText
-            android:id="@+id/editText_ExpMonth1"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:hint="EXP Month"
-            android:inputType="number" />
-
-        <EditText
-            android:id="@+id/editText_ExpYear1"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:hint="EXP Year"
-            android:inputType="number" />
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:src="@drawable/logo"
-        android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@+id/linearLayoutEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:background="#dddddd"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="#2c3e50"
         android:orientation="vertical"
         android:visibility="gone" >
 
-        <TextView
-            android:id="@+id/header_text"
-            android:layout_width="fill_parent"
-            android:layout_height="24sp"
-            android:layout_marginLeft="10dp"
-            android:gravity="bottom"
-            android:text="SDK Info"
-            android:textStyle="bold" >
-        </TextView>
-
-        <ScrollView
-            android:layout_width="fill_parent"
-            android:layout_height="120dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="5dp"
-            android:background="#ffffff"
-            android:visibility="visible" >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="#e74c3c"
+            android:orientation="horizontal" >
 
             <TextView
-                android:id="@+id/text_area_top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="5dp"
+                android:text="Swip Card"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
+            android:orientation="vertical"
+            android:visibility="visible" >
+
+            <EditText
+                android:id="@+id/editText_CreditCard1"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:hint="CREDIT CARD NUMBER"
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/editText_ExpMonth1"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:hint="EXP Month"
+                android:inputType="number" />
+
+            <EditText
+                android:id="@+id/editText_ExpYear1"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:hint="EXP Year"
+                android:inputType="number" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/logo"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/linearLayoutEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#dddddd"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/header_text"
+                android:layout_width="fill_parent"
+                android:layout_height="24sp"
+                android:layout_marginLeft="10dp"
+                android:gravity="bottom"
+                android:text="SDK Info"
+                android:textStyle="bold" >
+            </TextView>
+
+            <ScrollView
+                android:layout_width="fill_parent"
+                android:layout_height="120dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:background="#ffffff"
+                android:visibility="visible" >
+
+                <TextView
+                    android:id="@+id/text_area_top"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text=""
+                    android:textSize="14sp" >
+                </TextView>
+            </ScrollView>
+
+            <EditText
+                android:id="@+id/text_area_bottom"
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:background="#ffffff"
+                android:text=""
+                android:textSize="14sp"
+                android:visibility="visible" >
+            </EditText>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayoutBottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="10dp" >
+
+            <Button
+                android:id="@+id/btn_swipeCard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Swipe Card" />
+
+            <TextView
+                android:id="@+id/status_text"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:text=""
-                android:textSize="14sp" >
-            </TextView>
-        </ScrollView>
+                android:layout_weight="1"
+                android:gravity="center_vertical|center_horizontal"
+                android:textColor="@android:color/white" />
 
-        <EditText
-            android:id="@+id/text_area_bottom"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="10dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="5dp"
-            android:background="#ffffff"
-            android:text=""
-            android:textSize="14sp"
-            android:visibility="visible" >
-        </EditText>
-    </LinearLayout>
+            <Button
+                android:id="@+id/btn_command"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Command"
+                android:visibility="invisible" />
+        </LinearLayout>
+    </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/linearLayoutBottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="10dp" >
-
-        <Button
-            android:id="@+id/btn_swipeCard"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Swipe Card" />
-
-        <TextView
-            android:id="@+id/status_text"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:textColor="@android:color/white"
-            android:gravity="center_vertical|center_horizontal" />
-
-        <Button
-            android:id="@+id/btn_command"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Command"
-            android:visibility="invisible" />
-    </LinearLayout>
-
-</RelativeLayout>
-    
 </RelativeLayout>
